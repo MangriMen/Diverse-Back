@@ -1,25 +1,23 @@
 package server
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/MangriMen/Value-Back/api/db"
+	"github.com/MangriMen/Value-Back/internal/helpers"
+	"github.com/MangriMen/Value-Back/internal/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func InitApi() {
 	app := fiber.New()
 
-	db, err := db.OpenDBConnection()
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	app.Use(
+		cors.New(),
+		logger.New(),
+	)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello World!")
-	})
+	routes.PublicRoutes(app)
+	// routes.PrivateRoutes(app)
 
-	app.Listen(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")))
+	helpers.StartServerWithGracefulShutdown(app)
 }
