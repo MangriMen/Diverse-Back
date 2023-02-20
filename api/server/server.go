@@ -1,23 +1,21 @@
 package server
 
 import (
+	"github.com/MangriMen/Value-Back/configs"
 	"github.com/MangriMen/Value-Back/internal/helpers"
+	"github.com/MangriMen/Value-Back/internal/middleware"
 	"github.com/MangriMen/Value-Back/internal/routes"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func InitApi() {
-	app := fiber.New()
+	config := configs.FiberConfig()
+	app := fiber.New(config)
 
-	app.Use(
-		cors.New(),
-		logger.New(),
-	)
+	middleware.FiberMiddleware(app)
 
 	routes.PublicRoutes(app)
-	// routes.PrivateRoutes(app)
+	routes.PrivateRoutes(app)
 
 	helpers.StartServerWithGracefulShutdown(app)
 }
