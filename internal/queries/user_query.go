@@ -49,6 +49,19 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
+func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
+	user := models.User{}
+
+	query := `SELECT * FROM users WHERE username = $1`
+
+	err := q.Get(&user, query, username)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
 func (q *UserQueries) CreateUser(b *models.User) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
