@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  go:
+    container_name: go
+    build:
+      context: .
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3030:3030"
+    networks:
+      - fullstack
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.5-alpine
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=""
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ".:/docker-entrypoint-initdb.d"
+      - "dbdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fullstack
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - fullstack
+
+volumes:
+  dbdata:
+
+
+networks:
+  fullstack:
+    driver: bridge

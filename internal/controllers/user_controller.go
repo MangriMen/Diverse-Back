@@ -3,9 +3,9 @@ package controllers
 import (
 	"time"
 
-	"github.com/MangriMen/Value-Back/api/database"
-	"github.com/MangriMen/Value-Back/internal/helpers"
-	"github.com/MangriMen/Value-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/api/database"
+	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
