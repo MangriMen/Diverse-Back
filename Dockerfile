@@ -10,7 +10,7 @@ WORKDIR /build
 COPY . .
 RUN go build -trimpath -ldflags="-s -w" -o /app/server cmd/api/main.go
 
-FROM alpine3.17
+FROM alpine:3.17
 
 RUN apk update --no-cache && apk add --no-cache ca-certificates
 
