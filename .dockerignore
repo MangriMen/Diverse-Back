@@ -1,0 +1,7 @@
+.git
+.gitignore
+.gitkeep
+.vscode
+/main
+README.md
+.env

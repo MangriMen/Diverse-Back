@@ -9,7 +9,7 @@ RUN apk update --no-cache && apk add --no-cache tzdata
 
 WORKDIR /build
 COPY . .
-RUN go build -ldflags="-s -w" -o /app/server cmd/api/main.go
+RUN go build -trimpath -ldflags="-s -w" -o /app/server cmd/api/main.go
 
 FROM alpine
 
@@ -19,6 +19,5 @@ ENV TZ America/New_York
 
 WORKDIR /app
 COPY --from=build-stage /app/server /app/server
-COPY --from=build-stage /build/assets /app/assets
 
 CMD ["./server"]
