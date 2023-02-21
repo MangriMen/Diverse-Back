@@ -26,7 +26,7 @@ jobs:
       run: go mod verify
 
     - name: Go modules Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: go-cache
       with:
         path: ~/go/pkg/mod
