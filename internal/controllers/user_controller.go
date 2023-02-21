@@ -143,6 +143,13 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
+	if _, err := db.GetUserByEmail(user.Email); err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error":   true,
+			"message": "user with this email already exists",
+		})
+	}
+
 	user.Id = uuid.New()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
