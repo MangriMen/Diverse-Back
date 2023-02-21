@@ -1,7 +1,7 @@
 package queries
 
 import (
-	"github.com/MangriMen/Value-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )

@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/MangriMen/Value-Back/configs"
+	"github.com/MangriMen/Diverse-Back/configs"
 	"golang.org/x/crypto/bcrypt"
 )
 

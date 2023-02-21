@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/MangriMen/Value-Back/configs"
-	"github.com/MangriMen/Value-Back/internal/helpers"
-	"github.com/MangriMen/Value-Back/internal/middleware"
-	"github.com/MangriMen/Value-Back/internal/routes"
+	"github.com/MangriMen/Diverse-Back/configs"
+	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/middleware"
+	"github.com/MangriMen/Diverse-Back/internal/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
