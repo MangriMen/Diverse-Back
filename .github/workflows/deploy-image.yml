@@ -8,11 +8,8 @@ env:
 on:
   push:
     branches: ['develop', 'feature/DB-2-create-pipeline']
-
-on:
   release:
     types: ['published']
-  workflow_dispatch:
 
 jobs:
   build-and-push-image:
