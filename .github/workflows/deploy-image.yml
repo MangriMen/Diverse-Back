@@ -3,7 +3,7 @@ name: Create and publish a Docker image
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}-prod
+  IMAGE_NAME: ${{ github.repository }}
 
 on:
   push:
