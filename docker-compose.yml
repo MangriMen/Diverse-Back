@@ -3,8 +3,10 @@ version: "3.9"
 services:
   go-prod:
     image: ghcr.io/mangrimen/diverse-back:latest
-    container_name: go
+    container_name: go-prod
     restart: always
+    profiles:
+      - prod
     env_file:
       - .env
     ports:
@@ -17,7 +19,7 @@ services:
 
   go-test:
     image: ghcr.io/mangrimen/diverse-back:develop
-    container_name: go
+    container_name: go-test
     restart: always
     profiles:
       - test
@@ -26,12 +28,13 @@ services:
     ports:
       - "90:3030"
     networks:
+      - backend
     depends_on:
       postgres:
         condition: service_healthy
 
   go-hot-reload:
-    container_name: go
+    container_name: go-hot
     restart: always
     profiles:
       - dev

@@ -1,13 +1,12 @@
 name: Create and publish a Docker image
 
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 on:
   push:
-    branches: ['develop', 'feature/DB-2-create-pipeline']
+    branches: ['develop']
   release:
     types: ['published']
 
@@ -21,11 +20,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Test env
-      if: ${{ env.SERVER_PORT == 3030 }}
-      run: echo "yes"
-      shell: bash
 
     - name: Log in to the registry
       uses: docker/login-action@v2
