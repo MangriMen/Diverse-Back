@@ -1,0 +1,41 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches: ['feature/DB-2-create-pipeline']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+    contents: read
+    packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Log in to the registry
+      uses: docker/login-action@test
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, label) for Docker
+      id: meta
+      uses: docker/metadata-action@test2
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Build and push image
+      uses: docker/build-push-action@test3
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
