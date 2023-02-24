@@ -9,12 +9,6 @@ on:
     branches: ['develop']
   release:
     types: ['published']
-  workflow_dispatch:
-    inputs:
-      run_type:
-        required: true
-        type: choice
-        default: 'manual'
 
 jobs:
   build-and-push-image:
@@ -34,11 +28,18 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+
     - name: Extract metadata (tags, label) for Docker
       id: meta
       uses: docker/metadata-action@v4
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=mytag-{{branch}}
 
     - if: ${{ inputs.run_type == '' }}
       name: Build and push image
