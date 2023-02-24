@@ -9,6 +9,22 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+  SERVER_PORT: '${{ env.SERVER_PORT }}'
+  SERVER_READ_TIMEOUT: '${{ env.SERVER_READ_TIMEOUT }}'
+  JWT_SECRET_KEY: '${{ env.JWT_SECRET_KEY }}'
+  JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT: '${{ env.JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT }}'
+  DB_TYPE: '${{ env.DB_TYPE }}'
+  DB_HOST: '${{ env.DB_HOST }}'
+  DB_PORT: '${{ env.DB_PORT }}'
+  DB_USER: '${{ env.DB_USER }}'
+  DB_PASSWORD: '${{ env.DB_PASSWORD }}'
+  DB_NAME: '${{ env.DB_NAME }}'
+  DB_MAX_CONNECTIONS: '${{ env.DB_MAX_CONNECTIONS }}'
+  DB_MAX_IDLE_CONNECTIONS: '${{ env.DB_MAX_IDLE_CONNECTIONS }}'
+  DB_MAX_LIFETIME_CONNECTIONS: '${{ env.DB_MAX_LIFETIME_CONNECTIONS }}'
+  PGADMIN_EMAIL: '${{ env.PGADMIN_EMAIL }}'
+  PGADMIN_PASSWORD: '${{ env.PGADMIN_PASSWORD }}'
+
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
