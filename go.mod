@@ -1,4 +1,4 @@
-module github.com/MangriMen/Value-Back
+module github.com/MangriMen/Diverse-Back
 
 go 1.20
 

@@ -1,7 +1,7 @@
 package queries
 
 import (
-	"github.com/MangriMen/Value-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -42,6 +42,19 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
 	query := `SELECT * FROM users WHERE email = $1`
 
 	err := q.Get(&user, query, email)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
+	user := models.User{}
+
+	query := `SELECT * FROM users WHERE username = $1`
+
+	err := q.Get(&user, query, username)
 	if err != nil {
 		return user, err
 	}

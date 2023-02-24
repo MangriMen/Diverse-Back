@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/MangriMen/Value-Back/internal/queries"
+	"github.com/MangriMen/Diverse-Back/internal/queries"
 )
 
 type Queries struct {

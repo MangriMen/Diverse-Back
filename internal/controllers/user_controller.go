@@ -3,9 +3,9 @@ package controllers
 import (
 	"time"
 
-	"github.com/MangriMen/Value-Back/api/database"
-	"github.com/MangriMen/Value-Back/internal/helpers"
-	"github.com/MangriMen/Value-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/api/database"
+	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -140,6 +140,22 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
+		})
+	}
+
+	if _, err := db.GetUserByEmail(user.Email); err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error":   true,
+			"message": "user with this email already exists",
+		})
+	}
+
+	_, errEmail := db.GetUserByEmail(user.Email)
+	_, errUsername := db.GetUserByUsername(user.Username)
+	if errEmail == nil || errUsername == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error":   true,
+			"message": "user with this email or username already exists",
 		})
 	}
 

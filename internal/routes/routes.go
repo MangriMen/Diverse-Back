@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/MangriMen/Value-Back/internal/controllers"
-	"github.com/MangriMen/Value-Back/internal/middleware"
+	"github.com/MangriMen/Diverse-Back/internal/controllers"
+	"github.com/MangriMen/Diverse-Back/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 

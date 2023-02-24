@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/MangriMen/Value-Back/api/server"
+	"github.com/MangriMen/Diverse-Back/api/server"
 	"github.com/joho/godotenv"
 )
 
