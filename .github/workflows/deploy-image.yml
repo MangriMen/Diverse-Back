@@ -9,7 +9,8 @@ on:
     branches: ['develop']
   release:
     types: ['published']
-  workflow_dispatch
+
+on: workflow_dispatch
 
 jobs:
   build-and-push-image:
