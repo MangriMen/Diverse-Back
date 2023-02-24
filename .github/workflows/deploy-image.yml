@@ -1,12 +1,18 @@
 name: Create and publish a Docker image
 
-on:
-  push:
-    branches: ['feature/DB-2-create-pipeline']
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}-prod
+
+on:
+  push:
+    branches: ['develop', 'feature/DB-2-create-pipeline']
+
+on:
+  release:
+    types: ['published']
+  workflow_dispatch:
 
 jobs:
   build-and-push-image:
@@ -43,5 +49,7 @@ jobs:
         context: .
         push: true
         file: "./deployments/production/Dockerfile"
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+          ${{ steps.meta.outputs.tags }}
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         labels: ${{ steps.meta.outputs.labels }}

@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   go-prod:
+    image: ghcr.io/mangrimen/diverse-back:latest
     container_name: go
     restart: always
     profiles:
@@ -15,7 +16,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "3030:3030"
+      - "80:3030"
     networks:
       - backend
 
@@ -33,7 +34,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "3030:3030"
+      - "80:3030"
     networks:
       - backend
     volumes:
