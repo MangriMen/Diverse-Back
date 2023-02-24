@@ -38,25 +38,12 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=raw,value=mytag-{{branch}}
 
-    - if: ${{ inputs.run_type == '' }}
-      name: Build and push image
+    - name: Build and push image
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
         file: "./deployments/production/Dockerfile"
         tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-    
-    - if: ${{ inputs.run_type != '' }}
-      name: Build and push image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        file: "./deployments/production/Dockerfile"
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.run_type }}
         labels: ${{ steps.meta.outputs.labels }}
