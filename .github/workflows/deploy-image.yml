@@ -9,8 +9,12 @@ on:
     branches: ['develop']
   release:
     types: ['published']
-
-on: workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      run_type:
+        required: true
+        type: choice
+        default: 'manual'
 
 jobs:
   build-and-push-image:
@@ -36,11 +40,22 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-    - name: Build and push image
+    - if: ${{ inputs.run_type == '' }}
+      name: Build and push image
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
         file: "./deployments/production/Dockerfile"
         tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+    
+    - if: ${{ inputs.run_type != '' }}
+      name: Build and push image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        file: "./deployments/production/Dockerfile"
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.run_type }}
         labels: ${{ steps.meta.outputs.labels }}
