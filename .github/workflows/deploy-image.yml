@@ -5,6 +5,7 @@ on:
     branches: ['feature/DB-2-create-pipeline']
 
 env:
+  environment: production
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
