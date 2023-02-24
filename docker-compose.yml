@@ -5,22 +5,32 @@ services:
     image: ghcr.io/mangrimen/diverse-back:latest
     container_name: go
     restart: always
-    profiles:
-      - prod
-    build:
-      context: .
-      dockerfile: deployments/production/Dockerfile
     env_file:
       - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "80:3030"
     networks:
       - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  go-dev:
+  go-test:
+    image: ghcr.io/mangrimen/diverse-back:develop
+    container_name: go
+    restart: always
+    profiles:
+      - test
+    env_file:
+      - .env
+    ports:
+      - "90:3030"
+    networks:
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  go-hot-reload:
     container_name: go
     restart: always
     profiles:
@@ -30,23 +40,20 @@ services:
       dockerfile: deployments/develop/Dockerfile
     env_file:
       - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
-      - "80:3030"
+      - "3030:3030"
     networks:
       - backend
     volumes:
       - ".:/app"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     container_name: postgres
     image: postgres:14.5-alpine
     restart: always
-    profiles:
-      - prod
-      - dev
     env_file:
       - .env
     environment:
@@ -70,9 +77,6 @@ services:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
     restart: always
-    profiles:
-      - prod
-      - dev
     env_file:
       - .env
     environment:
