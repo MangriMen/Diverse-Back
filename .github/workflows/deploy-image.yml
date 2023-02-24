@@ -5,25 +5,8 @@ on:
     branches: ['feature/DB-2-create-pipeline']
 
 env:
-  environment: production
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
-  SERVER_PORT: '${{ secrets.SERVER_PORT }}'
-  SERVER_READ_TIMEOUT: '${{ secrets.SERVER_READ_TIMEOUT }}'
-  JWT_SECRET_KEY: '${{ secrets.JWT_SECRET_KEY }}'
-  JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT: '${{ secrets.JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT }}'
-  DB_TYPE: '${{ secrets.DB_TYPE }}'
-  DB_HOST: '${{ secrets.DB_HOST }}'
-  DB_PORT: '${{ secrets.DB_PORT }}'
-  DB_USER: '${{ secrets.DB_USER }}'
-  DB_PASSWORD: '${{ secrets.DB_PASSWORD }}'
-  DB_NAME: '${{ secrets.DB_NAME }}'
-  DB_MAX_CONNECTIONS: '${{ secrets.DB_MAX_CONNECTIONS }}'
-  DB_MAX_IDLE_CONNECTIONS: '${{ secrets.DB_MAX_IDLE_CONNECTIONS }}'
-  DB_MAX_LIFETIME_CONNECTIONS: '${{ secrets.DB_MAX_LIFETIME_CONNECTIONS }}'
-  PGADMIN_EMAIL: '${{ secrets.PGADMIN_EMAIL }}'
-  PGADMIN_PASSWORD: '${{ secrets.PGADMIN_PASSWORD }}'
 
 jobs:
   build-and-push-image:
