@@ -1,7 +1,14 @@
 .PHONY: dev prod
 
+all:
+	@echo "Usage: make BUILD_TARGET"
+	@echo ""
+	@echo "BUILD_TARGET:"
+	@echo "\tdev\t-\tbuild with hot-reload"
+	@echo "\tprod\t-\tproduction build"
+
 dev:
-	docker-compose -f dev.docker-compose.yml up --build
+	docker-compose --profile dev up --build
 
 prod:
-	docker-compose -f build.docker-compose.yml up --build
+	docker-compose --profile prod up --build
