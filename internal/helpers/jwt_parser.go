@@ -10,30 +10,36 @@ import (
 
 type TokenMetadata struct {
 	Expires int64
+	Id      string
 }
 
-func ExtractTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
+func GetTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 	token, err := verifyToken(c)
+
 	if err != nil {
 		return nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
+
 	if ok && token.Valid {
 		expires := int64(claims["exp"].(float64))
+		id := claims["id"].(string)
 
 		return &TokenMetadata{
 			Expires: expires,
+			Id:      id,
 		}, nil
 	}
 
 	return nil, err
 }
 
-func extractToken(c *fiber.Ctx) string {
+func getToken(c *fiber.Ctx) string {
 	bearToken := c.Get("Authorization")
 
 	onlyToken := strings.Split(bearToken, " ")
+
 	if len(onlyToken) == 2 {
 		return onlyToken[1]
 	}
@@ -42,9 +48,10 @@ func extractToken(c *fiber.Ctx) string {
 }
 
 func verifyToken(c *fiber.Ctx) (*jwt.Token, error) {
-	tokenString := extractToken(c)
+	tokenString := getToken(c)
 
 	token, err := jwt.Parse(tokenString, jwtKeyFunc)
+
 	if err != nil {
 		return nil, err
 	}

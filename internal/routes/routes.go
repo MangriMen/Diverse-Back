@@ -9,16 +9,16 @@ import (
 func PublicRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
-	route.Post("/login", controllers.LoginUser)
-	route.Post("/register", controllers.CreateUser)
-
 	route.Get("/users", controllers.GetUsers)
 	route.Get("/users/:id", controllers.GetUser)
+
+	route.Post("/login", controllers.LoginUser)
+	route.Post("/register", controllers.CreateUser)
 }
 
 func PrivateRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
-	route.Patch("/user", middleware.JWTProtected(), controllers.UpdateUser)
-	route.Delete("/user", middleware.JWTProtected(), controllers.DeleteUser)
+	route.Patch("/users/:id", middleware.JWTProtected(), controllers.UpdateUser)
+	route.Delete("/users/:id", middleware.JWTProtected(), controllers.DeleteUser)
 }
