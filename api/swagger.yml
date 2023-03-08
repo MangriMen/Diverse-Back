@@ -1,0 +1,332 @@
+basePath: /api/v1
+consumes:
+    - application/json
+definitions:
+    BaseUser:
+        description: User represents the user without password for this application
+        properties:
+            created_at:
+                description: The time the user was registered
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            email:
+                description: The email for this user
+                type: string
+                x-go-name: Email
+            id:
+                description: The id for this user
+                format: uuid
+                type: string
+                x-go-name: Id
+            name:
+                description: The name for this user
+                type: string
+                x-go-name: Name
+            updated_at:
+                description: The time the user was updated
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            username:
+                description: The username for this user
+                type: string
+                x-go-name: Username
+        required:
+            - id
+            - email
+            - username
+            - created_at
+            - updated_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    DefaultResponseBody:
+        description: 'swagger: model'
+        properties:
+            error:
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+        required:
+            - error
+            - message
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    User:
+        description: User represents the user for this application
+        properties:
+            created_at:
+                description: The time the user was registered
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            email:
+                description: The email for this user
+                type: string
+                x-go-name: Email
+            id:
+                description: The id for this user
+                format: uuid
+                type: string
+                x-go-name: Id
+            name:
+                description: The name for this user
+                type: string
+                x-go-name: Name
+            password:
+                description: The password for this user
+                type: string
+                x-go-name: Password
+            updated_at:
+                description: The time the user was updated
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            username:
+                description: The username for this user
+                type: string
+                x-go-name: Username
+        required:
+            - id
+            - email
+            - username
+            - created_at
+            - updated_at
+            - password
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+host: localhost:3030
+info:
+    title: Diverse API.
+    version: 0.0.1
+paths:
+    /login:
+        post:
+            description: Returns the user and token by given credentials
+            operationId: loginUser
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    properties:
+                        email:
+                            maxLength: 255
+                            minLength: 6
+                            type: string
+                            x-go-name: Email
+                        password:
+                            maxLength: 256
+                            minLength: 8
+                            type: string
+                            x-go-name: Password
+                    required:
+                        - email
+                        - password
+                    type: object
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+    /register:
+        post:
+            description: Returns the user and token by given credentials
+            operationId: createUser
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    properties:
+                        email:
+                            maxLength: 255
+                            minLength: 6
+                            type: string
+                            x-go-name: Email
+                        password:
+                            maxLength: 256
+                            minLength: 8
+                            type: string
+                            x-go-name: Password
+                        username:
+                            maxLength: 32
+                            minLength: 1
+                            type: string
+                            x-go-name: Username
+                    required:
+                        - email
+                        - password
+                        - username
+                    type: object
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+    /users:
+        get:
+            description: Returns a list of all users
+            operationId: getUsers
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetUsersResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+    /users/{id}:
+        delete:
+            description: Delete user by id
+            operationId: deleteUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: Id
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+        get:
+            description: Returns the user by given id
+            operationId: getUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: Id
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+        patch:
+            description: Update user by id with given fields
+            operationId: updateUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: Id
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/UpdateUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+produces:
+    - application/json
+responses:
+    DeleteUserResponse:
+        description: ""
+    ErrorResponse:
+        description: ""
+        schema:
+            $ref: '#/definitions/DefaultResponseBody'
+    GetUserResponse:
+        description: ""
+        schema:
+            properties:
+                error:
+                    type: boolean
+                    x-go-name: Error
+                message:
+                    type: string
+                    x-go-name: Message
+                user:
+                    $ref: '#/definitions/BaseUser'
+            required:
+                - error
+                - message
+                - user
+            type: object
+    GetUsersResponse:
+        description: ""
+        schema:
+            properties:
+                count:
+                    format: int64
+                    type: integer
+                    x-go-name: Count
+                error:
+                    type: boolean
+                    x-go-name: Error
+                message:
+                    type: string
+                    x-go-name: Message
+                users:
+                    items:
+                        $ref: '#/definitions/BaseUser'
+                    type: array
+                    x-go-name: Users
+            required:
+                - error
+                - message
+                - users
+                - count
+            type: object
+    RegisterLoginUserResponse:
+        description: ""
+        schema:
+            properties:
+                error:
+                    type: boolean
+                    x-go-name: Error
+                message:
+                    type: string
+                    x-go-name: Message
+                token:
+                    type: string
+                    x-go-name: Token
+                user:
+                    $ref: '#/definitions/BaseUser'
+            required:
+                - error
+                - message
+                - user
+                - token
+            type: object
+    UpdateUserResponse:
+        description: ""
+        schema:
+            type: string
+schemes:
+    - http
+    - https
+swagger: "2.0"

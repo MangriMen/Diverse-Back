@@ -80,11 +80,10 @@ func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.User) error {
 			password = $3,
 			username = $4,
 			name = $5,
-			created_at = $6,
-			updated_at = $7
+			updated_at = $6
 		WHERE id = $1`
 
-	_, err := q.Exec(query, id, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
+	_, err := q.Exec(query, id, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
 	if err != nil {
 		return err
 	}
