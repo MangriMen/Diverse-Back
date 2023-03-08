@@ -393,7 +393,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user := &models.User{Id: idToDelete}
+	user := &models.User{BaseUser: models.BaseUser{Id: idToDelete}}
 	validate := helpers.NewValidator()
 	if err := validate.StructPartial(user, "id"); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

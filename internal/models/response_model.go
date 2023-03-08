@@ -24,7 +24,7 @@ type GetUsersResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		Users []User `json:"users"`
+		Users []BaseUser `json:"users"`
 		// required: true
 		Count int `json:"count"`
 	}
@@ -36,7 +36,7 @@ type GetUserResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		User User `json:"user"`
+		User BaseUser `json:"user"`
 	}
 }
 
@@ -46,7 +46,7 @@ type RegisterLoginUserResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		User User `json:"user"`
+		User BaseUser `json:"user"`
 		// required: true
 		Token string `json:"token"`
 	}

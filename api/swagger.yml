@@ -2,6 +2,44 @@ basePath: /api/v1
 consumes:
     - application/json
 definitions:
+    BaseUser:
+        description: User represents the user without password for this application
+        properties:
+            created_at:
+                description: The time the user was registered
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            email:
+                description: The email for this user
+                type: string
+                x-go-name: Email
+            id:
+                description: The id for this user
+                format: uuid
+                type: string
+                x-go-name: Id
+            name:
+                description: The name for this user
+                type: string
+                x-go-name: Name
+            updated_at:
+                description: The time the user was updated
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            username:
+                description: The username for this user
+                type: string
+                x-go-name: Username
+        required:
+            - id
+            - email
+            - username
+            - created_at
+            - updated_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     DefaultResponseBody:
         description: 'swagger: model'
         properties:
@@ -53,10 +91,10 @@ definitions:
         required:
             - id
             - email
-            - password
             - username
             - created_at
             - updated_at
+            - password
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
 host: localhost:3030
@@ -232,7 +270,7 @@ responses:
                     type: string
                     x-go-name: Message
                 user:
-                    $ref: '#/definitions/User'
+                    $ref: '#/definitions/BaseUser'
             required:
                 - error
                 - message
@@ -254,7 +292,7 @@ responses:
                     x-go-name: Message
                 users:
                     items:
-                        $ref: '#/definitions/User'
+                        $ref: '#/definitions/BaseUser'
                     type: array
                     x-go-name: Users
             required:
@@ -277,7 +315,7 @@ responses:
                     type: string
                     x-go-name: Token
                 user:
-                    $ref: '#/definitions/User'
+                    $ref: '#/definitions/BaseUser'
             required:
                 - error
                 - message
