@@ -102,6 +102,20 @@ info:
     title: Diverse API.
     version: 0.0.1
 paths:
+    /fetch:
+        get:
+            description: Get user and new token if user exists
+            operationId: fetchUser
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
     /login:
         post:
             description: Returns the user and token by given credentials

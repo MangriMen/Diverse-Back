@@ -19,6 +19,8 @@ func PublicRoutes(a *fiber.App) {
 func PrivateRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
+	route.Get("/fetch", middleware.JWTProtected(), controllers.FetchUser)
+
 	route.Patch("/users/:id", middleware.JWTProtected(), controllers.UpdateUser)
 	route.Delete("/users/:id", middleware.JWTProtected(), controllers.DeleteUser)
 }
