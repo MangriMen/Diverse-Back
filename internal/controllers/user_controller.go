@@ -251,6 +251,77 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 }
 
+// swagger:route Get /fetch fetchUser
+// Get user and new token if user exists
+//
+// Produces:
+//   - application/json
+//
+// Schemes: http, https
+//
+// Responses:
+//   201: RegisterLoginUserResponse
+//   default: ErrorResponse
+
+func FetchUser(c *fiber.Ctx) error {
+	now := time.Now().Unix()
+
+	claims, err := helpers.GetTokenMetadata(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	if claims.Expires < now {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error":   true,
+			"message": "unathorized, check expiration time of your token",
+		})
+	}
+
+	id, err := uuid.Parse(claims.Id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	user, err := db.GetUser(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   true,
+			"message": "user with this ID not found",
+		})
+	}
+
+	token, err := helpers.GenerateNewAccessToken(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	user.PrepareToSend()
+	return c.JSON(fiber.Map{
+		"error":   false,
+		"message": nil,
+		"token":   token,
+		"user":    user,
+	})
+}
+
 // swagger:route PATCH /users/{id} updateUser
 // Update user by id with given fields
 //
