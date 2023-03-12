@@ -20,4 +20,5 @@ func PrivateRoutes(a *fiber.App) {
 
 	UserPrivateRoutes(route)
 	PostPrivateRoutes(route)
+	DataPrivateRoutes(route)
 }

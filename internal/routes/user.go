@@ -17,7 +17,7 @@ func UserPublicRoutes(route fiber.Router) {
 	route.Post("/register", controllers.CreateUser)
 }
 
-// UserPrivateRoutes ets up private routes for authenticated users.
+// UserPrivateRoutes sets up private routes for authenticated users.
 // These routes require a valid JWT for authentication and authorization to access the endpoints.
 // It includes endpoints for fetching and updating user information, as well as deleting user accounts.
 func UserPrivateRoutes(route fiber.Router) {

@@ -14,3 +14,16 @@ const PostCommentEditTimeSinceCreated = 24 * time.Hour
 
 // PostFetchCommentCount specifies the maximum number of comments to first time fetch a post.
 const PostFetchCommentCount = 20
+
+// DataPath specifies the root path for image files, video files, etc.
+const DataPath = "/var/lib/backend-data/"
+
+// Constants for MIME base types.
+const (
+	MIMEBaseImage = "image"
+)
+
+// GetAllowedMIMEBaseTypes returns types allowed to upload on server.
+func GetAllowedMIMEBaseTypes() []string {
+	return []string{MIMEBaseImage}
+}
