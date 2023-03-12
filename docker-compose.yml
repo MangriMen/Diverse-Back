@@ -16,6 +16,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   go-test:
     image: ghcr.io/mangrimen/diverse-back:develop
@@ -34,6 +36,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   go-hot-reload:
     container_name: go-hot
@@ -51,6 +55,7 @@ services:
       - backend
     volumes:
       - ".:/app"
+      - "backend-data:/var/lib/backend-data"
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,6 +99,7 @@ services:
 
 volumes:
   postgres-data:
+  backend-data:
 
 
 networks:

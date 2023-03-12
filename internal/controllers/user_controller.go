@@ -26,10 +26,7 @@ import (
 func GetUsers(c *fiber.Ctx) error {
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	users, err := db.GetUsers()
@@ -37,8 +34,6 @@ func GetUsers(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
 			"message": "users not found",
-			"count":   0,
-			"users":   nil,
 		})
 	}
 
@@ -70,18 +65,12 @@ func GetUsers(c *fiber.Ctx) error {
 func GetUser(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	user, err := db.GetUser(id)
@@ -89,7 +78,6 @@ func GetUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
 			"message": "user with given id was not found",
-			"user":    nil,
 		})
 	}
 
@@ -116,18 +104,12 @@ func GetUser(c *fiber.Ctx) error {
 func LoginUser(c *fiber.Ctx) error {
 	user := &models.User{}
 	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	foundUser, err := db.GetUserByEmail(user.Email)
@@ -147,10 +129,7 @@ func LoginUser(c *fiber.Ctx) error {
 
 	token, err := helpers.GenerateNewAccessToken(foundUser.Id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	foundUser.PrepareToSend()
@@ -177,33 +156,25 @@ func LoginUser(c *fiber.Ctx) error {
 func CreateUser(c *fiber.Ctx) error {
 	user := &models.User{}
 	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
-	if _, err := db.GetUserByEmail(user.Email); err == nil {
+	if _, err := db.GetUserByEmail(user.Email); err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"error":   true,
 			"message": "user with this email already exists",
 		})
 	}
 
-	_, errEmail := db.GetUserByEmail(user.Email)
-	_, errUsername := db.GetUserByUsername(user.Username)
-	if errEmail == nil || errUsername == nil {
+	if _, err := db.GetUserByUsername(user.Username); err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"error":   true,
-			"message": "user with this email or username already exists",
+			"message": "user with this username already exists",
 		})
 	}
 
@@ -221,25 +192,16 @@ func CreateUser(c *fiber.Ctx) error {
 
 	user.Password, err = helpers.HashPassword(user.Password)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": "cannot create user",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	if err := db.CreateUser(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	token, err := helpers.GenerateNewAccessToken(user.Id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	user.PrepareToSend()
@@ -264,37 +226,19 @@ func CreateUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func FetchUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
 	claims, err := helpers.GetTokenMetadata(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	id, err := uuid.Parse(claims.Id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	user, err := db.GetUser(id)
@@ -307,10 +251,7 @@ func FetchUser(c *fiber.Ctx) error {
 
 	token, err := helpers.GenerateNewAccessToken(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	user.PrepareToSend()
@@ -335,45 +276,24 @@ func FetchUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func UpdateUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
 	claims, err := helpers.GetTokenMetadata(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	id, err := uuid.Parse(claims.Id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	user := &models.User{}
 	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	foundUser, err := db.GetUser(id)
@@ -424,37 +344,19 @@ func UpdateUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func DeleteUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
 	claims, err := helpers.GetTokenMetadata(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	id, err := uuid.Parse(claims.Id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	idToDelete, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	if id != idToDelete {
@@ -475,17 +377,11 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"erorr":   true,
-			"message": "book with this ID not found",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	if err := db.DeleteUser(user.Id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

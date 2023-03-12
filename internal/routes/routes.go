@@ -23,4 +23,6 @@ func PrivateRoutes(a *fiber.App) {
 
 	route.Patch("/users/:id", middleware.JWTProtected(), controllers.UpdateUser)
 	route.Delete("/users/:id", middleware.JWTProtected(), controllers.DeleteUser)
+
+	route.Post("/data", middleware.JWTProtected(), controllers.UploadData)
 }
