@@ -5,6 +5,7 @@ import (
 
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/jwt_helpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -127,7 +128,7 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(foundUser.Id)
+	token, err := jwt_helpers.GenerateNewAccessToken(foundUser.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -199,7 +200,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
-	token, err := helpers.GenerateNewAccessToken(user.Id)
+	token, err := jwt_helpers.GenerateNewAccessToken(user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -226,7 +227,7 @@ func CreateUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func FetchUser(c *fiber.Ctx) error {
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwt_helpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -249,7 +250,7 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(id)
+	token, err := jwt_helpers.GenerateNewAccessToken(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -276,7 +277,7 @@ func FetchUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func UpdateUser(c *fiber.Ctx) error {
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwt_helpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -344,7 +345,7 @@ func UpdateUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func DeleteUser(c *fiber.Ctx) error {
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwt_helpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
