@@ -288,47 +288,6 @@ paths:
             schemes:
                 - http
                 - https
-    /post/{id}/comments:
-        post:
-            description: Add comment to the given post
-            operationId: addComment
-            produces:
-                - application/json
-            responses:
-                "201":
-                    $ref: '#/responses/CreateUpdateCommentResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-    /post/{id}/comments/{comment}:
-        delete:
-            description: Delete comment by comment id with given post id
-            operationId: deleteComment
-            produces:
-                - application/json
-            responses:
-                "204":
-                    $ref: '#/responses/DeleteCommentResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-        patch:
-            description: Update comment content by comment id with given post id
-            operationId: updateComment
-            produces:
-                - application/json
-            responses:
-                "201":
-                    $ref: '#/responses/CreateUpdateCommentResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
     /posts:
         get:
             description: Returns a list of all posts
@@ -391,6 +350,47 @@ paths:
             responses:
                 "201":
                     $ref: '#/responses/CreateUpdatePostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+    /posts/{id}/comments:
+        post:
+            description: Add comment to the given post
+            operationId: addComment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/CreateUpdateCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+    /posts/{id}/comments/{comment}:
+        delete:
+            description: Delete comment by comment id with given post id
+            operationId: deleteComment
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+        patch:
+            description: Update comment content by comment id with given post id
+            operationId: updateComment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/CreateUpdateCommentResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:
