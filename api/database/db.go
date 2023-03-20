@@ -6,6 +6,8 @@ import (
 
 type Queries struct {
 	*queries.UserQueries
+	*queries.PostQueries
+	*queries.CommentQueries
 }
 
 func OpenDBConnection() (*Queries, error) {
@@ -16,6 +18,8 @@ func OpenDBConnection() (*Queries, error) {
 	}
 
 	return &Queries{
-		UserQueries: &queries.UserQueries{DB: db},
+		UserQueries:    &queries.UserQueries{DB: db},
+		PostQueries:    &queries.PostQueries{DB: db},
+		CommentQueries: &queries.CommentQueries{DB: db},
 	}, nil
 }

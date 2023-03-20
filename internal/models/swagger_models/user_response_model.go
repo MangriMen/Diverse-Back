@@ -1,6 +1,7 @@
-package models
+package swagger_models
 
 import (
+	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -24,7 +25,7 @@ type GetUsersResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		Users []BaseUser `json:"users"`
+		Users []models.BaseUser `json:"users"`
 		// required: true
 		Count int `json:"count"`
 	}
@@ -36,7 +37,7 @@ type GetUserResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		User BaseUser `json:"user"`
+		User models.BaseUser `json:"user"`
 	}
 }
 
@@ -46,7 +47,7 @@ type RegisterLoginUserResponse struct {
 	Body struct {
 		DefaultResponseBody
 		// required: true
-		User BaseUser `json:"user"`
+		User models.BaseUser `json:"user"`
 		// required: true
 		Token string `json:"token"`
 	}
