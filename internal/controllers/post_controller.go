@@ -335,7 +335,7 @@ func DeletePost(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-// swagger:route POST /post/{id}/comments addComment
+// swagger:route POST /posts/{id}/comments addComment
 // Add comment to the given post
 //
 // Produces:
@@ -431,7 +431,7 @@ func AddComment(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route PATCH /post/{id}/comments/{comment} updateComment
+// swagger:route PATCH /posts/{id}/comments/{comment} updateComment
 // Update comment content by comment id with given post id
 //
 // Produces:
@@ -527,7 +527,7 @@ func UpdateComment(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /post/{id}/comments/{comment} deleteComment
+// swagger:route DELETE /posts/{id}/comments/{comment} deleteComment
 // Delete comment by comment id with given post id
 //
 // Schemes: http, https
