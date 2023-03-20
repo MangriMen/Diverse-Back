@@ -1,8 +1,10 @@
 package configs
 
-const PASSWORD_ENCRYPT_COST = 12
+const BodyLimit = 1024 * 1024 * 1024
 
-const DATA_PATH = "/var/lib/backend-data/"
+const PasswordEncryptCost = 12
+
+const DataPath = "/var/lib/backend-data/"
 
 const (
 	MIMEBaseImage = "image"
@@ -11,3 +13,5 @@ const (
 var UploadMIMEBaseTypes = []string{
 	MIMEBaseImage,
 }
+
+const WebpQuality = 75

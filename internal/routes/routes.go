@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"path/filepath"
+
+	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/controllers"
 	"github.com/MangriMen/Diverse-Back/internal/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -11,6 +14,8 @@ func PublicRoutes(a *fiber.App) {
 
 	route.Get("/users", controllers.GetUsers)
 	route.Get("/users/:id", controllers.GetUser)
+
+	route.Static("data/image/", filepath.Join(configs.DataPath, configs.MIMEBaseImage), fiber.Static{Compress: true})
 
 	route.Post("/login", controllers.LoginUser)
 	route.Post("/register", controllers.CreateUser)
