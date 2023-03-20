@@ -18,6 +18,9 @@ const PostFetchCommentCount = 20
 // DataPath specifies the root path for image files, video files, etc.
 const DataPath = "/var/lib/backend-data/"
 
+// BodyLimit is limit for body size in bits
+const BodyLimit = 1024 * 1024 * 1024
+
 // Constants for MIME base types.
 const (
 	MIMEBaseImage = "image"
@@ -27,3 +30,5 @@ const (
 func GetAllowedMIMEBaseTypes() []string {
 	return []string{MIMEBaseImage}
 }
+
+const WebpQuality = 75

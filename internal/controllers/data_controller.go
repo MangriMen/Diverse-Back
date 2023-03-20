@@ -29,7 +29,7 @@ func UploadData(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
 
-	err = c.SaveFile(receivedFile, filepath.Join(pathToFolder, filename))
+	err = helpers.ProcessFile(receivedFile, filepath.Join(pathToFolder, filename))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(helpers.GetResponse(err, helpers.DefaultError))
 	}
@@ -38,5 +38,6 @@ func UploadData(c *fiber.Ctx) error {
 		"error":   false,
 		"message": nil,
 		"url":     url,
+		"path":    filepath.Join(pathToFolder, filename),
 	})
 }
