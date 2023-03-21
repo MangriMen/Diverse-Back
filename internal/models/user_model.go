@@ -31,6 +31,9 @@ type BaseUser struct {
 	// The time the user was updated
 	// required: true
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+
+	// URL to user avatar
+	Avatar_url *string `db:"avatar_url" json:"avatar_url"`
 }
 
 // User represents the user for this application
