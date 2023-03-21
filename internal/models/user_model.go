@@ -39,6 +39,10 @@ type DBUser struct {
 	Password string `db:"password" json:"password,omitempty" validate:"required,gte=8,lte=256"`
 }
 
+func (u *DBUser) ToUser() User {
+	return User{BaseUser: u.BaseUser}
+}
+
 // User represents the user for this application
 // swagger:model
 type User struct {
@@ -47,8 +51,4 @@ type User struct {
 
 func (user *DBUser) PrepareToSend() {
 	user.Password = ""
-}
-
-func (u *DBUser) ToUser() User {
-	return User{BaseUser: u.BaseUser}
 }

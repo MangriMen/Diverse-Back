@@ -5,6 +5,7 @@ definitions:
     BaseResponseBody:
         properties:
             error:
+                example: false
                 type: boolean
                 x-go-name: Error
             message:
@@ -14,7 +15,7 @@ definitions:
             - error
             - message
         type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models/swagger_models
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     Comment:
         properties:
             content:
@@ -45,6 +46,90 @@ definitions:
             - updated_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    GetPostResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+            user:
+                $ref: '#/definitions/Post'
+        required:
+            - error
+            - message
+            - user
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostsResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+            users:
+                items:
+                    $ref: '#/definitions/Post'
+                type: array
+                x-go-name: Posts
+        required:
+            - error
+            - message
+            - count
+            - users
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetUserResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - error
+            - message
+            - user
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetUsersResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+            users:
+                items:
+                    $ref: '#/definitions/User'
+                type: array
+                x-go-name: Users
+        required:
+            - error
+            - message
+            - count
+            - users
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     Post:
         description: Post represents the post for this application
         properties:
@@ -85,6 +170,27 @@ definitions:
             - created_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    RegisterLoginUserResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+            token:
+                type: string
+                x-go-name: Token
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - error
+            - message
+            - token
+            - user
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     User:
         description: User represents the user for this application
         properties:
@@ -142,6 +248,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - User
     /login:
@@ -151,6 +259,7 @@ paths:
             parameters:
                 - in: body
                   name: Body
+                  required: true
                   schema:
                     properties:
                         email:
@@ -183,6 +292,25 @@ paths:
         get:
             description: Returns a list of all posts
             operationId: getPosts
+            parameters:
+                - format: uuid
+                  in: query
+                  name: last_seen_post_id
+                  type: string
+                  x-go-name: LastSeenPostId
+                - format: date-time
+                  in: query
+                  name: last_seen_post_created_at
+                  type: string
+                  x-go-name: LastSeenPostCreatedAt
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
             produces:
                 - application/json
             responses:
@@ -193,11 +321,35 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
         post:
             description: Creates the post with given info
             operationId: createPost
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    properties:
+                        content:
+                            type: string
+                            x-go-name: Content
+                        description:
+                            maxLength: 2048
+                            type: string
+                            x-go-name: Description
+                        user_id:
+                            format: uuid
+                            type: string
+                            x-go-name: UserId
+                    required:
+                        - content
+                        - description
+                        - user_id
+                    type: object
             produces:
                 - application/json
             responses:
@@ -208,6 +360,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
     /posts/{post}:
@@ -231,6 +385,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
         get:
@@ -253,6 +409,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
         patch:
@@ -275,6 +433,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
     /posts/{post}/comments:
@@ -282,6 +442,17 @@ paths:
             description: Add comment to the given post
             operationId: addComment
             parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    properties:
+                        content:
+                            type: string
+                            x-go-name: Content
+                    required:
+                        - content
+                    type: object
                 - format: uuid
                   in: path
                   name: post
@@ -298,6 +469,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
     /posts/{post}/comments/{comment}:
@@ -307,16 +480,16 @@ paths:
             parameters:
                 - format: uuid
                   in: path
-                  name: post
-                  required: true
-                  type: string
-                  x-go-name: Post
-                - format: uuid
-                  in: path
                   name: comment
                   required: true
                   type: string
                   x-go-name: Comment
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
             produces:
                 - application/json
             responses:
@@ -327,6 +500,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
         patch:
@@ -335,16 +510,27 @@ paths:
             parameters:
                 - format: uuid
                   in: path
-                  name: post
-                  required: true
-                  type: string
-                  x-go-name: Post
-                - format: uuid
-                  in: path
                   name: comment
                   required: true
                   type: string
                   x-go-name: Comment
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    properties:
+                        content:
+                            type: string
+                            x-go-name: Content
+                    required:
+                        - content
+                    type: object
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
             produces:
                 - application/json
             responses:
@@ -355,6 +541,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - Post
     /register:
@@ -384,8 +572,8 @@ paths:
                             x-go-name: Username
                     required:
                         - email
-                        - password
                         - username
+                        - password
                     type: object
             produces:
                 - application/json
@@ -436,6 +624,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - User
         get:
@@ -470,6 +660,31 @@ paths:
                   required: true
                   type: string
                   x-go-name: User
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    properties:
+                        email:
+                            maxLength: 255
+                            minLength: 6
+                            type: string
+                            x-go-name: Email
+                        name:
+                            maxLength: 32
+                            type: string
+                            x-go-name: Name
+                        password:
+                            maxLength: 256
+                            minLength: 8
+                            type: string
+                            x-go-name: Password
+                        username:
+                            maxLength: 32
+                            minLength: 1
+                            type: string
+                            x-go-name: Username
+                    type: object
             produces:
                 - application/json
             responses:
@@ -480,6 +695,8 @@ paths:
             schemes:
                 - http
                 - https
+            security:
+                - bearerAuth: []
             tags:
                 - User
 produces:
@@ -506,108 +723,23 @@ responses:
     GetPostResponse:
         description: ""
         schema:
-            properties:
-                error:
-                    type: boolean
-                    x-go-name: Error
-                message:
-                    type: string
-                    x-go-name: Message
-                user:
-                    $ref: '#/definitions/Post'
-            required:
-                - error
-                - message
-                - user
-            type: object
+            $ref: '#/definitions/GetPostResponseBody'
     GetPostsResponse:
         description: ""
         schema:
-            properties:
-                count:
-                    format: int64
-                    type: integer
-                    x-go-name: Count
-                error:
-                    type: boolean
-                    x-go-name: Error
-                message:
-                    type: string
-                    x-go-name: Message
-                users:
-                    items:
-                        $ref: '#/definitions/Post'
-                    type: array
-                    x-go-name: Posts
-            required:
-                - error
-                - message
-                - users
-                - count
-            type: object
+            $ref: '#/definitions/GetPostsResponseBody'
     GetUserResponse:
         description: ""
         schema:
-            properties:
-                error:
-                    type: boolean
-                    x-go-name: Error
-                message:
-                    type: string
-                    x-go-name: Message
-                user:
-                    $ref: '#/definitions/User'
-            required:
-                - error
-                - message
-                - user
-            type: object
+            $ref: '#/definitions/GetUserResponseBody'
     GetUsersResponse:
         description: ""
         schema:
-            properties:
-                count:
-                    format: int64
-                    type: integer
-                    x-go-name: Count
-                error:
-                    type: boolean
-                    x-go-name: Error
-                message:
-                    type: string
-                    x-go-name: Message
-                users:
-                    items:
-                        $ref: '#/definitions/User'
-                    type: array
-                    x-go-name: Users
-            required:
-                - error
-                - message
-                - users
-                - count
-            type: object
+            $ref: '#/definitions/GetUsersResponseBody'
     RegisterLoginUserResponse:
         description: ""
         schema:
-            properties:
-                error:
-                    type: boolean
-                    x-go-name: Error
-                message:
-                    type: string
-                    x-go-name: Message
-                token:
-                    type: string
-                    x-go-name: Token
-                user:
-                    $ref: '#/definitions/User'
-            required:
-                - error
-                - message
-                - user
-                - token
-            type: object
+            $ref: '#/definitions/RegisterLoginUserResponseBody'
     UpdateUserResponse:
         description: ""
         schema:
@@ -615,4 +747,10 @@ responses:
 schemes:
     - http
     - https
+securityDefinitions:
+    bearerAuth:
+        description: JWT Authorization header
+        in: header
+        name: Authorization
+        type: apiKey
 swagger: "2.0"

@@ -1,27 +1,34 @@
-package swagger_models
+package responses
 
 import "github.com/MangriMen/Diverse-Back/internal/models"
+
+type GetPostsResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	Count int `json:"count"`
+
+	// required: true
+	Posts []models.Post `json:"users"`
+}
 
 // swagger:response
 type GetPostsResponse struct {
 	// in: body
-	Body struct {
-		BaseResponseBody
-		// required: true
-		Posts []models.Post `json:"users"`
-		// required: true
-		Count int `json:"count"`
-	}
+	Body GetPostsResponseBody
+}
+
+type GetPostResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	Post models.Post `json:"user"`
 }
 
 // swagger:response
 type GetPostResponse struct {
 	// in: body
-	Body struct {
-		BaseResponseBody
-		// required: true
-		Post models.Post `json:"user"`
-	}
+	Body GetPostResponseBody
 }
 
 // swagger:response
