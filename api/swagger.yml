@@ -2,32 +2,17 @@ basePath: /api/v1
 consumes:
     - application/json
 definitions:
-    BaseComment:
+    BaseResponseBody:
         properties:
-            content:
-                description: Comment content
+            error:
+                type: boolean
+                x-go-name: Error
+            message:
                 type: string
-                x-go-name: Content
-            created_at:
-                description: The time the comment was created
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            id:
-                description: The id for this comment
-                format: uuid
-                type: string
-                x-go-name: Id
-            updated_at:
-                description: The time the comment was updated
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
+                x-go-name: Message
         required:
-            - id
-            - content
-            - created_at
-            - updated_at
+            - error
+            - message
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     BasePost:
@@ -127,7 +112,7 @@ definitions:
                 type: string
                 x-go-name: UpdatedAt
             user:
-                $ref: '#/definitions/BaseUser'
+                $ref: "#/definitions/User"
         required:
             - id
             - content
@@ -135,26 +120,12 @@ definitions:
             - updated_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
-    DefaultResponseBody:
-        description: 'swagger: model'
-        properties:
-            error:
-                type: boolean
-                x-go-name: Error
-            message:
-                type: string
-                x-go-name: Message
-        required:
-            - error
-            - message
-        type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models/swagger_models
     Post:
         description: Post represents the post for this application
         properties:
             comments:
                 items:
-                    $ref: '#/definitions/Comment'
+                    $ref: "#/definitions/Comment"
                 type: array
                 x-go-name: Comments
             content:
@@ -181,7 +152,7 @@ definitions:
                 type: integer
                 x-go-name: Likes
             user:
-                $ref: '#/definitions/BaseUser'
+                $ref: "#/definitions/User"
         required:
             - id
             - content
@@ -214,10 +185,6 @@ definitions:
                 description: The name for this user
                 type: string
                 x-go-name: Name
-            password:
-                description: The password for this user
-                type: string
-                x-go-name: Password
             updated_at:
                 description: The time the user was updated
                 format: date-time
@@ -233,7 +200,6 @@ definitions:
             - username
             - created_at
             - updated_at
-            - password
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
 host: localhost:3030
@@ -249,12 +215,14 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/RegisterLoginUserResponse'
+                    $ref: "#/responses/RegisterLoginUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
     /login:
         post:
             description: Returns the user and token by given credentials
@@ -263,85 +231,49 @@ paths:
                 - in: body
                   name: Body
                   schema:
-                    properties:
-                        email:
-                            maxLength: 255
-                            minLength: 6
-                            type: string
-                            x-go-name: Email
-                        password:
-                            maxLength: 256
-                            minLength: 8
-                            type: string
-                            x-go-name: Password
-                    required:
-                        - email
-                        - password
-                    type: object
+                      properties:
+                          email:
+                              maxLength: 255
+                              minLength: 6
+                              type: string
+                              x-go-name: Email
+                          password:
+                              maxLength: 256
+                              minLength: 8
+                              type: string
+                              x-go-name: Password
+                      required:
+                          - email
+                          - password
+                      type: object
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/RegisterLoginUserResponse'
+                    $ref: "#/responses/RegisterLoginUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
     /posts:
         get:
             description: Returns a list of all posts
-            operationId: getPost
+            operationId: getPosts
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/GetPostsResponse'
+                    $ref: "#/responses/GetPostsResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
-    /posts/{id}:
-        delete:
-            description: Delete post by id
-            operationId: deletePost
-            produces:
-                - application/json
-            responses:
-                "204":
-                    $ref: '#/responses/DeletePostResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-        get:
-            description: Returns the post by given id
-            operationId: getPost
-            produces:
-                - application/json
-            responses:
-                "200":
-                    $ref: '#/responses/GetPostResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-        patch:
-            description: Update post by id with given fields
-            operationId: updatePost
-            produces:
-                - application/json
-            responses:
-                "201":
-                    $ref: '#/responses/CreateUpdatePostResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
+            tags:
+                - Post
         post:
             description: Creates the post with given info
             operationId: createPost
@@ -349,53 +281,161 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/CreateUpdatePostResponse'
+                    $ref: "#/responses/CreateUpdatePostResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
-    /posts/{id}/comments:
-        post:
-            description: Add comment to the given post
-            operationId: addComment
-            produces:
-                - application/json
-            responses:
-                "201":
-                    $ref: '#/responses/CreateUpdateCommentResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-    /posts/{id}/comments/{comment}:
+            tags:
+                - Post
+    /posts/{post}:
         delete:
-            description: Delete comment by comment id with given post id
-            operationId: deleteComment
+            description: Delete post by id
+            operationId: deletePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
             produces:
                 - application/json
             responses:
                 "204":
-                    $ref: '#/responses/DeleteCommentResponse'
+                    $ref: "#/responses/DeletePostResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - Post
+        get:
+            description: Returns the post by given id
+            operationId: getPost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: "#/responses/GetPostResponse"
+                default:
+                    $ref: "#/responses/ErrorResponse"
+            schemes:
+                - http
+                - https
+            tags:
+                - Post
         patch:
-            description: Update comment content by comment id with given post id
-            operationId: updateComment
+            description: Update post by id with given fields
+            operationId: updatePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/CreateUpdateCommentResponse'
+                    $ref: "#/responses/CreateUpdatePostResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - Post
+    /posts/{post}/comments:
+        post:
+            description: Add comment to the given post
+            operationId: addComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: "#/responses/CreateUpdateCommentResponse"
+                default:
+                    $ref: "#/responses/ErrorResponse"
+            schemes:
+                - http
+                - https
+            tags:
+                - Post
+    /posts/{post}/comments/{comment}:
+        delete:
+            description: Delete comment by comment id with given post id
+            operationId: deleteComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: "#/responses/DeleteCommentResponse"
+                default:
+                    $ref: "#/responses/ErrorResponse"
+            schemes:
+                - http
+                - https
+            tags:
+                - Post
+        patch:
+            description: Update comment content by comment id with given post id
+            operationId: updateComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: "#/responses/CreateUpdateCommentResponse"
+                default:
+                    $ref: "#/responses/ErrorResponse"
+            schemes:
+                - http
+                - https
+            tags:
+                - Post
     /register:
         post:
             description: Returns the user and token by given credentials
@@ -405,112 +445,122 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        email:
-                            maxLength: 255
-                            minLength: 6
-                            type: string
-                            x-go-name: Email
-                        password:
-                            maxLength: 256
-                            minLength: 8
-                            type: string
-                            x-go-name: Password
-                        username:
-                            maxLength: 32
-                            minLength: 1
-                            type: string
-                            x-go-name: Username
-                    required:
-                        - email
-                        - password
-                        - username
-                    type: object
+                      properties:
+                          email:
+                              maxLength: 255
+                              minLength: 6
+                              type: string
+                              x-go-name: Email
+                          password:
+                              maxLength: 256
+                              minLength: 8
+                              type: string
+                              x-go-name: Password
+                          username:
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                              x-go-name: Username
+                      required:
+                          - email
+                          - password
+                          - username
+                      type: object
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/RegisterLoginUserResponse'
+                    $ref: "#/responses/RegisterLoginUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
     /users:
         get:
             description: Returns a list of all users
-            operationId: getUsers
+            operationId: allowempty
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/GetUsersResponse'
+                    $ref: "#/responses/GetUsersResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
-    /users/{id}:
+            tags:
+                - User
+    /users/{user}:
         delete:
             description: Delete user by id
             operationId: deleteUser
             parameters:
                 - format: uuid
                   in: path
-                  name: id
+                  name: user
                   required: true
                   type: string
-                  x-go-name: Id
+                  x-go-name: User
             produces:
                 - application/json
             responses:
                 "204":
-                    $ref: '#/responses/DeleteUserResponse'
+                    $ref: "#/responses/DeleteUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
         get:
             description: Returns the user by given id
             operationId: getUser
             parameters:
                 - format: uuid
                   in: path
-                  name: id
+                  name: user
                   required: true
                   type: string
-                  x-go-name: Id
+                  x-go-name: User
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/GetUserResponse'
+                    $ref: "#/responses/GetUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
         patch:
             description: Update user by id with given fields
             operationId: updateUser
             parameters:
                 - format: uuid
                   in: path
-                  name: id
+                  name: user
                   required: true
                   type: string
-                  x-go-name: Id
+                  x-go-name: User
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/UpdateUserResponse'
+                    $ref: "#/responses/UpdateUserResponse"
                 default:
-                    $ref: '#/responses/ErrorResponse'
+                    $ref: "#/responses/ErrorResponse"
             schemes:
                 - http
                 - https
+            tags:
+                - User
 produces:
     - application/json
 responses:
@@ -531,7 +581,49 @@ responses:
     ErrorResponse:
         description: ""
         schema:
-            $ref: '#/definitions/DefaultResponseBody'
+            $ref: "#/definitions/BaseResponseBody"
+    GetPostResponse:
+        description: ""
+        schema:
+            properties:
+                error:
+                    type: boolean
+                    x-go-name: Error
+                message:
+                    type: string
+                    x-go-name: Message
+                user:
+                    $ref: "#/definitions/Post"
+            required:
+                - error
+                - message
+                - user
+            type: object
+    GetPostsResponse:
+        description: ""
+        schema:
+            properties:
+                count:
+                    format: int64
+                    type: integer
+                    x-go-name: Count
+                error:
+                    type: boolean
+                    x-go-name: Error
+                message:
+                    type: string
+                    x-go-name: Message
+                users:
+                    items:
+                        $ref: "#/definitions/Post"
+                    type: array
+                    x-go-name: Posts
+            required:
+                - error
+                - message
+                - users
+                - count
+            type: object
     GetUserResponse:
         description: ""
         schema:
@@ -543,7 +635,7 @@ responses:
                     type: string
                     x-go-name: Message
                 user:
-                    $ref: '#/definitions/BaseUser'
+                    $ref: "#/definitions/User"
             required:
                 - error
                 - message
@@ -565,7 +657,7 @@ responses:
                     x-go-name: Message
                 users:
                     items:
-                        $ref: '#/definitions/BaseUser'
+                        $ref: "#/definitions/User"
                     type: array
                     x-go-name: Users
             required:
@@ -588,7 +680,7 @@ responses:
                     type: string
                     x-go-name: Token
                 user:
-                    $ref: '#/definitions/BaseUser'
+                    $ref: "#/definitions/User"
             required:
                 - error
                 - message

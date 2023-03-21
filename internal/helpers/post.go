@@ -11,7 +11,7 @@ func PreparePostToSend(post models.DBPost, db *database.Queries) models.Post {
 
 	user, err := db.GetUser(post.UserId)
 	if err == nil {
-		preparedPost.User = &user.BaseUser
+		preparedPost.User = ptr(user.ToUser())
 	}
 
 	comments, err := db.GetComments(post.Id)
@@ -29,7 +29,7 @@ func PrepareCommentToPost(comment models.DBComment, db *database.Queries) models
 
 	user, err := db.GetUser(comment.UserId)
 	if err == nil {
-		preparedComment.User = &user.BaseUser
+		preparedComment.User = ptr(user.ToUser())
 	}
 
 	return preparedComment

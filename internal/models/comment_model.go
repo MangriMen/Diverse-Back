@@ -39,7 +39,7 @@ type DBComment struct {
 type Comment struct {
 	BaseComment
 
-	User *BaseUser `json:"user"`
+	User *User `json:"user"`
 }
 
 func (c *DBComment) ToComment() Comment {

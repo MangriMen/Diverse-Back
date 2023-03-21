@@ -11,7 +11,7 @@ import (
 	"github.com/samber/lo"
 )
 
-// swagger:route GET /users getUsers
+// swagger:route GET /users User allowempty
 // Returns a list of all users
 //
 // Produces:
@@ -42,7 +42,7 @@ func GetUsers(c *fiber.Ctx) error {
 		})
 	}
 
-	users = lo.Map(users, func(item models.User, index int) models.User {
+	users = lo.Map(users, func(item models.DBUser, index int) models.DBUser {
 		item.PrepareToSend()
 		return item
 	})
@@ -55,7 +55,7 @@ func GetUsers(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route GET /users/{id} getUser
+// swagger:route GET /users/{user} User getUser
 // Returns the user by given id
 //
 // Produces:
@@ -68,7 +68,7 @@ func GetUsers(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func GetUser(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	userId, err := uuid.Parse(c.Params("user"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -84,7 +84,7 @@ func GetUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := db.GetUser(id)
+	user, err := db.GetUser(userId)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -101,7 +101,7 @@ func GetUser(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route POST /login loginUser
+// swagger:route POST /login User loginUser
 // Returns the user and token by given credentials
 //
 // Produces:
@@ -114,7 +114,7 @@ func GetUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func LoginUser(c *fiber.Ctx) error {
-	user := &models.User{}
+	user := &models.DBUser{}
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -162,7 +162,7 @@ func LoginUser(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route POST /register createUser
+// swagger:route POST /register User createUser
 // Returns the user and token by given credentials
 //
 // Produces:
@@ -175,7 +175,7 @@ func LoginUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func CreateUser(c *fiber.Ctx) error {
-	user := &models.User{}
+	user := &models.DBUser{}
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -251,7 +251,7 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route Get /fetch fetchUser
+// swagger:route Get /fetch User fetchUser
 // Get user and new token if user exists
 //
 // Produces:
@@ -281,7 +281,7 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	id, err := uuid.Parse(claims.Id)
+	userId, err := uuid.Parse(claims.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -297,15 +297,15 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := db.GetUser(id)
+	user, err := db.GetUser(userId)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
-			"message": "user with this ID not found",
+			"message": "user with this id not found",
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(id)
+	token, err := helpers.GenerateNewAccessToken(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -322,7 +322,7 @@ func FetchUser(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route PATCH /users/{id} updateUser
+// swagger:route PATCH /users/{user} User updateUser
 // Update user by id with given fields
 //
 // Produces:
@@ -352,7 +352,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	id, err := uuid.Parse(claims.Id)
+	userId, err := uuid.Parse(claims.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -360,7 +360,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user := &models.User{}
+	user := &models.DBUser{}
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -376,11 +376,11 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	foundUser, err := db.GetUser(id)
+	foundUser, err := db.GetUser(userId)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
-			"message": "user with this ID not found",
+			"message": "user with this id not found",
 		})
 	}
 
@@ -411,7 +411,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /users/{id} deleteUser
+// swagger:route DELETE /users/{user} User deleteUser
 // Delete user by id
 //
 // Schemes: http, https
@@ -441,7 +441,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	id, err := uuid.Parse(claims.Id)
+	userId, err := uuid.Parse(claims.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -449,7 +449,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	idToDelete, err := uuid.Parse(c.Params("id"))
+	userIdToDelete, err := uuid.Parse(c.Params("user"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -457,14 +457,14 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if id != idToDelete {
+	if userId != userIdToDelete {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error":   true,
 			"message": "not enough permission to delete user",
 		})
 	}
 
-	user := &models.User{BaseUser: models.BaseUser{Id: idToDelete}}
+	user := &models.DBUser{BaseUser: models.BaseUser{Id: userIdToDelete}}
 	validate := helpers.NewValidator()
 	if err := validate.StructPartial(user, "id"); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -477,7 +477,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"erorr":   true,
-			"message": "book with this ID not found",
+			"message": "book with this id not found",
 		})
 	}
 
