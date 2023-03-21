@@ -13,7 +13,7 @@ import (
 	"github.com/samber/lo"
 )
 
-// swagger:route GET /posts getPost
+// swagger:route GET /posts Post getPosts
 // Returns a list of all posts
 //
 // Produces:
@@ -56,7 +56,7 @@ func GetPosts(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route GET /posts/{id} getPost
+// swagger:route GET /posts/{post} Post getPost
 // Returns the post by given id
 //
 // Produces:
@@ -69,7 +69,7 @@ func GetPosts(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func GetPost(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	id, err := uuid.Parse(c.Params("post"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -103,7 +103,7 @@ func GetPost(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route POST /posts/{id} createPost
+// swagger:route POST /posts Post createPost
 // Creates the post with given info
 //
 // Produces:
@@ -161,7 +161,7 @@ func CreatePost(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route PATCH /posts/{id} updatePost
+// swagger:route PATCH /posts/{post} Post updatePost
 // Update post by id with given fields
 //
 // Produces:
@@ -190,7 +190,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postId, err := uuid.Parse(c.Params("id"))
+	postId, err := uuid.Parse(c.Params("post"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -256,7 +256,7 @@ func UpdatePost(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /posts/{id} deletePost
+// swagger:route DELETE /posts/{post} Post deletePost
 // Delete post by id
 //
 // Schemes: http, https
@@ -285,7 +285,7 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postIdToDelete, err := uuid.Parse(c.Params("id"))
+	postIdToDelete, err := uuid.Parse(c.Params("post"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -335,7 +335,7 @@ func DeletePost(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-// swagger:route POST /posts/{id}/comments addComment
+// swagger:route POST /posts/{post}/comments Post addComment
 // Add comment to the given post
 //
 // Produces:
@@ -364,7 +364,7 @@ func AddComment(c *fiber.Ctx) error {
 		})
 	}
 
-	postId, err := uuid.Parse(c.Params("id"))
+	postId, err := uuid.Parse(c.Params("post"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -431,7 +431,7 @@ func AddComment(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route PATCH /posts/{id}/comments/{comment} updateComment
+// swagger:route PATCH /posts/{post}/comments/{comment} Post updateComment
 // Update comment content by comment id with given post id
 //
 // Produces:
@@ -527,7 +527,7 @@ func UpdateComment(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /posts/{id}/comments/{comment} deleteComment
+// swagger:route DELETE /posts/{post}/comments/{comment} Post deleteComment
 // Delete comment by comment id with given post id
 //
 // Schemes: http, https

@@ -10,8 +10,8 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-func (q *UserQueries) GetUsers() ([]models.User, error) {
-	users := []models.User{}
+func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
+	users := []models.DBUser{}
 
 	query := `SELECT * FROM users`
 
@@ -23,8 +23,8 @@ func (q *UserQueries) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (q *UserQueries) GetUser(id uuid.UUID) (models.User, error) {
-	user := models.User{}
+func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE id = $1`
 
@@ -36,8 +36,8 @@ func (q *UserQueries) GetUser(id uuid.UUID) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
-	user := models.User{}
+func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE email = $1`
 
@@ -49,8 +49,8 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
-	user := models.User{}
+func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE username = $1`
 
@@ -62,7 +62,7 @@ func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) CreateUser(b *models.User) error {
+func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	_, err := q.Exec(query, b.Id, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
@@ -73,7 +73,7 @@ func (q *UserQueries) CreateUser(b *models.User) error {
 	return nil
 }
 
-func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.User) error {
+func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.DBUser) error {
 	query := `UPDATE users
 		SET
 			email = $2,

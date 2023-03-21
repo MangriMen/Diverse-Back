@@ -9,19 +9,19 @@ import (
 func PostPrivateRoutes(route fiber.Router) {
 	route.Get("/posts", middleware.JWTProtected(), controllers.GetPosts)
 
-	route.Get("/posts/:id", middleware.JWTProtected(), controllers.GetPost)
+	route.Get("/posts/:post", middleware.JWTProtected(), controllers.GetPost)
 
 	route.Post("/posts", middleware.JWTProtected(), controllers.CreatePost)
 
-	route.Patch("/posts/:id", middleware.JWTProtected(), controllers.UpdatePost)
+	route.Patch("/posts/:post", middleware.JWTProtected(), controllers.UpdatePost)
 
-	route.Delete("/posts/:id", middleware.JWTProtected(), controllers.DeletePost)
+	route.Delete("/posts/:post", middleware.JWTProtected(), controllers.DeletePost)
 
 	PostCommentPrivateRoutes(route)
 }
 
 func PostCommentPrivateRoutes(route fiber.Router) {
-	posts := route.Group("/posts/:id")
+	posts := route.Group("/posts/:post")
 
 	posts.Post("/comments", middleware.JWTProtected(), controllers.AddComment)
 

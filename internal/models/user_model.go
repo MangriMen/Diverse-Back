@@ -6,8 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// User represents the user without password for this application
-// swagger:model
 type BaseUser struct {
 	// The id for this user
 	// required: true
@@ -33,9 +31,7 @@ type BaseUser struct {
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
-// User represents the user for this application
-// swagger:model
-type User struct {
+type DBUser struct {
 	BaseUser
 
 	// The password for this user
@@ -43,6 +39,16 @@ type User struct {
 	Password string `db:"password" json:"password,omitempty" validate:"required,gte=8,lte=256"`
 }
 
-func (user *User) PrepareToSend() {
+// User represents the user for this application
+// swagger:model
+type User struct {
+	BaseUser
+}
+
+func (user *DBUser) PrepareToSend() {
 	user.Password = ""
+}
+
+func (u *DBUser) ToUser() User {
+	return User{BaseUser: u.BaseUser}
 }

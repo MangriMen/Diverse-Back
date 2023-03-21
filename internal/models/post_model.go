@@ -6,8 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// BasePost represents the post without userId
-// swagger:model
 type BasePost struct {
 	// The id for this post
 	// required: true
@@ -42,7 +40,7 @@ type DBPost struct {
 type Post struct {
 	BasePost
 
-	User *BaseUser `json:"user"`
+	User *User `json:"user"`
 
 	Comments []Comment `json:"comments"`
 }

@@ -6,3 +6,5 @@ func GetNotEmpty[T comparable](a T, b T) T {
 	}
 	return a
 }
+
+func ptr[T any](obj T) *T { return &obj }
