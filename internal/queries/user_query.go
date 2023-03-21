@@ -73,7 +73,7 @@ func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	return nil
 }
 
-func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.DBUser) error {
+func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 	query := `UPDATE users
 		SET
 			email = $2,
@@ -83,7 +83,7 @@ func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.DBUser) error {
 			updated_at = $6
 		WHERE id = $1`
 
-	_, err := q.Exec(query, id, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
+	_, err := q.Exec(query, b.Id, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
 	if err != nil {
 		return err
 	}

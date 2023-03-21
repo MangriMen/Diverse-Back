@@ -35,6 +35,10 @@ type DBPost struct {
 	UserId uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
+func (p *DBPost) ToPost() Post {
+	return Post{BasePost: p.BasePost}
+}
+
 // Post represents the post for this application
 // swagger:model
 type Post struct {
@@ -43,10 +47,6 @@ type Post struct {
 	User *User `json:"user"`
 
 	Comments []Comment `json:"comments"`
-}
-
-func (p *DBPost) ToPost() Post {
-	return Post{BasePost: p.BasePost}
 }
 
 func (p *Post) ToDBPost() DBPost {

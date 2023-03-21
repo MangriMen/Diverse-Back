@@ -47,14 +47,14 @@ func (q *PostQueries) AddComment(b *models.DBComment) error {
 	return nil
 }
 
-func (q *UserQueries) UpdateComment(id uuid.UUID, b *models.DBComment) error {
+func (q *UserQueries) UpdateComment(b *models.DBComment) error {
 	query := `UPDATE comments
 		SET
 			content = $2
 			updated_at = $3
 		WHERE id = $1`
 
-	_, err := q.Exec(query, id, b.Content, b.UpdatedAt)
+	_, err := q.Exec(query, b.Id, b.Content, b.UpdatedAt)
 	if err != nil {
 		return err
 	}

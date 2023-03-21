@@ -8,6 +8,8 @@ import (
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
+	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -21,11 +23,34 @@ import (
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   200: GetPostsResponse
 //   default: ErrorResponse
 
 func GetPosts(c *fiber.Ctx) error {
+	fetchPostParameters := &parameters.PostsFetchParameters{}
+	if err := c.QueryParser(fetchPostParameters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	validate := helpers.NewValidator()
+	if err := validate.Struct(fetchPostParameters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if fetchPostParameters.LastSeenPostCreatedAt.IsZero() {
+		fetchPostParameters.LastSeenPostCreatedAt = time.Now()
+	}
+
 	db, err := database.OpenDBConnection()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -34,25 +59,21 @@ func GetPosts(c *fiber.Ctx) error {
 		})
 	}
 
-	posts, err := db.GetPosts()
+	dbPosts, err := db.GetPosts(fetchPostParameters)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
-			"message": "users not found",
-			"count":   0,
-			"users":   nil,
+			"message": "posts not found",
 		})
 	}
 
-	postsToSend := lo.Map(posts, func(item models.DBPost, index int) models.Post {
+	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
 		return helpers.PreparePostToSend(item, db)
 	})
 
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"count":   len(postsToSend),
-		"posts":   postsToSend,
+	return c.JSON(responses.GetPostsResponseBody{
+		Count: len(postsToSend),
+		Posts: postsToSend,
 	})
 }
 
@@ -64,14 +85,17 @@ func GetPosts(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   200: GetPostResponse
 //   default: ErrorResponse
 
 func GetPost(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("post"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	postIdParameter := &parameters.PostIdParameter{}
+	if err := c.QueryParser(postIdParameter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -85,21 +109,18 @@ func GetPost(c *fiber.Ctx) error {
 		})
 	}
 
-	post, err := db.GetPost(id)
+	post, err := db.GetPost(postIdParameter.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
-			"message": "users not found",
-			"count":   0,
-			"users":   nil,
+			"message": "post not found",
 		})
 	}
 
 	postToSend := helpers.PreparePostToSend(post, db)
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"post":    postToSend,
+
+	return c.JSON(responses.GetPostResponseBody{
+		Post: postToSend,
 	})
 }
 
@@ -111,31 +132,41 @@ func GetPost(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   201: CreateUpdatePostResponse
 //   default: ErrorResponse
 
 func CreatePost(c *fiber.Ctx) error {
-	post := &models.Post{}
-	if err := c.BodyParser(post); err != nil {
+	postCreateParameters := &parameters.PostCreateParameters{}
+	if err := c.QueryParser(postCreateParameters); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
+	validate := helpers.NewValidator()
+	if err := validate.Struct(postCreateParameters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
 	newPost := &models.DBPost{
 		BasePost: models.BasePost{
 			Id:          uuid.New(),
-			Content:     post.Content,
-			Description: post.Description,
+			Content:     postCreateParameters.Body.Content,
+			Description: postCreateParameters.Body.Description,
 			Likes:       0,
 			CreatedAt:   time.Now(),
 		},
-		UserId: post.User.Id,
+		UserId: postCreateParameters.Body.UserId,
 	}
 
-	validate := helpers.NewValidator()
 	if err := validate.Struct(newPost); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -169,6 +200,9 @@ func CreatePost(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   201: CreateUpdatePostResponse
 //   default: ErrorResponse
@@ -190,19 +224,19 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postId, err := uuid.Parse(c.Params("post"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	postUpdateParameters := &parameters.PostUpdateParameters{}
+	if err := c.QueryParser(postUpdateParameters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	post := &models.Post{}
-	if err := c.BodyParser(post); err != nil {
+	validate := helpers.NewValidator()
+	if err := validate.Struct(postUpdateParameters); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
-			"message": err.Error(),
+			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
@@ -214,7 +248,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost, err := db.GetPost(postId)
+	foundPost, err := db.GetPost(postUpdateParameters.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -236,9 +270,8 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost.Description = helpers.GetNotEmpty(post.Description, foundPost.Description)
+	foundPost.Description = helpers.GetNotEmpty(postUpdateParameters.Body.Description, foundPost.Description)
 
-	validate := helpers.NewValidator()
 	if err := validate.Struct(foundPost); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -246,7 +279,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.UpdatePost(foundPost.Id, &foundPost); err != nil {
+	if err := db.UpdatePost(&foundPost); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"erorr":   true,
 			"message": err.Error(),
@@ -263,6 +296,9 @@ func UpdatePost(c *fiber.Ctx) error {
 //
 // Produces:
 //   - application/json
+//
+// Security:
+//   bearerAuth:
 //
 // Responses:
 //   204: DeletePostResponse
@@ -285,17 +321,16 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postIdToDelete, err := uuid.Parse(c.Params("post"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	postIdParameter := &parameters.PostIdParameter{}
+	if err := c.QueryParser(postIdParameter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	post := &models.DBPost{BasePost: models.BasePost{Id: postIdToDelete}}
 	validate := helpers.NewValidator()
-	if err := validate.StructPartial(post, "id"); err != nil {
+	if err := validate.Struct(postIdParameter); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -310,7 +345,7 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost, err := db.GetPost(postIdToDelete)
+	foundPost, err := db.GetPost(postIdParameter.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -325,7 +360,7 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DeletePost(post.Id); err != nil {
+	if err := db.DeletePost(foundPost.Id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -342,6 +377,9 @@ func DeletePost(c *fiber.Ctx) error {
 //   - application/json
 //
 // Schemes: http, https
+//
+// Security:
+//   bearerAuth:
 //
 // Responses:
 //   201: CreateUpdateCommentResponse
@@ -364,19 +402,34 @@ func AddComment(c *fiber.Ctx) error {
 		})
 	}
 
-	postId, err := uuid.Parse(c.Params("post"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	commentAddParametersParams := &parameters.CommentAddParametersParams{}
+	if err := c.ParamsParser(commentAddParametersParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	comment := &models.Comment{}
-	if err := c.BodyParser(comment); err != nil {
+	commentAddParametersBody := &parameters.CommentAddParametersBody{}
+	if err := c.BodyParser(commentAddParametersBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
+		})
+	}
+
+	validate := helpers.NewValidator()
+	if err := validate.Struct(commentAddParametersParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if err := validate.Struct(commentAddParametersBody); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
@@ -395,7 +448,7 @@ func AddComment(c *fiber.Ctx) error {
 		})
 	}
 
-	if _, err := db.GetPost(postId); err != nil {
+	if _, err := db.GetPost(commentAddParametersParams.Post); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
 			"message": "post with this ID not found",
@@ -405,15 +458,14 @@ func AddComment(c *fiber.Ctx) error {
 	newComment := &models.DBComment{
 		BaseComment: models.BaseComment{
 			Id:        uuid.New(),
-			Content:   comment.Content,
+			Content:   commentAddParametersBody.Content,
 			CreatedAt: time.Now(),
 		},
-		PostId: postId,
+		PostId: commentAddParametersParams.Post,
 		UserId: userId,
 	}
 	newComment.UpdatedAt = newComment.CreatedAt
 
-	validate := helpers.NewValidator()
 	if err := validate.Struct(newComment); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -439,6 +491,9 @@ func AddComment(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   201: CreateUpdateCommentResponse
 //   default: ErrorResponse
@@ -460,19 +515,19 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	commentId, err := uuid.Parse(c.Params("comment"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	commentUpdateParameters := &parameters.CommentUpdateParameters{}
+	if err := c.QueryParser(commentUpdateParameters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	comment := &models.Comment{}
-	if err := c.BodyParser(comment); err != nil {
+	validate := helpers.NewValidator()
+	if err := validate.Struct(commentUpdateParameters); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
-			"message": err.Error(),
+			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
@@ -484,7 +539,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment, err := db.GetComment(commentId)
+	foundComment, err := db.GetComment(commentUpdateParameters.Comment)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -506,10 +561,9 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment.Content = helpers.GetNotEmpty(comment.Content, foundComment.Content)
+	foundComment.Content = helpers.GetNotEmpty(commentUpdateParameters.Body.Content, foundComment.Content)
 	foundComment.UpdatedAt = time.Now()
 
-	validate := helpers.NewValidator()
 	if err := validate.Struct(foundComment); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -517,7 +571,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.UpdateComment(foundComment.Id, &foundComment); err != nil {
+	if err := db.UpdateComment(&foundComment); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"erorr":   true,
 			"message": err.Error(),
@@ -534,6 +588,9 @@ func UpdateComment(c *fiber.Ctx) error {
 //
 // Produces:
 //   - application/json
+//
+// Security:
+//   bearerAuth:
 //
 // Responses:
 //   204: DeleteCommentResponse
@@ -556,17 +613,16 @@ func DeleteComment(c *fiber.Ctx) error {
 		})
 	}
 
-	commentIdToDelete, err := uuid.Parse(c.Params("comment"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	postCommentIdParameter := &parameters.PostCommentIdParameter{}
+	if err := c.QueryParser(postCommentIdParameter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	comment := &models.DBComment{BaseComment: models.BaseComment{Id: commentIdToDelete}}
 	validate := helpers.NewValidator()
-	if err := validate.StructPartial(comment, "id"); err != nil {
+	if err := validate.Struct(postCommentIdParameter); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -581,7 +637,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment, err := db.GetComment(commentIdToDelete)
+	foundComment, err := db.GetComment(postCommentIdParameter.Comment)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -596,7 +652,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DeleteComment(comment.Id); err != nil {
+	if err := db.DeleteComment(foundComment.Id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),

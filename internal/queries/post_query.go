@@ -2,6 +2,7 @@ package queries
 
 import (
 	"github.com/MangriMen/Diverse-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -10,12 +11,16 @@ type PostQueries struct {
 	*sqlx.DB
 }
 
-func (q *PostQueries) GetPosts() ([]models.DBPost, error) {
+func (q *PostQueries) GetPosts(fetchPostParameters *parameters.PostsFetchParameters) ([]models.DBPost, error) {
 	posts := []models.DBPost{}
 
-	query := `SELECT * FROM posts`
+	query := `SELECT *
+		FROM posts
+		WHERE created_at < $1
+		ORDER BY created_at DESC
+		FETCH FIRST $2 ROWS ONLY`
 
-	err := q.Select(&posts, query)
+	err := q.Select(&posts, query, fetchPostParameters.LastSeenPostCreatedAt, fetchPostParameters.Count)
 	if err != nil {
 		return posts, err
 	}
@@ -47,13 +52,13 @@ func (q *PostQueries) CreatePost(b *models.DBPost) error {
 	return nil
 }
 
-func (q *UserQueries) UpdatePost(id uuid.UUID, b *models.DBPost) error {
+func (q *UserQueries) UpdatePost(b *models.DBPost) error {
 	query := `UPDATE posts
 		SET
 			description = $2
 		WHERE id = $1`
 
-	_, err := q.Exec(query, id, b.Description)
+	_, err := q.Exec(query, b.Id, b.Description)
 	if err != nil {
 		return err
 	}

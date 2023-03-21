@@ -36,12 +36,12 @@ type DBComment struct {
 	UserId uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
+func (c *DBComment) ToComment() Comment {
+	return Comment{BaseComment: c.BaseComment}
+}
+
 type Comment struct {
 	BaseComment
 
 	User *User `json:"user"`
-}
-
-func (c *DBComment) ToComment() Comment {
-	return Comment{BaseComment: c.BaseComment}
 }
