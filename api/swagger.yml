@@ -139,6 +139,48 @@ definitions:
             - content
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    GetCommentResponseBody:
+        properties:
+            comment:
+                $ref: "#/definitions/Comment"
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - comment
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetCommentsResponseBody:
+        properties:
+            comments:
+                items:
+                    $ref: "#/definitions/Comment"
+                type: array
+                x-go-name: Comments
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                type: string
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+            - comments
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostResponseBody:
         properties:
             error:
@@ -460,6 +502,16 @@ paths:
             parameters:
                 - format: uuid
                   in: query
+                  name: last_seen_comment_id
+                  type: string
+                  x-go-name: LastSeenCommentId
+                - format: date-time
+                  in: query
+                  name: last_seen_comment_created_at
+                  type: string
+                  x-go-name: LastSeenCommentCreatedAt
+                - format: uuid
+                  in: query
                   name: last_seen_post_id
                   type: string
                   x-go-name: LastSeenPostId
@@ -587,6 +639,23 @@ paths:
             tags:
                 - Post
     /posts/{post}/comments:
+        get:
+            description: Returns a list of post comments
+            operationId: getComments
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: "#/responses/GetPostsResponse"
+                default:
+                    $ref: "#/responses/ErrorResponse"
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
         post:
             description: Add comment to the given post
             operationId: addComment
@@ -817,6 +886,14 @@ responses:
         description: ""
         schema:
             $ref: "#/definitions/BaseResponseBody"
+    GetCommentResponse:
+        description: ""
+        schema:
+            $ref: "#/definitions/GetCommentResponseBody"
+    GetCommentsResponse:
+        description: ""
+        schema:
+            $ref: "#/definitions/GetCommentsResponseBody"
     GetPostResponse:
         description: ""
         schema:

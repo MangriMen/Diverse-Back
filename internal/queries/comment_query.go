@@ -2,6 +2,7 @@ package queries
 
 import (
 	"github.com/MangriMen/Diverse-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -10,12 +11,17 @@ type CommentQueries struct {
 	*sqlx.DB
 }
 
-func (q *PostQueries) GetComments(postId uuid.UUID) ([]models.DBComment, error) {
+func (q *PostQueries) GetComments(postId uuid.UUID, commentsFetchRequestQuery *parameters.CommentsFetchRequestQuery) ([]models.DBComment, error) {
 	comments := []models.DBComment{}
 
-	query := `SELECT * FROM comments WHERE post_id = $1`
+	query := `SELECT *
+		FROM comments
+		WHERE post_id = $1
+		AND created_at < $2
+		ORDER BY created_at DESC
+		FETCH FIRST $3 ROWS ONLY`
 
-	err := q.Select(&comments, query, postId)
+	err := q.Select(&comments, query, postId, commentsFetchRequestQuery.LastSeenCommentCreatedAt, commentsFetchRequestQuery.Count)
 	if err != nil {
 		return comments, err
 	}

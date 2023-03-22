@@ -385,6 +385,83 @@ func DeletePost(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// swagger:route GET /posts/{post}/comments Post getComments
+// Returns a list of post comments
+//
+// Produces:
+//   - application/json
+//
+// Schemes: http, https
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   200: GetPostsResponse
+//   default: ErrorResponse
+
+func GetComments(c *fiber.Ctx) error {
+	postCommentIdParams := &parameters.PostCommentIdParams{}
+	if err := c.QueryParser(postCommentIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	commentsFetchRequestQuery := &parameters.CommentsFetchRequestQuery{}
+	if err := c.QueryParser(commentsFetchRequestQuery); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	validate := helpers.NewValidator()
+	if err := validate.Struct(postCommentIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if err := validate.Struct(commentsFetchRequestQuery); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if commentsFetchRequestQuery.LastSeenCommentCreatedAt.IsZero() {
+		commentsFetchRequestQuery.LastSeenCommentCreatedAt = time.Now()
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	dbPosts, err := db.GetComments(postCommentIdParams.Post, commentsFetchRequestQuery)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   true,
+			"message": "posts not found",
+		})
+	}
+
+	commentsToSend := lo.Map(dbPosts, func(item models.DBComment, index int) models.Comment {
+		return helpers.PrepareCommentToPost(item, db)
+	})
+
+	return c.JSON(responses.GetCommentsResponseBody{
+		Count:    len(commentsToSend),
+		Comments: commentsToSend,
+	})
+}
+
 // swagger:route POST /posts/{post}/comments Post addComment
 // Add comment to the given post
 //
