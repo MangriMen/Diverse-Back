@@ -1,8 +1,11 @@
 package helpers
 
 import (
+	"time"
+
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/samber/lo"
 )
 
@@ -14,7 +17,7 @@ func PreparePostToSend(post models.DBPost, db *database.Queries) models.Post {
 		preparedPost.User = ptr(user.ToUser())
 	}
 
-	comments, err := db.GetComments(post.Id)
+	comments, err := db.GetComments(post.Id, &parameters.CommentsFetchRequestQuery{Count: 20, LastSeenCommentCreatedAt: time.Now()})
 	if err == nil {
 		preparedPost.Comments = lo.Map(comments, func(item models.DBComment, index int) models.Comment {
 			return PrepareCommentToPost(item, db)
