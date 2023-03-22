@@ -46,6 +46,24 @@ definitions:
             - updated_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    CommentAddRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+        required:
+            - content
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    CommentUpdateRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+        required:
+            - content
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     GetPostResponseBody:
         properties:
             error:
@@ -55,12 +73,12 @@ definitions:
             message:
                 type: string
                 x-go-name: Message
-            user:
+            post:
                 $ref: '#/definitions/Post'
         required:
             - error
             - message
-            - user
+            - post
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostsResponseBody:
@@ -76,7 +94,7 @@ definitions:
             message:
                 type: string
                 x-go-name: Message
-            users:
+            posts:
                 items:
                     $ref: '#/definitions/Post'
                 type: array
@@ -85,7 +103,7 @@ definitions:
             - error
             - message
             - count
-            - users
+            - posts
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetUserResponseBody:
@@ -130,6 +148,23 @@ definitions:
             - users
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    LoginRequestBody:
+        properties:
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+        required:
+            - email
+            - password
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     Post:
         description: Post represents the post for this application
         properties:
@@ -170,6 +205,25 @@ definitions:
             - created_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    PostCreateRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+            description:
+                maxLength: 2048
+                type: string
+                x-go-name: Description
+            user_id:
+                format: uuid
+                type: string
+                x-go-name: UserId
+        required:
+            - content
+            - description
+            - user_id
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     RegisterLoginUserResponseBody:
         properties:
             error:
@@ -191,6 +245,29 @@ definitions:
             - user
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    RegisterRequestBody:
+        properties:
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+            username:
+                maxLength: 32
+                minLength: 1
+                type: string
+                x-go-name: Username
+        required:
+            - email
+            - username
+            - password
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     User:
         description: User represents the user for this application
         properties:
@@ -229,6 +306,29 @@ definitions:
             - updated_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    UserUpdateRequestBody:
+        properties:
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            name:
+                maxLength: 32
+                type: string
+                x-go-name: Name
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+            username:
+                maxLength: 32
+                minLength: 1
+                type: string
+                x-go-name: Username
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
 host: localhost:3030
 info:
     title: Diverse API.
@@ -261,21 +361,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        email:
-                            maxLength: 255
-                            minLength: 6
-                            type: string
-                            x-go-name: Email
-                        password:
-                            maxLength: 256
-                            minLength: 8
-                            type: string
-                            x-go-name: Password
-                    required:
-                        - email
-                        - password
-                    type: object
+                    $ref: '#/definitions/LoginRequestBody'
             produces:
                 - application/json
             responses:
@@ -333,23 +419,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        content:
-                            type: string
-                            x-go-name: Content
-                        description:
-                            maxLength: 2048
-                            type: string
-                            x-go-name: Description
-                        user_id:
-                            format: uuid
-                            type: string
-                            x-go-name: UserId
-                    required:
-                        - content
-                        - description
-                        - user_id
-                    type: object
+                    $ref: '#/definitions/PostCreateRequestBody'
             produces:
                 - application/json
             responses:
@@ -446,13 +516,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        content:
-                            type: string
-                            x-go-name: Content
-                    required:
-                        - content
-                    type: object
+                    $ref: '#/definitions/CommentAddRequestBody'
                 - format: uuid
                   in: path
                   name: post
@@ -518,13 +582,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        content:
-                            type: string
-                            x-go-name: Content
-                    required:
-                        - content
-                    type: object
+                    $ref: '#/definitions/CommentUpdateRequestBody'
                 - format: uuid
                   in: path
                   name: post
@@ -554,27 +612,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        email:
-                            maxLength: 255
-                            minLength: 6
-                            type: string
-                            x-go-name: Email
-                        password:
-                            maxLength: 256
-                            minLength: 8
-                            type: string
-                            x-go-name: Password
-                        username:
-                            maxLength: 32
-                            minLength: 1
-                            type: string
-                            x-go-name: Username
-                    required:
-                        - email
-                        - username
-                        - password
-                    type: object
+                    $ref: '#/definitions/RegisterRequestBody'
             produces:
                 - application/json
             responses:
@@ -664,27 +702,7 @@ paths:
                   name: Body
                   required: true
                   schema:
-                    properties:
-                        email:
-                            maxLength: 255
-                            minLength: 6
-                            type: string
-                            x-go-name: Email
-                        name:
-                            maxLength: 32
-                            type: string
-                            x-go-name: Name
-                        password:
-                            maxLength: 256
-                            minLength: 8
-                            type: string
-                            x-go-name: Password
-                        username:
-                            maxLength: 32
-                            minLength: 1
-                            type: string
-                            x-go-name: Username
-                    type: object
+                    $ref: '#/definitions/UserUpdateRequestBody'
             produces:
                 - application/json
             responses:

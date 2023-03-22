@@ -31,8 +31,8 @@ import (
 //   default: ErrorResponse
 
 func GetPosts(c *fiber.Ctx) error {
-	fetchPostParameters := &parameters.PostsFetchParameters{}
-	if err := c.QueryParser(fetchPostParameters); err != nil {
+	postsFetchRequestQuery := &parameters.PostsFetchRequestQuery{}
+	if err := c.QueryParser(postsFetchRequestQuery); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -40,15 +40,15 @@ func GetPosts(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(fetchPostParameters); err != nil {
+	if err := validate.Struct(postsFetchRequestQuery); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if fetchPostParameters.LastSeenPostCreatedAt.IsZero() {
-		fetchPostParameters.LastSeenPostCreatedAt = time.Now()
+	if postsFetchRequestQuery.LastSeenPostCreatedAt.IsZero() {
+		postsFetchRequestQuery.LastSeenPostCreatedAt = time.Now()
 	}
 
 	db, err := database.OpenDBConnection()
@@ -59,7 +59,7 @@ func GetPosts(c *fiber.Ctx) error {
 		})
 	}
 
-	dbPosts, err := db.GetPosts(fetchPostParameters)
+	dbPosts, err := db.GetPosts(postsFetchRequestQuery)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -93,8 +93,8 @@ func GetPosts(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func GetPost(c *fiber.Ctx) error {
-	postIdParameter := &parameters.PostIdParameter{}
-	if err := c.QueryParser(postIdParameter); err != nil {
+	postIdParams := &parameters.PostIdParams{}
+	if err := c.QueryParser(postIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -109,7 +109,7 @@ func GetPost(c *fiber.Ctx) error {
 		})
 	}
 
-	post, err := db.GetPost(postIdParameter.Post)
+	post, err := db.GetPost(postIdParams.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -140,8 +140,8 @@ func GetPost(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func CreatePost(c *fiber.Ctx) error {
-	postCreateParameters := &parameters.PostCreateParameters{}
-	if err := c.QueryParser(postCreateParameters); err != nil {
+	postCreateRequestBody := &parameters.PostCreateRequestBody{}
+	if err := c.QueryParser(postCreateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -149,7 +149,7 @@ func CreatePost(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(postCreateParameters); err != nil {
+	if err := validate.Struct(postCreateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -159,12 +159,12 @@ func CreatePost(c *fiber.Ctx) error {
 	newPost := &models.DBPost{
 		BasePost: models.BasePost{
 			Id:          uuid.New(),
-			Content:     postCreateParameters.Body.Content,
-			Description: postCreateParameters.Body.Description,
+			Content:     postCreateRequestBody.Content,
+			Description: postCreateRequestBody.Description,
 			Likes:       0,
 			CreatedAt:   time.Now(),
 		},
-		UserId: postCreateParameters.Body.UserId,
+		UserId: postCreateRequestBody.UserId,
 	}
 
 	if err := validate.Struct(newPost); err != nil {
@@ -224,8 +224,16 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postUpdateParameters := &parameters.PostUpdateParameters{}
-	if err := c.QueryParser(postUpdateParameters); err != nil {
+	postIdParams := &parameters.PostIdParams{}
+	if err := c.ParamsParser(postIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	postUpdateRequestBody := &parameters.PostUpdateRequestBody{}
+	if err := c.QueryParser(postUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -233,7 +241,14 @@ func UpdatePost(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(postUpdateParameters); err != nil {
+	if err := validate.Struct(postIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if err := validate.Struct(postUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -248,7 +263,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost, err := db.GetPost(postUpdateParameters.Post)
+	foundPost, err := db.GetPost(postIdParams.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -270,7 +285,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost.Description = helpers.GetNotEmpty(postUpdateParameters.Body.Description, foundPost.Description)
+	foundPost.Description = helpers.GetNotEmpty(postUpdateRequestBody.Description, foundPost.Description)
 
 	if err := validate.Struct(foundPost); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -321,8 +336,8 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	postIdParameter := &parameters.PostIdParameter{}
-	if err := c.QueryParser(postIdParameter); err != nil {
+	postIdParams := &parameters.PostIdParams{}
+	if err := c.QueryParser(postIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -330,7 +345,7 @@ func DeletePost(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(postIdParameter); err != nil {
+	if err := validate.Struct(postIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -345,7 +360,7 @@ func DeletePost(c *fiber.Ctx) error {
 		})
 	}
 
-	foundPost, err := db.GetPost(postIdParameter.Post)
+	foundPost, err := db.GetPost(postIdParams.Post)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -402,16 +417,16 @@ func AddComment(c *fiber.Ctx) error {
 		})
 	}
 
-	commentAddParametersParams := &parameters.CommentAddParametersParams{}
-	if err := c.ParamsParser(commentAddParametersParams); err != nil {
+	commentAddRequestParams := &parameters.CommentAddRequestParams{}
+	if err := c.ParamsParser(commentAddRequestParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	commentAddParametersBody := &parameters.CommentAddParametersBody{}
-	if err := c.BodyParser(commentAddParametersBody); err != nil {
+	commentAddRequestBody := &parameters.CommentAddRequestBody{}
+	if err := c.BodyParser(commentAddRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -419,14 +434,14 @@ func AddComment(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(commentAddParametersParams); err != nil {
+	if err := validate.Struct(commentAddRequestParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if err := validate.Struct(commentAddParametersBody); err != nil {
+	if err := validate.Struct(commentAddRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -448,7 +463,7 @@ func AddComment(c *fiber.Ctx) error {
 		})
 	}
 
-	if _, err := db.GetPost(commentAddParametersParams.Post); err != nil {
+	if _, err := db.GetPost(commentAddRequestParams.Post); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
 			"message": "post with this ID not found",
@@ -458,10 +473,10 @@ func AddComment(c *fiber.Ctx) error {
 	newComment := &models.DBComment{
 		BaseComment: models.BaseComment{
 			Id:        uuid.New(),
-			Content:   commentAddParametersBody.Content,
+			Content:   commentAddRequestBody.Content,
 			CreatedAt: time.Now(),
 		},
-		PostId: commentAddParametersParams.Post,
+		PostId: commentAddRequestParams.Post,
 		UserId: userId,
 	}
 	newComment.UpdatedAt = newComment.CreatedAt
@@ -515,8 +530,16 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	commentUpdateParameters := &parameters.CommentUpdateParameters{}
-	if err := c.QueryParser(commentUpdateParameters); err != nil {
+	postCommentIdParams := &parameters.PostCommentIdParams{}
+	if err := c.ParamsParser(postCommentIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	commentUpdateRequestBody := &parameters.CommentUpdateRequestBody{}
+	if err := c.BodyParser(commentUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -524,7 +547,14 @@ func UpdateComment(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(commentUpdateParameters); err != nil {
+	if err := validate.Struct(postCommentIdParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if err := validate.Struct(commentUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -539,7 +569,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment, err := db.GetComment(commentUpdateParameters.Comment)
+	foundComment, err := db.GetComment(postCommentIdParams.Comment)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -561,7 +591,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment.Content = helpers.GetNotEmpty(commentUpdateParameters.Body.Content, foundComment.Content)
+	foundComment.Content = helpers.GetNotEmpty(commentUpdateRequestBody.Content, foundComment.Content)
 	foundComment.UpdatedAt = time.Now()
 
 	if err := validate.Struct(foundComment); err != nil {
@@ -613,8 +643,8 @@ func DeleteComment(c *fiber.Ctx) error {
 		})
 	}
 
-	postCommentIdParameter := &parameters.PostCommentIdParameter{}
-	if err := c.QueryParser(postCommentIdParameter); err != nil {
+	postCommentIdParams := &parameters.PostCommentIdParams{}
+	if err := c.ParamsParser(postCommentIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -622,7 +652,7 @@ func DeleteComment(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(postCommentIdParameter); err != nil {
+	if err := validate.Struct(postCommentIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -637,7 +667,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		})
 	}
 
-	foundComment, err := db.GetComment(postCommentIdParameter.Comment)
+	foundComment, err := db.GetComment(postCommentIdParams.Comment)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
