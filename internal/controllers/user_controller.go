@@ -67,8 +67,8 @@ func GetUsers(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func GetUser(c *fiber.Ctx) error {
-	userIdParameter := &parameters.UserIdParameter{}
-	if err := c.QueryParser(userIdParameter); err != nil {
+	userIdParams := &parameters.UserIdParams{}
+	if err := c.ParamsParser(userIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -83,7 +83,7 @@ func GetUser(c *fiber.Ctx) error {
 		})
 	}
 
-	dbUser, err := db.GetUser(userIdParameter.User)
+	dbUser, err := db.GetUser(userIdParams.User)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -110,8 +110,8 @@ func GetUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func LoginUser(c *fiber.Ctx) error {
-	loginParameters := &parameters.LoginParameters{}
-	if err := c.BodyParser(loginParameters); err != nil {
+	loginRequestBody := &parameters.LoginRequestBody{}
+	if err := c.BodyParser(loginRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -126,7 +126,7 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	foundDBUser, err := db.GetUserByEmail(loginParameters.Body.Email)
+	foundDBUser, err := db.GetUserByEmail(loginRequestBody.Email)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -134,7 +134,7 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if ok := helpers.CheckPasswordHash(loginParameters.Body.Password, foundDBUser.Password); !ok {
+	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"error":   true,
 			"message": "wrong password",
@@ -168,8 +168,8 @@ func LoginUser(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func CreateUser(c *fiber.Ctx) error {
-	registerParameters := &parameters.RegisterParameters{}
-	if err := c.BodyParser(registerParameters); err != nil {
+	registerRequestBody := &parameters.RegisterRequestBody{}
+	if err := c.BodyParser(registerRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -177,7 +177,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(registerParameters); err != nil {
+	if err := validate.Struct(registerRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -192,8 +192,8 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	_, errEmail := db.GetUserByEmail(registerParameters.Body.Email)
-	_, errUsername := db.GetUserByUsername(registerParameters.Body.Username)
+	_, errEmail := db.GetUserByEmail(registerRequestBody.Email)
+	_, errUsername := db.GetUserByUsername(registerRequestBody.Username)
 	if errEmail == nil || errUsername == nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"error":   true,
@@ -204,14 +204,14 @@ func CreateUser(c *fiber.Ctx) error {
 	user := &models.DBUser{
 		BaseUser: models.BaseUser{
 			Id:        uuid.New(),
-			Email:     registerParameters.Body.Email,
-			Username:  registerParameters.Body.Username,
+			Email:     registerRequestBody.Email,
+			Username:  registerRequestBody.Username,
 			CreatedAt: time.Now(),
 		},
 	}
 	user.UpdatedAt = user.CreatedAt
 
-	user.Password, err = helpers.HashPassword(registerParameters.Body.Password)
+	user.Password, err = helpers.HashPassword(registerRequestBody.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -360,8 +360,8 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userUpdateParameters := &parameters.UserUpdateParameters{}
-	if err := c.BodyParser(userUpdateParameters); err != nil {
+	userUpdateRequestBody := &parameters.UserUpdateRequestBody{}
+	if err := c.BodyParser(userUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -369,7 +369,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(userUpdateParameters); err != nil {
+	if err := validate.Struct(userUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -392,12 +392,12 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	foundUser.Email = helpers.GetNotEmpty(userUpdateParameters.Body.Email, foundUser.Email)
-	foundUser.Username = helpers.GetNotEmpty(userUpdateParameters.Body.Username, foundUser.Username)
-	foundUser.Name = helpers.GetNotEmpty(userUpdateParameters.Body.Name, foundUser.Name)
+	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
+	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
+	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
 
-	if userUpdateParameters.Body.Password != "" {
-		foundUser.Password, err = helpers.HashPassword(userUpdateParameters.Body.Password)
+	if userUpdateRequestBody.Password != "" {
+		foundUser.Password, err = helpers.HashPassword(userUpdateRequestBody.Password)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error":   true,
@@ -466,8 +466,8 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userIdParameter := &parameters.UserIdParameter{}
-	if err := c.QueryParser(userIdParameter); err != nil {
+	userIdParams := &parameters.UserIdParams{}
+	if err := c.ParamsParser(userIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -475,14 +475,14 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(userIdParameter); err != nil {
+	if err := validate.Struct(userIdParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if userId != userIdParameter.User {
+	if userId != userIdParams.User {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error":   true,
 			"message": "not enough permission to delete user",
@@ -497,7 +497,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DeleteUser(userIdParameter.User); err != nil {
+	if err := db.DeleteUser(userIdParams.User); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),

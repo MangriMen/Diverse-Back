@@ -2,41 +2,47 @@ package parameters
 
 import "github.com/google/uuid"
 
-// swagger:parameters deleteComment
-type PostCommentIdParameter struct {
-	PostIdParameter
+type PostCommentIdParams struct {
+	PostIdParams
 
 	// in: path
 	// required: true
-	Comment uuid.UUID `params:"comment" validate:"required"`
+	Comment uuid.UUID `params:"comment" json:"comment" validate:"required"`
 }
 
-type CommentAddParametersParams struct {
-	PostIdParameter
+// swagger:parameters deleteComment
+type PostCommentIdRequest struct {
+	PostCommentIdParams
 }
 
-type CommentAddParametersBody struct {
+type CommentAddRequestParams struct {
+	PostIdParams
+}
+
+type CommentAddRequestBody struct {
 	// required: true
 	Content string `json:"content" validate:"required"`
 }
 
 // swagger:parameters addComment
-type CommentAddParameters struct {
-	CommentAddParametersParams
+type CommentAddRequest struct {
+	CommentAddRequestParams
 
 	// in: body
 	// required: true
-	Body CommentAddParametersBody
+	Body CommentAddRequestBody
+}
+
+type CommentUpdateRequestBody struct {
+	// required: true
+	Content string `json:"content" validate:"required"`
 }
 
 // swagger:parameters updateComment
-type CommentUpdateParameters struct {
-	PostCommentIdParameter
+type CommentUpdateRequest struct {
+	PostCommentIdParams
 
 	// in: body
 	// required: true
-	Body struct {
-		// required: true
-		Content string `json:"content" validate:"required"`
-	} `json:"body"`
+	Body CommentUpdateRequestBody
 }

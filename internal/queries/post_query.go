@@ -11,7 +11,7 @@ type PostQueries struct {
 	*sqlx.DB
 }
 
-func (q *PostQueries) GetPosts(fetchPostParameters *parameters.PostsFetchParameters) ([]models.DBPost, error) {
+func (q *PostQueries) GetPosts(postsFetchRequestQuery *parameters.PostsFetchRequestQuery) ([]models.DBPost, error) {
 	posts := []models.DBPost{}
 
 	query := `SELECT *
@@ -20,7 +20,7 @@ func (q *PostQueries) GetPosts(fetchPostParameters *parameters.PostsFetchParamet
 		ORDER BY created_at DESC
 		FETCH FIRST $2 ROWS ONLY`
 
-	err := q.Select(&posts, query, fetchPostParameters.LastSeenPostCreatedAt, fetchPostParameters.Count)
+	err := q.Select(&posts, query, postsFetchRequestQuery.LastSeenPostCreatedAt, postsFetchRequestQuery.Count)
 	if err != nil {
 		return posts, err
 	}

@@ -9,7 +9,7 @@ type GetPostsResponseBody struct {
 	Count int `json:"count"`
 
 	// required: true
-	Posts []models.Post `json:"users"`
+	Posts []models.Post `json:"posts"`
 }
 
 // swagger:response
@@ -22,7 +22,7 @@ type GetPostResponseBody struct {
 	BaseResponseBody
 
 	// required: true
-	Post models.Post `json:"user"`
+	Post models.Post `json:"post"`
 }
 
 // swagger:response
