@@ -12,7 +12,7 @@ type PostIdParams struct {
 	Post uuid.UUID `params:"post" json:"post" validate:"required"`
 }
 
-// swagger:parameters getPost updatePost deletePost addComment updateComment deleteComment
+// swagger:parameters getPost updatePost deletePost
 type PostIdRequest struct {
 	PostIdParams
 }

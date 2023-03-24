@@ -423,16 +423,6 @@ paths:
             parameters:
                 - format: uuid
                   in: query
-                  name: last_seen_comment_id
-                  type: string
-                  x-go-name: LastSeenCommentId
-                - format: date-time
-                  in: query
-                  name: last_seen_comment_created_at
-                  type: string
-                  x-go-name: LastSeenCommentCreatedAt
-                - format: uuid
-                  in: query
                   name: last_seen_post_id
                   type: string
                   x-go-name: LastSeenPostId
@@ -563,6 +553,31 @@ paths:
         get:
             description: Returns a list of post comments
             operationId: getComments
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: query
+                  name: last_seen_comment_id
+                  type: string
+                  x-go-name: LastSeenCommentId
+                - format: date-time
+                  in: query
+                  name: last_seen_comment_created_at
+                  type: string
+                  x-go-name: LastSeenCommentCreatedAt
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
             produces:
                 - application/json
             responses:
@@ -581,17 +596,17 @@ paths:
             description: Add comment to the given post
             operationId: addComment
             parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CommentAddRequestBody'
                 - format: uuid
                   in: path
                   name: post
                   required: true
                   type: string
                   x-go-name: Post
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CommentAddRequestBody'
             produces:
                 - application/json
             responses:
@@ -613,16 +628,16 @@ paths:
             parameters:
                 - format: uuid
                   in: path
-                  name: comment
-                  required: true
-                  type: string
-                  x-go-name: Comment
-                - format: uuid
-                  in: path
                   name: post
                   required: true
                   type: string
                   x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
             produces:
                 - application/json
             responses:
@@ -643,6 +658,12 @@ paths:
             parameters:
                 - format: uuid
                   in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
                   name: comment
                   required: true
                   type: string
@@ -652,12 +673,6 @@ paths:
                   required: true
                   schema:
                     $ref: '#/definitions/CommentUpdateRequestBody'
-                - format: uuid
-                  in: path
-                  name: post
-                  required: true
-                  type: string
-                  x-go-name: Post
             produces:
                 - application/json
             responses:

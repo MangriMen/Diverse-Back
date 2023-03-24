@@ -65,7 +65,9 @@ type CommentsFetchRequestQuery struct {
 	Count int `query:"count" json:"count" validate:"required,min=1,max=50"`
 }
 
-// swagger:parameters getPosts
+// swagger:parameters getComments
 type CommentsFetchRequest struct {
+	PostIdParams
+
 	CommentsFetchRequestQuery
 }
