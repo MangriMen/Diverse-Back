@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Starting server with a graceful shutdown
+// StartServerWithGracefulShutdown is starting server with a graceful shutdown.
 func StartServerWithGracefulShutdown(a *fiber.App) {
 	idleConnectionsClosed := make(chan struct{})
 

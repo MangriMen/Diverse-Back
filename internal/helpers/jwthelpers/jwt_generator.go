@@ -1,4 +1,5 @@
-package helpers
+// Package jwthelpers provides functions to help you work with the jwt token.
+package jwthelpers
 
 import (
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// GenerateNewAccessToken generates a new JWT access token based on the provided user ID.
 func GenerateNewAccessToken(id uuid.UUID) (string, error) {
 	secret := os.Getenv("JWT_SECRET_KEY")
 

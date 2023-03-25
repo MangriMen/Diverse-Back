@@ -6,10 +6,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// UserQueries is struct for interacting with a database for user-related queries.
 type UserQueries struct {
 	*sqlx.DB
 }
 
+// GetUsers is used to fetch users
+// Returns a slice of users.
 func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 	users := []models.DBUser{}
 
@@ -23,6 +26,7 @@ func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 	return users, nil
 }
 
+// GetUser retrieves a single user from the database based on the given id parameter.
 func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
 	user := models.DBUser{}
 
@@ -36,6 +40,7 @@ func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
 	return user, nil
 }
 
+// GetUserByEmail retrieves a single user from the database based on the given email parameter.
 func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
 	user := models.DBUser{}
 
@@ -49,6 +54,7 @@ func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
 	return user, nil
 }
 
+// GetUserByUsername retrieves a single user from the database based on the given username parameter.
 func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) {
 	user := models.DBUser{}
 
@@ -62,6 +68,7 @@ func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) 
 	return user, nil
 }
 
+// CreateUser creates a new user at the database based on the given user object.
 func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
@@ -73,6 +80,7 @@ func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	return nil
 }
 
+// UpdateUser updates user content based on the given ID.
 func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 	query := `UPDATE users
 		SET
@@ -91,6 +99,7 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 	return nil
 }
 
+// DeleteUser deletes user based on the given ID.
 func (q *UserQueries) DeleteUser(id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
 

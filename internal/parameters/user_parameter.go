@@ -2,17 +2,21 @@ package parameters
 
 import "github.com/google/uuid"
 
-type UserIdParams struct {
+// UserIDParams includes the id of the user.
+type UserIDParams struct {
 	// in: path
 	// required: true
 	User uuid.UUID `params:"user" json:"user"`
 }
 
+// UserIDRequest is used to represent a request that requires a user id parameter,
+// such as fetching a specific user, updating user, or deleting a user.
 // swagger:parameters getUser updateUser deleteUser
-type UserIdRequest struct {
-	UserIdParams
+type UserIDRequest struct {
+	UserIDParams
 }
 
+// LoginRequestBody includes the email and password of the user.
 type LoginRequestBody struct {
 	// required: true
 	// min length: 6
@@ -25,6 +29,7 @@ type LoginRequestBody struct {
 	Password string `json:"password" validate:"required,gte=8,lte=256"`
 }
 
+// LoginRequest is used for login a user.
 // swagger:parameters loginUser
 type LoginRequest struct {
 	// in: body
@@ -32,6 +37,7 @@ type LoginRequest struct {
 	Body LoginRequestBody
 }
 
+// RegisterRequestBody includes the email, username, and password of the user being created.
 type RegisterRequestBody struct {
 	// required: true
 	// min length: 6
@@ -49,6 +55,7 @@ type RegisterRequestBody struct {
 	Password string `json:"password" validate:"required,gte=8,lte=256"`
 }
 
+// RegisterRequest is used for register a new user.
 // swagger:parameters createUser
 type RegisterRequest struct {
 	// in: body
@@ -56,6 +63,7 @@ type RegisterRequest struct {
 	Body RegisterRequestBody
 }
 
+// UserUpdateRequestBody includes the new email, username, name or password for the user.
 type UserUpdateRequestBody struct {
 	// min length: 6
 	// max length: 255
@@ -73,6 +81,8 @@ type UserUpdateRequestBody struct {
 	Password string `json:"password" validate:"gte=8,lte=256"`
 }
 
+// UserUpdateRequest represents a request to update a user's information,
+// including fields such as email, username, name or password
 // swagger:parameters updateUser
 type UserUpdateRequest struct {
 	// in: body

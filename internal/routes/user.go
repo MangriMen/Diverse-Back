@@ -6,6 +6,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// UserPublicRoutes sets up the public routes for user-related API endpoints
+// such as getting a list of users, getting a specific user by ID,
+// logging in a user, and register a new user.
 func UserPublicRoutes(route fiber.Router) {
 	route.Get("/users", controllers.GetUsers)
 	route.Get("/users/:id", controllers.GetUser)
@@ -14,6 +17,9 @@ func UserPublicRoutes(route fiber.Router) {
 	route.Post("/register", controllers.CreateUser)
 }
 
+// UserPrivateRoutes ets up private routes for authenticated users.
+// These routes require a valid JWT for authentication and authorization to access the endpoints.
+// It includes endpoints for fetching and updating user information, as well as deleting user accounts.
 func UserPrivateRoutes(route fiber.Router) {
 	route.Get("/fetch", middleware.JWTProtected(), controllers.FetchUser)
 
