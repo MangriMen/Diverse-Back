@@ -3,6 +3,7 @@ consumes:
     - application/json
 definitions:
     BaseResponseBody:
+        description: Contains error and message fields.
         properties:
             error:
                 example: false
@@ -14,6 +15,7 @@ definitions:
         required:
             - error
             - message
+        title: BaseResponseBody represents the base response body for API.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     BasePost:
@@ -106,7 +108,7 @@ definitions:
                 description: The id for this comment
                 format: uuid
                 type: string
-                x-go-name: Id
+                x-go-name: ID
             updated_at:
                 description: The time the comment was updated
                 format: date-time
@@ -128,6 +130,7 @@ definitions:
                 x-go-name: Content
         required:
             - content
+        title: CommentAddRequestBody includes the content of the comment.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     CommentUpdateRequestBody:
@@ -137,9 +140,13 @@ definitions:
                 x-go-name: Content
         required:
             - content
+        title: CommentUpdateRequestBody includes the content of the comment.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     GetCommentResponseBody:
+        description: |-
+            GetCommentResponseBody includes the signle comment for a post
+            based on given post and comment ID.
         properties:
             comment:
                 $ref: "#/definitions/Comment"
@@ -157,6 +164,9 @@ definitions:
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetCommentsResponseBody:
+        description: |-
+            GetCommentsResponseBody includes the slice of comments for a post
+            and its count.
         properties:
             comments:
                 items:
@@ -196,6 +206,7 @@ definitions:
             - error
             - message
             - post
+        title: GetPostResponseBody includes the signle post for a given ID.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostsResponseBody:
@@ -221,6 +232,7 @@ definitions:
             - message
             - count
             - posts
+        title: GetPostsResponseBody includes the slice of posts.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetUserResponseBody:
@@ -238,6 +250,7 @@ definitions:
             - error
             - message
             - user
+        title: GetUserResponseBody includes the signle user for a given ID.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetUsersResponseBody:
@@ -263,6 +276,7 @@ definitions:
             - message
             - count
             - users
+        title: GetUsersResponseBody includes the slice of users.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     LoginRequestBody:
@@ -280,6 +294,7 @@ definitions:
         required:
             - email
             - password
+        title: LoginRequestBody includes the email and password of the user.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     Post:
@@ -307,7 +322,7 @@ definitions:
                 description: The id for this post
                 format: uuid
                 type: string
-                x-go-name: Id
+                x-go-name: ID
             likes:
                 description: Number of likes
                 format: int64
@@ -334,11 +349,12 @@ definitions:
             user_id:
                 format: uuid
                 type: string
-                x-go-name: UserId
+                x-go-name: UserID
         required:
             - content
             - description
             - user_id
+        title: PostCreateRequestBody includes the content, description and id of the user creating the post.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     RegisterLoginUserResponseBody:
@@ -360,6 +376,7 @@ definitions:
             - message
             - token
             - user
+        title: RegisterLoginUserResponseBody includes the token and user model when user register or login.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     RegisterRequestBody:
@@ -383,6 +400,7 @@ definitions:
             - email
             - username
             - password
+        title: RegisterRequestBody includes the email, username, and password of the user being created.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     User:
@@ -448,6 +466,7 @@ definitions:
                 minLength: 1
                 type: string
                 x-go-name: Username
+        title: UserUpdateRequestBody includes the new email, username, name or password for the user.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
 host: localhost:3030
@@ -504,7 +523,7 @@ paths:
                   in: query
                   name: last_seen_post_id
                   type: string
-                  x-go-name: LastSeenPostId
+                  x-go-name: LastSeenPostID
                 - format: date-time
                   in: query
                   name: last_seen_post_created_at
@@ -643,8 +662,9 @@ paths:
                   in: query
                   name: last_seen_comment_id
                   type: string
-                  x-go-name: LastSeenCommentId
-                - format: date-time
+                  x-go-name: LastSeenCommentID
+                - description: nolint:lll
+                  format: date-time
                   in: query
                   name: last_seen_comment_created_at
                   type: string
@@ -884,53 +904,55 @@ produces:
     - application/json
 responses:
     CreateUpdateCommentResponse:
-        description: ""
+        description: CreateUpdateCommentResponse represents response for successfully create or update comment request.
         schema:
             type: string
     CreateUpdatePostResponse:
-        description: ""
+        description: CreateUpdatePostResponse represents response for successfully create or update post request.
         schema:
             type: string
     DeleteCommentResponse:
-        description: ""
+        description: DeleteCommentResponse represents response for successfully delete comment request.
     DeletePostResponse:
-        description: ""
+        description: DeletePostResponse represents response for successfully delete post.
     DeleteUserResponse:
-        description: ""
+        description: DeleteUserResponse represents response for successfully delete user requestt.
     ErrorResponse:
-        description: ""
+        description: |-
+            ErrorResponse represents the error response body for API.
+            Contains error and message fields.
         schema:
             $ref: "#/definitions/BaseResponseBody"
     GetCommentResponse:
-        description: ""
+        description: GetCommentResponse represent the response retrived on get comment request.
         schema:
             $ref: "#/definitions/GetCommentResponseBody"
     GetCommentsResponse:
-        description: ""
+        description: GetCommentsResponse represent the response retrived on get comments request.
         schema:
             $ref: "#/definitions/GetCommentsResponseBody"
     GetPostResponse:
-        description: ""
+        description: GetPostResponse represent the response retrived on get post request.
         schema:
             $ref: "#/definitions/GetPostResponseBody"
     GetPostsResponse:
-        description: ""
+        description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: "#/definitions/GetPostsResponseBody"
     GetUserResponse:
-        description: ""
+        description: GetUserResponse represent the response retrived on get user request.
         schema:
             $ref: "#/definitions/GetUserResponseBody"
     GetUsersResponse:
-        description: ""
+        description: GetUsersResponse represent the response retrived on get users request.
         schema:
             $ref: "#/definitions/GetUsersResponseBody"
     RegisterLoginUserResponse:
-        description: ""
+        description: RegisterLoginUserResponse represent the response retrived on register or login request.
         schema:
             $ref: "#/definitions/RegisterLoginUserResponseBody"
     UpdateUserResponse:
-        description: ""
+        description: UpdateUserResponse represents response for successfully update user request.
         schema:
             type: string
 schemes:

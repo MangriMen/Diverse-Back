@@ -1,3 +1,4 @@
+// Package server provides functionality to run REST API server
 package server
 
 import (
@@ -8,7 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func InitApi() {
+// InitAPI is used for initialize a new instance of fiber web application.
+func InitAPI() {
 	config := configs.FiberConfig()
 	app := fiber.New(config)
 

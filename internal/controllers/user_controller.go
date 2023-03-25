@@ -5,6 +5,7 @@ import (
 
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
@@ -67,8 +68,8 @@ func GetUsers(c *fiber.Ctx) error {
 //   default: ErrorResponse
 
 func GetUser(c *fiber.Ctx) error {
-	userIdParams := &parameters.UserIdParams{}
-	if err := c.ParamsParser(userIdParams); err != nil {
+	userIDParams := &parameters.UserIDParams{}
+	if err := c.ParamsParser(userIDParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -83,7 +84,7 @@ func GetUser(c *fiber.Ctx) error {
 		})
 	}
 
-	dbUser, err := db.GetUser(userIdParams.User)
+	dbUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -141,7 +142,7 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(foundDBUser.Id)
+	token, err := jwthelpers.GenerateNewAccessToken(foundDBUser.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -219,21 +220,21 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := validate.Struct(user); err != nil {
+	if err = validate.Struct(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if err := db.CreateUser(user); err != nil {
+	if err = db.CreateUser(user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(user.Id)
+	token, err := jwthelpers.GenerateNewAccessToken(user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -266,7 +267,7 @@ func CreateUser(c *fiber.Ctx) error {
 func FetchUser(c *fiber.Ctx) error {
 	now := time.Now().Unix()
 
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwthelpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -281,7 +282,7 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := uuid.Parse(claims.Id)
+	userID, err := uuid.Parse(claims.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -297,7 +298,7 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	dbUser, err := db.GetUser(userId)
+	dbUser, err := db.GetUser(userID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -305,7 +306,7 @@ func FetchUser(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := helpers.GenerateNewAccessToken(userId)
+	token, err := jwthelpers.GenerateNewAccessToken(userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -337,7 +338,7 @@ func FetchUser(c *fiber.Ctx) error {
 func UpdateUser(c *fiber.Ctx) error {
 	now := time.Now().Unix()
 
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwthelpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -352,7 +353,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := uuid.Parse(claims.Id)
+	userID, err := uuid.Parse(claims.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -361,7 +362,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	userUpdateRequestBody := &parameters.UserUpdateRequestBody{}
-	if err := c.BodyParser(userUpdateRequestBody); err != nil {
+	if err = c.BodyParser(userUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -369,7 +370,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(userUpdateRequestBody); err != nil {
+	if err = validate.Struct(userUpdateRequestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
@@ -384,7 +385,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	foundUser, err := db.GetUser(userId)
+	foundUser, err := db.GetUser(userID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -408,14 +409,14 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	foundUser.UpdatedAt = time.Now()
 
-	if err := validate.Struct(foundUser); err != nil {
+	if err = validate.Struct(foundUser); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if err := db.UpdateUser(&foundUser); err != nil {
+	if err = db.UpdateUser(&foundUser); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"erorr":   true,
 			"message": err.Error(),
@@ -443,7 +444,7 @@ func UpdateUser(c *fiber.Ctx) error {
 func DeleteUser(c *fiber.Ctx) error {
 	now := time.Now().Unix()
 
-	claims, err := helpers.GetTokenMetadata(c)
+	claims, err := jwthelpers.GetTokenMetadata(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -458,7 +459,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := uuid.Parse(claims.Id)
+	userID, err := uuid.Parse(claims.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -466,8 +467,8 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	userIdParams := &parameters.UserIdParams{}
-	if err := c.ParamsParser(userIdParams); err != nil {
+	userIDParams := &parameters.UserIDParams{}
+	if err = c.ParamsParser(userIDParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -475,14 +476,14 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	validate := helpers.NewValidator()
-	if err := validate.Struct(userIdParams); err != nil {
+	if err = validate.Struct(userIDParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
 		})
 	}
 
-	if userId != userIdParams.User {
+	if userID != userIDParams.User {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error":   true,
 			"message": "not enough permission to delete user",
@@ -497,7 +498,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DeleteUser(userIdParams.User); err != nil {
+	if err = db.DeleteUser(userIDParams.User); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),

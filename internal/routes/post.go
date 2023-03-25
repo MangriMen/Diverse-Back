@@ -6,6 +6,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// PostPrivateRoutes sets up the private routes for the post-related endpoints,
+// which require JWT authentication to access. It includes routes
+// for retrieving, creating, updating, and deleting posts.
+// Additionally, it sets up the private routes for post comments.
 func PostPrivateRoutes(route fiber.Router) {
 	route.Get("/posts", middleware.JWTProtected(), controllers.GetPosts)
 
@@ -20,6 +24,9 @@ func PostPrivateRoutes(route fiber.Router) {
 	PostCommentPrivateRoutes(route)
 }
 
+// PostCommentPrivateRoutes sets up the private routes for the comment-related endpoints,
+// which require JWT authentication to access. It includes routes
+// for retrieving, creating, updating, and deleting comments.
 func PostCommentPrivateRoutes(route fiber.Router) {
 	posts := route.Group("/posts/:post")
 

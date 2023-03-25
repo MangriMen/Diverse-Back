@@ -1,3 +1,4 @@
+// Package models provides base models for database and work with REST API
 package models
 
 import (
@@ -9,7 +10,7 @@ import (
 type BaseComment struct {
 	// The id for this comment
 	// required: true
-	Id uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
+	ID uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
 
 	// Comment content
 	// required: true
@@ -29,11 +30,11 @@ type DBComment struct {
 
 	// Parent post id
 	// required: true
-	PostId uuid.UUID `db:"post_id" json:"post_id" validate:"required,uuid"`
+	PostID uuid.UUID `db:"post_id" json:"post_id" validate:"required,uuid"`
 
 	// Id of the user who wrote the comment
 	// required: true
-	UserId uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
+	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
 func (c *DBComment) ToComment() Comment {

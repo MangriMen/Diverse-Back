@@ -9,7 +9,7 @@ import (
 type BasePost struct {
 	// The id for this post
 	// required: true
-	Id uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
+	ID uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
 
 	// The url to the post content
 	// required: true
@@ -32,7 +32,7 @@ type DBPost struct {
 
 	// The id of the user who created the post
 	// required: true
-	UserId uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
+	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
 func (p *DBPost) ToPost() Post {
