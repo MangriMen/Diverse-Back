@@ -15,7 +15,11 @@ func PublicRoutes(a *fiber.App) {
 	route.Get("/users", controllers.GetUsers)
 	route.Get("/users/:id", controllers.GetUser)
 
-	route.Static("data/image/", filepath.Join(configs.DataPath, configs.MIMEBaseImage), fiber.Static{Compress: true})
+	route.Static(
+		"data/image/raw",
+		filepath.Join(configs.DataPath, configs.MIMEBaseImage),
+		fiber.Static{Compress: true},
+	)
 
 	route.Post("/login", controllers.LoginUser)
 	route.Post("/register", controllers.CreateUser)
