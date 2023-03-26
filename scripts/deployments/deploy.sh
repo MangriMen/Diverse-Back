@@ -1,7 +1,7 @@
 branch="$DEPLOY_BRANCH"
 
-if [[ -z $DEPLOY_PROFILE ]]; then
-  echo "DEPLOY_PROFILE env variable not set"
+if [[ -z $profile ]]; then
+  echo "profile not set"
 fi
 
 case "$profile" in
@@ -14,7 +14,7 @@ case "$profile" in
     ;;
 
   *)
-    echo "Invalid DEPLOY_PROFILE value. Must be 'prod' or 'test'"
+    echo "Invalid profile value. Must be 'prod' or 'test'"
     exit 1
     ;;
 esac
