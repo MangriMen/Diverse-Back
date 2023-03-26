@@ -68,7 +68,7 @@ jobs:
 
       - name: Set deploy profile
         run: |
-          if [[ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]] then;
+          if [[ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]]; then
             echo "DEPLOY_PROFILE=test" >>$GITHUB_ENV
           else
             echo "DEPLOY_PROFILE=prod" >>$GITHUB_ENV
@@ -81,4 +81,4 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: ./scripts/deployments/deploy.sh -p test
+          script: ${{ steps.deploy-script.outputs.contents }}
