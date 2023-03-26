@@ -68,7 +68,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: bash scripts/deployments/deploy.sh -p prod
+          script: ./scripts/deployments/deploy.sh -p prod
 
       - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
         name: Deploy on test server
@@ -78,4 +78,4 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: bash scripts/deployments/deploy.sh -p test
+          script: ./scripts/deployments/deploy.sh -p test
