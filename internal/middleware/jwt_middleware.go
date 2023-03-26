@@ -4,14 +4,12 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-
 	jwtware "github.com/gofiber/jwt/v3"
 )
 
 // JWTProtected func for specify routes group with JWT authentication.
 // See: https://github.com/gofiber/jwt
 func JWTProtected() func(*fiber.Ctx) error {
-
 	// Create config for JWT authentication middleware.
 	config := jwtware.Config{
 		SigningKey:   []byte(os.Getenv("JWT_SECRET_KEY")),

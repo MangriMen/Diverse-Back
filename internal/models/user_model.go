@@ -6,12 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// User represents the user without password for this application
-// swagger:model
+// BaseUser represents a base user struct in a system.
 type BaseUser struct {
 	// The id for this user
 	// required: true
-	Id uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
+	ID uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
 
 	// The email for this user
 	// required: true
@@ -33,12 +32,11 @@ type BaseUser struct {
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 
 	// URL to user avatar
-	Avatar_url *string `db:"avatar_url" json:"avatar_url"`
+	AvatarURL *string `db:"avatar_url" json:"avatar_url"`
 }
 
-// User represents the user for this application
-// swagger:model
-type User struct {
+// DBUser represents a user struct from database.
+type DBUser struct {
 	BaseUser
 
 	// The password for this user
@@ -46,6 +44,13 @@ type User struct {
 	Password string `db:"password" json:"password,omitempty" validate:"required,gte=8,lte=256"`
 }
 
-func (user *User) PrepareToSend() {
-	user.Password = ""
+// ToUser converts the DBUser to User model.
+func (u *DBUser) ToUser() User {
+	return User{BaseUser: u.BaseUser}
+}
+
+// User represents the user for this application
+// swagger:model
+type User struct {
+	BaseUser
 }

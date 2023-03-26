@@ -6,12 +6,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// UserQueries is struct for interacting with a database for user-related queries.
 type UserQueries struct {
 	*sqlx.DB
 }
 
-func (q *UserQueries) GetUsers() ([]models.User, error) {
-	users := []models.User{}
+// GetUsers is used to fetch users
+// Returns a slice of users.
+func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
+	users := []models.DBUser{}
 
 	query := `SELECT * FROM users`
 
@@ -23,8 +26,9 @@ func (q *UserQueries) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (q *UserQueries) GetUser(id uuid.UUID) (models.User, error) {
-	user := models.User{}
+// GetUser retrieves a single user from the database based on the given id parameter.
+func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE id = $1`
 
@@ -36,8 +40,9 @@ func (q *UserQueries) GetUser(id uuid.UUID) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
-	user := models.User{}
+// GetUserByEmail retrieves a single user from the database based on the given email parameter.
+func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE email = $1`
 
@@ -49,8 +54,9 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
-	user := models.User{}
+// GetUserByUsername retrieves a single user from the database based on the given username parameter.
+func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) {
+	user := models.DBUser{}
 
 	query := `SELECT * FROM users WHERE username = $1`
 
@@ -62,10 +68,11 @@ func (q *UserQueries) GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) CreateUser(b *models.User) error {
+// CreateUser creates a new user at the database based on the given user object.
+func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
-	_, err := q.Exec(query, b.Id, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
+	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -73,7 +80,8 @@ func (q *UserQueries) CreateUser(b *models.User) error {
 	return nil
 }
 
-func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.User) error {
+// UpdateUser updates user content based on the given ID.
+func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 	query := `UPDATE users
 		SET
 			email = $2,
@@ -83,7 +91,7 @@ func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.User) error {
 			updated_at = $6
 		WHERE id = $1`
 
-	_, err := q.Exec(query, id, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
+	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -91,6 +99,7 @@ func (q *UserQueries) UpdateUser(id uuid.UUID, b *models.User) error {
 	return nil
 }
 
+// DeleteUser deletes user based on the given ID.
 func (q *UserQueries) DeleteUser(id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
 
