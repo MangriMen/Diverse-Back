@@ -1,43 +1,30 @@
-profile=''
+profile="$DEPLOY_PROFILE"
+branch="$DEPLOY_BRANCH"
 
-print_usage() {
-  printf "Usage: deploy
-  -p      Profile. May be prod or test.\n"
-}
+if [[ -z $DEPLOY_PROFILE ]]; then
+  echo "DEPLOY_PROFILE env variable not set"
+fi
 
-while getopts 'p:' flag; do
-  case "${flag}" in
-    p) profile="${OPTARG}" ;;
-    *) print_usage
-       exit 1 ;;
-  esac
-done
+case "$profile" in
+  "prod")
+    branch="main"
+    ;;
 
-deploy() {
-  local branch="$1"
-  local profile="$2"
+  "test")
+    branch="develop"
+    ;;
 
-  if [[ -z $branch ]]; then
-    echo "branch argument are empty"
-  fi
-
-  if [[ -z $profile ]]; then
-    echo "profile argument are empty"
-  fi
-
-  echo $branch $profile
-
-  cd "~/diverse/Diverse-Back-$profile"
-  git checkout "$branch"
-  git pull
-  sudo docker-compose -f docker-compose.yml --profile "$profile" stop
-  sudo docker-compose -f docker-compose.yml --profile "$profile" pull
-  sudo docker-compose -f docker-compose.yml --profile "$profile" up -d --build
-}
-
-case $profile in
-  "prod") deploy 'main' $profile ;;
-  "test") deploy 'develop' $profile ;;
-  *) print_usage
-     exit 1 ;;
+  *)
+    echo "Invalid DEPLOY_PROFILE value. Must be 'prod' or 'test'"
+    exit 1
+    ;;
 esac
+
+echo "Profile: $profile; Branch: $branch"
+
+cd "~/diverse/Diverse-Back-$profile"
+git checkout "$branch"
+git pull
+sudo docker-compose -f docker-compose.yml --profile "$profile" stop
+sudo docker-compose -f docker-compose.yml --profile "$profile" pull
+sudo docker-compose -f docker-compose.yml --profile "$profile" up -d --build

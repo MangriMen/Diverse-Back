@@ -55,23 +55,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Read deploy script contents
+        id: deploy-script
+        uses: andstor/file-reader-action@v1
+        with:
+          path: scripts/deployments/deploy.sh
+
       - name: Extract branch name
+        id: extract_branch
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
-        id: extract_branch
 
-      - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
-        name: Deploy on prod server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: ./scripts/deployments/deploy.sh -p prod
+      - name: Set deploy profile
+        run: |
+          if [[ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]] then;
+            echo "DEPLOY_PROFILE=test" >>$GITHUB_ENV
+          else
+            echo "DEPLOY_PROFILE=prod" >>$GITHUB_ENV
+          fi
 
-      - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
-        name: Deploy on test server
+      - name: Deploy on {{ env.DEPLOY_PROFILE }} profile
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
