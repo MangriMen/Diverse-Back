@@ -13,7 +13,7 @@ import (
 // such as getting a image.
 func DataPublicRoutes(route fiber.Router) {
 	route.Static(
-		"data/image/",
+		"data/image/raw",
 		filepath.Join(configs.DataPath, configs.MIMEBaseImage),
 		fiber.Static{Compress: true},
 	)

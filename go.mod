@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/gofiber/jwt/v3 v3.3.6
 	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/h2non/bimg v1.1.6
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/samber/lo v1.37.0
 	golang.org/x/crypto v0.5.0
@@ -16,9 +17,6 @@ require (
 require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/gofiber/utils v0.0.10 // indirect
-	github.com/gorilla/schema v1.1.0 // indirect
-	github.com/h2non/bimg v1.1.9 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -32,7 +30,6 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/gofiber/fiber v1.14.6
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/joho/godotenv v1.5.1
