@@ -105,7 +105,11 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
+
 	foundDBUser, err := db.GetUserByEmail(loginRequestBody.Email)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
+	}
 
 	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
 		return helpers.Response(c, fiber.StatusForbidden, "Wrong email or password")
