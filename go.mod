@@ -7,9 +7,11 @@ require (
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/gofiber/jwt/v3 v3.3.6
 	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/h2non/bimg v1.1.6
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/samber/lo v1.37.0
 	golang.org/x/crypto v0.5.0
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17
 )
 
 require (
@@ -23,7 +25,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.12.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/text v0.6.0 // indirect
 )
 

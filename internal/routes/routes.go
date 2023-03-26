@@ -11,6 +11,7 @@ func PublicRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
 	UserPublicRoutes(route)
+	DataPublicRoutes(route)
 }
 
 // PrivateRoutes sets up private routes for an API version X
@@ -20,4 +21,5 @@ func PrivateRoutes(a *fiber.App) {
 
 	UserPrivateRoutes(route)
 	PostPrivateRoutes(route)
+	DataPrivateRoutes(route)
 }

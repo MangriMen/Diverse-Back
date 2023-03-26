@@ -15,6 +15,7 @@ func InitAPI() {
 	app := fiber.New(config)
 
 	middleware.FiberMiddleware(app)
+	middleware.Compress(app)
 
 	routes.PublicRoutes(app)
 	routes.PrivateRoutes(app)
