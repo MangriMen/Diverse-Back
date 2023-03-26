@@ -17,82 +17,7 @@ definitions:
             - message
         title: BaseResponseBody represents the base response body for API.
         type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
-    BasePost:
-        description: BasePost represents the post without userId
-        properties:
-            content:
-                description: The url to the post content
-                type: string
-                x-go-name: Content
-            created_at:
-                description: The time the post was created
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            description:
-                description: Post description
-                type: string
-                x-go-name: Description
-            id:
-                description: The id for this post
-                format: uuid
-                type: string
-                x-go-name: Id
-            likes:
-                description: Number of likes
-                format: int64
-                type: integer
-                x-go-name: Likes
-        required:
-            - id
-            - content
-            - description
-            - created_at
-        type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
-    BaseUser:
-        description: User represents the user without password for this application
-        properties:
-            avatar_url:
-                description: URL to user avatar
-                type: string
-                x-go-name: Avatar_url
-            created_at:
-                description: The time the user was registered
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            email:
-                description: The email for this user
-                type: string
-                x-go-name: Email
-            id:
-                description: The id for this user
-                format: uuid
-                type: string
-                x-go-name: Id
-            name:
-                description: The name for this user
-                type: string
-                x-go-name: Name
-            updated_at:
-                description: The time the user was updated
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-            username:
-                description: The username for this user
-                type: string
-                x-go-name: Username
-        required:
-            - id
-            - email
-            - username
-            - created_at
-            - updated_at
-        type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     Comment:
         properties:
             content:
@@ -405,6 +330,39 @@ definitions:
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     User:
         description: User represents the user for this application
+        properties:
+            content:
+                description: The url to the post content
+                type: string
+                x-go-name: Content
+            created_at:
+                description: The time the post was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            description:
+                description: Post description
+                type: string
+                x-go-name: Description
+            id:
+                description: The id for this post
+                format: uuid
+                type: string
+                x-go-name: Id
+            likes:
+                description: Number of likes
+                format: int64
+                type: integer
+                x-go-name: Likes
+        required:
+            - id
+            - content
+            - description
+            - created_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    BaseUser:
+        description: User represents the user without password for this application
         properties:
             avatar_url:
                 description: URL to user avatar
