@@ -1,19 +1,14 @@
 package helpers
 
-import "github.com/gofiber/fiber/v2"
-
-const (
-	DefaultError uint32 = 1 << iota
+import (
+	"github.com/MangriMen/Diverse-Back/internal/responses"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GetResponse(err error, responseType uint32) fiber.Map {
-	switch responseType {
-	case DefaultError:
-		return fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		}
-	default:
-		return fiber.Map{}
-	}
+// Response used to compact return default error response.
+func Response(c *fiber.Ctx, responseStatus int, err interface{}) error {
+	return c.Status(responseStatus).JSON(responses.BaseResponseBody{
+		Error:   true,
+		Message: &err,
+	})
 }

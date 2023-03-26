@@ -32,4 +32,4 @@ func GetAllowedMIMEBaseTypes() []string {
 }
 
 // WebpQuality is webp quality for saved images.
-const WebpQuality = 75
+const WebpQuality = 85

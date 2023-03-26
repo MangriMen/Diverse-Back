@@ -13,18 +13,22 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// GenerateUniqueFilename generates uuid, removes dashed from it and returns.
 func GenerateUniqueFilename() string {
-	uniqueFileId := uuid.New()
-	filename := strings.Replace(uniqueFileId.String(), "-", "", -1)
+	uniqueFileID := uuid.New()
+	filename := strings.ReplaceAll(uniqueFileID.String(), "-", "")
 	return filename
 }
 
+// ParseContentType returns content type splitted by / to tuple.
 func ParseContentType(contentType string) (string, string) {
 	parsedContentType := strings.Split(contentType, "/")
 	baseType, extendType := parsedContentType[0], parsedContentType[1]
 	return baseType, extendType
 }
 
+// ValidateContentType checks that filetype in allowed types.
+// Returns splitted type if ok, else error.
 func ValidateContentType(
 	fileheader *multipart.FileHeader,
 	allowedMIMEBaseTypes []string,
@@ -43,16 +47,17 @@ func readFileFromMultipart(fileheader *multipart.FileHeader) ([]byte, error) {
 		return nil, err
 	}
 
-	defer file.Close()
+	defer CloseFileQuietly(file)
 
 	fileBuffer := bytes.NewBuffer(nil)
-	if _, err := io.Copy(fileBuffer, file); err != nil {
+	if _, err = io.Copy(fileBuffer, file); err != nil {
 		return nil, err
 	}
 
 	return fileBuffer.Bytes(), nil
 }
 
+// ProcessFile check base file type and call process function to save it.
 func ProcessFile(fileheader *multipart.FileHeader, filepath string) error {
 	fileBuffer, err := readFileFromMultipart(fileheader)
 	if err != nil {
@@ -60,9 +65,9 @@ func ProcessFile(fileheader *multipart.FileHeader, filepath string) error {
 	}
 
 	baseType, _ := ParseContentType(fileheader.Header.Get("Content-Type"))
-	switch baseType {
-	case configs.MIMEBaseImage:
-		if err := processImage(fileBuffer, 85, filepath); err != nil {
+
+	if baseType == configs.MIMEBaseImage {
+		if err = processImage(fileBuffer, configs.WebpQuality, filepath); err != nil {
 			return err
 		}
 	}
@@ -87,4 +92,11 @@ func processImage(buffer []byte, quality int, filepath string) error {
 	}
 
 	return nil
+}
+
+// CloseFileQuietly close db object quietly without returning error.
+func CloseFileQuietly(file multipart.File) {
+	if err := file.Close(); err != nil {
+		_ = file.Close()
+	}
 }
