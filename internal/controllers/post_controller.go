@@ -8,7 +8,6 @@ import (
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
-	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/helpers/posthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
@@ -33,21 +32,11 @@ import (
 //   200: GetPostsResponse
 //   default: ErrorResponse
 
+// GetPosts is used to fetch posts from database with request parameters.
 func GetPosts(c *fiber.Ctx) error {
-	postsFetchRequestQuery := &parameters.PostsFetchRequestQuery{}
-	if err := c.QueryParser(postsFetchRequestQuery); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err := validate.Struct(postsFetchRequestQuery); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	postsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.PostsFetchRequestQuery](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	if postsFetchRequestQuery.LastSeenPostCreatedAt.IsZero() {
@@ -56,18 +45,12 @@ func GetPosts(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	dbPosts, err := db.GetPosts(postsFetchRequestQuery)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "posts not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Posts not found")
 	}
 
 	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
@@ -81,7 +64,7 @@ func GetPosts(c *fiber.Ctx) error {
 }
 
 // swagger:route GET /posts/{post} Post getPost
-// Returns the post by given id
+// Returns the post by given ID
 //
 // Produces:
 //   - application/json
@@ -95,32 +78,24 @@ func GetPosts(c *fiber.Ctx) error {
 //   200: GetPostResponse
 //   default: ErrorResponse
 
+// GetPost is used to fetch post from database by ID.
 func GetPost(c *fiber.Ctx) error {
-	postIDParams := &parameters.PostIDParams{}
-	if err := c.QueryParser(postIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	post, err := db.GetPost(postIDParams.Post)
+	dbPost, err := db.GetPost(postIDParams.Post)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "post not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Post with given id was not found")
 	}
 
-	postToSend := posthelpers.PreparePostToSend(post, db)
+	postToSend := posthelpers.PreparePostToSend(dbPost, db)
 
 	return c.JSON(responses.GetPostResponseBody{
 		Post: postToSend,
@@ -142,21 +117,11 @@ func GetPost(c *fiber.Ctx) error {
 //   201: CreateUpdatePostResponse
 //   default: ErrorResponse
 
+// CreatePost is used to create a new post.
 func CreatePost(c *fiber.Ctx) error {
-	postCreateRequestBody := &parameters.PostCreateRequestBody{}
-	if err := c.QueryParser(postCreateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err := validate.Struct(postCreateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	postCreateRequestBody, err := helpers.GetBodyAndValidate[parameters.PostCreateRequestBody](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	newPost := &models.DBPost{
@@ -170,33 +135,25 @@ func CreatePost(c *fiber.Ctx) error {
 		UserID: postCreateRequestBody.UserID,
 	}
 
-	if err := validate.Struct(newPost); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	validate := helpers.NewValidator()
+	if err = validate.Struct(newPost); err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	if err = db.CreatePost(newPost); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
 }
 
 // swagger:route PATCH /posts/{post} Post updatePost
-// Update post by id with given fields
+// Update post by ID with given fields
 //
 // Produces:
 //   - application/json
@@ -210,60 +167,26 @@ func CreatePost(c *fiber.Ctx) error {
 //   201: CreateUpdatePostResponse
 //   default: ErrorResponse
 
+// UpdatePost is used to update the post by ID.
 func UpdatePost(c *fiber.Ctx) error {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	postIDParams := &parameters.PostIDParams{}
-	if err = c.ParamsParser(postIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	postUpdateRequestBody := &parameters.PostUpdateRequestBody{}
-	if err = c.QueryParser(postUpdateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(postIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
-	}
-
-	if err = validate.Struct(postUpdateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	postUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.PostUpdateRequestBody](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	foundPost, err := db.GetPost(postIDParams.Post)
@@ -296,11 +219,9 @@ func UpdatePost(c *fiber.Ctx) error {
 		foundPost.Description,
 	)
 
+	validate := helpers.NewValidator()
 	if err = validate.Struct(foundPost); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	if err = db.UpdatePost(&foundPost); err != nil {
@@ -314,7 +235,7 @@ func UpdatePost(c *fiber.Ctx) error {
 }
 
 // swagger:route DELETE /posts/{post} Post deletePost
-// Delete post by id
+// Delete post by ID
 //
 // Schemes: http, https
 //
@@ -328,67 +249,34 @@ func UpdatePost(c *fiber.Ctx) error {
 //   204: DeletePostResponse
 //   default: ErrorResponse
 
+// DeletePost is used to delete the post by ID.
 func DeletePost(c *fiber.Ctx) error {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	postIDParams := &parameters.PostIDParams{}
-	if err = c.QueryParser(postIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(postIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err)
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"erorr":   true,
-			"message": "book with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
 	foundPost, err := db.GetPost(postIDParams.Post)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "post with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
 	}
 
 	if userID != foundPost.UserID {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to delete post",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Not enough permission to delete post")
 	}
 
 	if err = db.DeletePost(foundPost.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
@@ -409,36 +297,20 @@ func DeletePost(c *fiber.Ctx) error {
 //   200: GetPostsResponse
 //   default: ErrorResponse
 
+// GetComments is used to fetch the post comments by post ID.
 func GetComments(c *fiber.Ctx) error {
-	postCommentIDParams := &parameters.PostCommentIDParams{}
-	if err := c.QueryParser(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
-	commentsFetchRequestQuery := &parameters.CommentsFetchRequestQuery{}
-	if err := c.QueryParser(commentsFetchRequestQuery); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err := validate.Struct(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
-	}
-
-	if err := validate.Struct(commentsFetchRequestQuery); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	commentsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.CommentsFetchRequestQuery](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	if commentsFetchRequestQuery.LastSeenCommentCreatedAt.IsZero() {
@@ -447,18 +319,12 @@ func GetComments(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	dbPosts, err := db.GetComments(postCommentIDParams.Post, commentsFetchRequestQuery)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "posts not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Posts not found")
 	}
 
 	commentsToSend := lo.Map(dbPosts, func(item models.DBComment, index int) models.Comment {
@@ -486,74 +352,38 @@ func GetComments(c *fiber.Ctx) error {
 //   201: CreateUpdateCommentResponse
 //   default: ErrorResponse
 
+// AddComment is used to add the comment to the post by ID.
 func AddComment(c *fiber.Ctx) error {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	commentAddRequestParams, err := helpers.GetParamsAndValidate[parameters.CommentAddRequestParams](
+		c,
+	)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
-	commentAddRequestParams := &parameters.CommentAddRequestParams{}
-	if err = c.ParamsParser(commentAddRequestParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	commentAddRequestBody := &parameters.CommentAddRequestBody{}
-	if err = c.BodyParser(commentAddRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(commentAddRequestParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
-	}
-
-	if err = validate.Struct(commentAddRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	commentAddRequestBody, err := helpers.GetBodyAndValidate[parameters.CommentAddRequestBody](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	if _, err = db.GetUser(userID); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "User with this ID not found")
 	}
 
-	if _, err := db.GetPost(commentAddRequestParams.Post); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "post with this ID not found",
-		})
+	if _, err = db.GetPost(commentAddRequestParams.Post); err != nil {
+		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
 	}
 
 	newComment := &models.DBComment{
@@ -567,25 +397,20 @@ func AddComment(c *fiber.Ctx) error {
 	}
 	newComment.UpdatedAt = newComment.CreatedAt
 
+	validate := helpers.NewValidator()
 	if err = validate.Struct(newComment); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	if err = db.AddComment(newComment); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
 }
 
 // swagger:route PATCH /posts/{post}/comments/{comment} Post updateComment
-// Update comment content by comment id with given post id
+// Update comment content by comment ID with given post ID
 //
 // Produces:
 //   - application/json
@@ -599,75 +424,41 @@ func AddComment(c *fiber.Ctx) error {
 //   201: CreateUpdateCommentResponse
 //   default: ErrorResponse
 
+// UpdateComment is used to update the comment on the post by post ID and comment ID.
 func UpdateComment(c *fiber.Ctx) error {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
-	postCommentIDParams := &parameters.PostCommentIDParams{}
-	if err = c.ParamsParser(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	commentUpdateRequestBody := &parameters.CommentUpdateRequestBody{}
-	if err = c.BodyParser(commentUpdateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
-	}
-
-	if err = validate.Struct(commentUpdateRequestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	commentUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.CommentUpdateRequestBody](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	foundComment, err := db.GetComment(postCommentIDParams.Comment)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "comment with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
 	}
 
 	if userID != foundComment.UserID {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to update comment",
-		})
+		return helpers.Response(
+			c,
+			fiber.StatusNotFound,
+			"Not enough permission to update comment",
+		)
 	}
 
 	if foundComment.CreatedAt.Add(configs.PostCommentEditTimeSinceCreated).
@@ -688,25 +479,20 @@ func UpdateComment(c *fiber.Ctx) error {
 	)
 	foundComment.UpdatedAt = time.Now()
 
+	validate := helpers.NewValidator()
 	if err = validate.Struct(foundComment); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	if err = db.UpdateComment(&foundComment); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"erorr":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
 }
 
 // swagger:route DELETE /posts/{post}/comments/{comment} Post deleteComment
-// Delete comment by comment id with given post id
+// Delete comment by comment ID with given post ID
 //
 // Schemes: http, https
 //
@@ -720,67 +506,38 @@ func UpdateComment(c *fiber.Ctx) error {
 //   204: DeleteCommentResponse
 //   default: ErrorResponse
 
+// DeleteComment is used to delete the comment on the post by post ID and comment ID.
 func DeleteComment(c *fiber.Ctx) error {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	postCommentIDParams := &parameters.PostCommentIDParams{}
-	if err = c.ParamsParser(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(postCommentIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"erorr":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
 	foundComment, err := db.GetComment(postCommentIDParams.Comment)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "comment with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
 	}
 
 	if userID != foundComment.UserID {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to delete comment",
-		})
+		return helpers.Response(
+			c,
+			fiber.StatusNotFound,
+			"Not enough permission to delete comment",
+		)
 	}
 
 	if err = db.DeleteComment(foundComment.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

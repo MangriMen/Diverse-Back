@@ -72,7 +72,7 @@ func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) 
 func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
-	_, err := q.Exec(query, b.Id, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
+	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 			updated_at = $6
 		WHERE id = $1`
 
-	_, err := q.Exec(query, b.Id, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
+	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
 	if err != nil {
 		return err
 	}

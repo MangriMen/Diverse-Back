@@ -8,7 +8,7 @@ type BaseResponseBody struct {
 	Error bool `json:"error"`
 
 	// required: true
-	Message *string `json:"message"`
+	Message interface{} `json:"message"`
 }
 
 // ErrorResponse represents the error response body for API.

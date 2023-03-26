@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// BaseComment represents a base comment struct in a system.
 type BaseComment struct {
 	// The id for this comment
 	// required: true
@@ -25,6 +26,7 @@ type BaseComment struct {
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
+// DBComment represents a comment struct from database.
 type DBComment struct {
 	BaseComment
 
@@ -37,10 +39,13 @@ type DBComment struct {
 	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
+// ToComment converts the DBComment to Comment model.
 func (c *DBComment) ToComment() Comment {
 	return Comment{BaseComment: c.BaseComment}
 }
 
+// Comment represents the comment for this application
+// swagger:model
 type Comment struct {
 	BaseComment
 

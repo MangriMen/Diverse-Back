@@ -10,7 +10,6 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
         required:
             - error
@@ -19,6 +18,7 @@ definitions:
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     Comment:
+        description: Comment represents the comment for this application
         properties:
             content:
                 description: Comment content
@@ -40,7 +40,7 @@ definitions:
                 type: string
                 x-go-name: UpdatedAt
             user:
-                $ref: "#/definitions/User"
+                $ref: '#/definitions/User'
         required:
             - id
             - content
@@ -74,13 +74,12 @@ definitions:
             based on given post and comment ID.
         properties:
             comment:
-                $ref: "#/definitions/Comment"
+                $ref: '#/definitions/Comment'
             error:
                 example: false
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
         required:
             - error
@@ -95,7 +94,7 @@ definitions:
         properties:
             comments:
                 items:
-                    $ref: "#/definitions/Comment"
+                    $ref: '#/definitions/Comment'
                 type: array
                 x-go-name: Comments
             count:
@@ -107,7 +106,6 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
         required:
             - error
@@ -123,10 +121,9 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
             post:
-                $ref: "#/definitions/Post"
+                $ref: '#/definitions/Post'
         required:
             - error
             - message
@@ -145,11 +142,10 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
             posts:
                 items:
-                    $ref: "#/definitions/Post"
+                    $ref: '#/definitions/Post'
                 type: array
                 x-go-name: Posts
         required:
@@ -167,10 +163,9 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
             user:
-                $ref: "#/definitions/User"
+                $ref: '#/definitions/User'
         required:
             - error
             - message
@@ -189,11 +184,10 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
             users:
                 items:
-                    $ref: "#/definitions/User"
+                    $ref: '#/definitions/User'
                 type: array
                 x-go-name: Users
         required:
@@ -227,7 +221,7 @@ definitions:
         properties:
             comments:
                 items:
-                    $ref: "#/definitions/Comment"
+                    $ref: '#/definitions/Comment'
                 type: array
                 x-go-name: Comments
             content:
@@ -254,7 +248,7 @@ definitions:
                 type: integer
                 x-go-name: Likes
             user:
-                $ref: "#/definitions/User"
+                $ref: '#/definitions/User'
         required:
             - id
             - content
@@ -289,13 +283,12 @@ definitions:
                 type: boolean
                 x-go-name: Error
             message:
-                type: string
                 x-go-name: Message
             token:
                 type: string
                 x-go-name: Token
             user:
-                $ref: "#/definitions/User"
+                $ref: '#/definitions/User'
         required:
             - error
             - message
@@ -331,43 +324,10 @@ definitions:
     User:
         description: User represents the user for this application
         properties:
-            content:
-                description: The url to the post content
-                type: string
-                x-go-name: Content
-            created_at:
-                description: The time the post was created
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            description:
-                description: Post description
-                type: string
-                x-go-name: Description
-            id:
-                description: The id for this post
-                format: uuid
-                type: string
-                x-go-name: Id
-            likes:
-                description: Number of likes
-                format: int64
-                type: integer
-                x-go-name: Likes
-        required:
-            - id
-            - content
-            - description
-            - created_at
-        type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
-    BaseUser:
-        description: User represents the user without password for this application
-        properties:
             avatar_url:
                 description: URL to user avatar
                 type: string
-                x-go-name: Avatar_url
+                x-go-name: AvatarURL
             created_at:
                 description: The time the user was registered
                 format: date-time
@@ -381,7 +341,7 @@ definitions:
                 description: The id for this user
                 format: uuid
                 type: string
-                x-go-name: Id
+                x-go-name: ID
             name:
                 description: The name for this user
                 type: string
@@ -440,9 +400,9 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/RegisterLoginUserResponse"
+                    $ref: '#/responses/RegisterLoginUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -459,14 +419,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/LoginRequestBody"
+                    $ref: '#/definitions/LoginRequestBody'
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/RegisterLoginUserResponse"
+                    $ref: '#/responses/RegisterLoginUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -499,9 +459,9 @@ paths:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/GetPostsResponse"
+                    $ref: '#/responses/GetPostsResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -517,14 +477,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/PostCreateRequestBody"
+                    $ref: '#/definitions/PostCreateRequestBody'
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/CreateUpdatePostResponse"
+                    $ref: '#/responses/CreateUpdatePostResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -534,7 +494,7 @@ paths:
                 - Post
     /posts/{post}:
         delete:
-            description: Delete post by id
+            description: Delete post by ID
             operationId: deletePost
             parameters:
                 - format: uuid
@@ -547,9 +507,9 @@ paths:
                 - application/json
             responses:
                 "204":
-                    $ref: "#/responses/DeletePostResponse"
+                    $ref: '#/responses/DeletePostResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -558,7 +518,7 @@ paths:
             tags:
                 - Post
         get:
-            description: Returns the post by given id
+            description: Returns the post by given ID
             operationId: getPost
             parameters:
                 - format: uuid
@@ -571,9 +531,9 @@ paths:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/GetPostResponse"
+                    $ref: '#/responses/GetPostResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -582,7 +542,7 @@ paths:
             tags:
                 - Post
         patch:
-            description: Update post by id with given fields
+            description: Update post by ID with given fields
             operationId: updatePost
             parameters:
                 - format: uuid
@@ -595,9 +555,9 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/CreateUpdatePostResponse"
+                    $ref: '#/responses/CreateUpdatePostResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -639,9 +599,9 @@ paths:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/GetPostsResponse"
+                    $ref: '#/responses/GetPostsResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -663,14 +623,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/CommentAddRequestBody"
+                    $ref: '#/definitions/CommentAddRequestBody'
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/CreateUpdateCommentResponse"
+                    $ref: '#/responses/CreateUpdateCommentResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -680,7 +640,7 @@ paths:
                 - Post
     /posts/{post}/comments/{comment}:
         delete:
-            description: Delete comment by comment id with given post id
+            description: Delete comment by comment ID with given post ID
             operationId: deleteComment
             parameters:
                 - format: uuid
@@ -699,9 +659,9 @@ paths:
                 - application/json
             responses:
                 "204":
-                    $ref: "#/responses/DeleteCommentResponse"
+                    $ref: '#/responses/DeleteCommentResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -710,7 +670,7 @@ paths:
             tags:
                 - Post
         patch:
-            description: Update comment content by comment id with given post id
+            description: Update comment content by comment ID with given post ID
             operationId: updateComment
             parameters:
                 - format: uuid
@@ -729,14 +689,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/CommentUpdateRequestBody"
+                    $ref: '#/definitions/CommentUpdateRequestBody'
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/CreateUpdateCommentResponse"
+                    $ref: '#/responses/CreateUpdateCommentResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -753,14 +713,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/RegisterRequestBody"
+                    $ref: '#/definitions/RegisterRequestBody'
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/RegisterLoginUserResponse"
+                    $ref: '#/responses/RegisterLoginUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -774,9 +734,9 @@ paths:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/GetUsersResponse"
+                    $ref: '#/responses/GetUsersResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -797,9 +757,9 @@ paths:
                 - application/json
             responses:
                 "204":
-                    $ref: "#/responses/DeleteUserResponse"
+                    $ref: '#/responses/DeleteUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -821,9 +781,9 @@ paths:
                 - application/json
             responses:
                 "200":
-                    $ref: "#/responses/GetUserResponse"
+                    $ref: '#/responses/GetUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -843,14 +803,14 @@ paths:
                   name: Body
                   required: true
                   schema:
-                      $ref: "#/definitions/UserUpdateRequestBody"
+                    $ref: '#/definitions/UserUpdateRequestBody'
             produces:
                 - application/json
             responses:
                 "201":
-                    $ref: "#/responses/UpdateUserResponse"
+                    $ref: '#/responses/UpdateUserResponse'
                 default:
-                    $ref: "#/responses/ErrorResponse"
+                    $ref: '#/responses/ErrorResponse'
             schemes:
                 - http
                 - https
@@ -880,35 +840,35 @@ responses:
             ErrorResponse represents the error response body for API.
             Contains error and message fields.
         schema:
-            $ref: "#/definitions/BaseResponseBody"
+            $ref: '#/definitions/BaseResponseBody'
     GetCommentResponse:
         description: GetCommentResponse represent the response retrived on get comment request.
         schema:
-            $ref: "#/definitions/GetCommentResponseBody"
+            $ref: '#/definitions/GetCommentResponseBody'
     GetCommentsResponse:
         description: GetCommentsResponse represent the response retrived on get comments request.
         schema:
-            $ref: "#/definitions/GetCommentsResponseBody"
+            $ref: '#/definitions/GetCommentsResponseBody'
     GetPostResponse:
         description: GetPostResponse represent the response retrived on get post request.
         schema:
-            $ref: "#/definitions/GetPostResponseBody"
+            $ref: '#/definitions/GetPostResponseBody'
     GetPostsResponse:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
-            $ref: "#/definitions/GetPostsResponseBody"
+            $ref: '#/definitions/GetPostsResponseBody'
     GetUserResponse:
         description: GetUserResponse represent the response retrived on get user request.
         schema:
-            $ref: "#/definitions/GetUserResponseBody"
+            $ref: '#/definitions/GetUserResponseBody'
     GetUsersResponse:
         description: GetUsersResponse represent the response retrived on get users request.
         schema:
-            $ref: "#/definitions/GetUsersResponseBody"
+            $ref: '#/definitions/GetUsersResponseBody'
     RegisterLoginUserResponse:
         description: RegisterLoginUserResponse represent the response retrived on register or login request.
         schema:
-            $ref: "#/definitions/RegisterLoginUserResponseBody"
+            $ref: '#/definitions/RegisterLoginUserResponseBody'
     UpdateUserResponse:
         description: UpdateUserResponse represents response for successfully update user request.
         schema:

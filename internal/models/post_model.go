@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// BasePost represents a base post struct in a system.
 type BasePost struct {
 	// The id for this post
 	// required: true
@@ -27,6 +28,7 @@ type BasePost struct {
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
+// DBPost represents a post struct from database.
 type DBPost struct {
 	BasePost
 
@@ -35,6 +37,7 @@ type DBPost struct {
 	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
+// ToPost converts the DBPost to Post model.
 func (p *DBPost) ToPost() Post {
 	return Post{BasePost: p.BasePost}
 }
@@ -47,8 +50,4 @@ type Post struct {
 	User *User `json:"user"`
 
 	Comments []Comment `json:"comments"`
-}
-
-func (p *Post) ToDBPost() DBPost {
-	return DBPost{BasePost: p.BasePost}
 }
