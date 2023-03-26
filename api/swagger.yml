@@ -321,6 +321,24 @@ definitions:
         title: RegisterRequestBody includes the email, username, and password of the user being created.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    UploadDataResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            id:
+                type: string
+                x-go-name: ID
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - id
+        title: UploadDataResponseBody includes the id of uploaded data.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     User:
         description: User represents the user for this application
         properties:
@@ -392,6 +410,27 @@ info:
     title: Diverse API.
     version: 0.0.1
 paths:
+    /data:
+        post:
+            description: Returns the ID of uploaded data
+            operationId: uploadData
+            parameters:
+                - in: formData
+                  name: file
+                  type: file
+                  x-go-name: File
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/UploadDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            tags:
+                - Data
     /fetch:
         get:
             description: Get user and new token if user exists
@@ -873,6 +912,10 @@ responses:
         description: UpdateUserResponse represents response for successfully update user request.
         schema:
             type: string
+    UploadDataResponse:
+        description: UploadDataResponse represent the response retrived on upload data request.
+        schema:
+            $ref: '#/definitions/UploadDataResponseBody'
 schemes:
     - http
     - https
