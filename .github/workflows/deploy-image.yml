@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push-image:
+  build:
     runs-on: ubuntu-latest
 
     permissions:
@@ -50,6 +50,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - uses: actions/checkout@v3
@@ -67,13 +68,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~/diverse/Diverse-Back-prod
-            git checkout main
-            git pull
-            sudo docker-compose -f docker-compose.yml --profile prod stop
-            sudo docker-compose -f docker-compose.yml --profile prod pull
-            sudo docker-compose -f docker-compose.yml --profile prod up -d --build
+          script: bash scripts/deployments/deploy.sh -p prod
 
       - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
         name: Deploy on test server
@@ -83,10 +78,4 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~/diverse/Diverse-Back-test
-            git checkout develop
-            git pull
-            sudo docker-compose -f docker-compose.yml --profile test stop
-            sudo docker-compose -f docker-compose.yml --profile test pull
-            sudo docker-compose -f docker-compose.yml --profile test up -d --build
+          script: bash scripts/deployments/deploy.sh -p test
