@@ -48,11 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
       - name: Build
         run: go build -v ./...
 
@@ -62,11 +57,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
 
       - name: Test
         run: go test -race -vet=off -v ./...
@@ -78,11 +68,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
       - name: Install staticcheck
         run: go install honnef.co/go/tools/cmd/staticcheck@latest
 
@@ -91,3 +76,7 @@ jobs:
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          skip-go-installation: true
+          skip-pkg-cache: true
+          skip-build-cache: true

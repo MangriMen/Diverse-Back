@@ -1,4 +1,3 @@
-profile="$DEPLOY_PROFILE"
 branch="$DEPLOY_BRANCH"
 
 if [[ -z $DEPLOY_PROFILE ]]; then
