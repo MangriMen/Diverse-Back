@@ -1,4 +1,4 @@
-name: Create and publish a Docker image
+name: Docker build and deploy
 
 env:
   REGISTRY: ghcr.io
@@ -32,11 +32,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       - name: Extract metadata (tags, label) for Docker
         id: meta
         uses: docker/metadata-action@v4
@@ -46,12 +41,23 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:
-          context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          context: .
           file: "./deployments/production/Dockerfile"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
+        id: extract_branch
 
       - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
         name: Deploy on prod server
