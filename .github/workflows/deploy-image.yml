@@ -55,18 +55,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Read deploy script contents
-        id: deploy-script
-        uses: andstor/file-reader-action@v1
-        with:
-          path: scripts/deployments/deploy.sh
-
       - name: Extract branch name
         id: extract_branch
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
 
-      - name: Deploy on {{ env.DEPLOY_PROFILE }} profile
+      - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
+        name: Deploy on prod server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -74,10 +69,25 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            if [[ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]]; then
-              profile='test'
-            else
-              profile='prod'
-            fi
+            cd ~/diverse/Diverse-Back-prod
+            git checkout main
+            git pull
+            sudo docker-compose -f docker-compose.yml --profile prod stop
+            sudo docker-compose -f docker-compose.yml --profile prod pull
+            sudo docker-compose -f docker-compose.yml --profile prod up -d --build
 
-            ${{ steps.deploy-script.outputs.contents }}
+      - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
+        name: Deploy on test server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/diverse/Diverse-Back-test
+            git checkout develop
+            git pull
+            sudo docker-compose -f docker-compose.yml --profile test stop
+            sudo docker-compose -f docker-compose.yml --profile test pull
+            sudo docker-compose -f docker-compose.yml --profile test up -d --build
