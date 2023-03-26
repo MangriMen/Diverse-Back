@@ -82,5 +82,6 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            export DEPLOY_PROFILE={{ env.DEPLOY_PROFILE }}
+            export DEPLOY_PROFILE=$DEPLOY_PROFILE
+            echo $DEPLOY_PROFILE
             ${{ steps.deploy-script.outputs.contents }}
