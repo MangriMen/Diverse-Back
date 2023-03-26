@@ -1,5 +1,8 @@
 name: Go build and lint
 
+env:
+  GO_VERSION: 1.20.x
+
 on:
   push:
     branches: ["main", "develop"]
@@ -17,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20.x"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Verify dependencies
         run: go mod verify
@@ -41,6 +44,13 @@ jobs:
     needs: build
 
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
       - name: Test
         run: go test -race -vet=off -v ./...
 
@@ -53,7 +63,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20.x"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install staticcheck
         run: go install honnef.co/go/tools/cmd/staticcheck@latest
