@@ -13,8 +13,6 @@ services:
       dockerfile: deployments/production/Dockerfile
     env_file:
       - .env
-    ports:
-      - "3030:3030"
     networks:
       - backend
     depends_on:
@@ -37,8 +35,6 @@ services:
       - .env
     environment:
       - SERVER_PORT=${TEST_SERVER_PORT}
-    ports:
-      - "3040:3040"
     networks:
       - backend
     depends_on:
