@@ -4,6 +4,7 @@ x-nginx:
   &nginx
   container_name: diverse-nginx-$COMPOSE_PROJECT_NAME
   restart: always
+  pull_policy: build
   build:
     context: .
     dockerfile: deployments/NginxReverse.Dockerfile
@@ -83,6 +84,7 @@ services:
       [
         "serve",
         "swagger.yml",
+        "--flavor=swagger",
         "--no-open",
         "--base-path=/api/v1/",
         "--port=$SWAGGER_PORT"
