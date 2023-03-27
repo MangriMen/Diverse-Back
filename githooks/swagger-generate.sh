@@ -1,1 +1,1 @@
-$HOME/go/bin/swagger generate spec -o ./api/swagger.yml
+$HOME/go/bin/swagger generate spec -o ./docs/swagger.yml
