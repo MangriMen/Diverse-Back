@@ -60,7 +60,6 @@ services:
     environment:
       - SERVER_PORT=${TEST_SERVER_PORT}
     ports:
-      - "3030:3030"
       - "40000:40000"
     networks:
       - backend
@@ -102,6 +101,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
+    ports:
+      - 3033:3033
     networks:
       - backend
 
@@ -123,7 +124,33 @@ services:
     networks:
       - backend
 
-  web:
+  web-prod:
+    container_name: diverse-nginx
+    profiles:
+      - prod
+    build:
+      context: .
+      dockerfile: deployments/production/NginxReverse.Dockerfile
+    restart: always
+    ports:
+      - "3030:80"
+    networks:
+      - backend
+
+  web-test:
+    container_name: diverse-nginx
+    profiles:
+      - test
+    build:
+      context: .
+      dockerfile: deployments/production/NginxReverse.Dockerfile
+    restart: always
+    ports:
+      - "3040:80"
+    networks:
+      - backend
+
+  web-dev:
     container_name: diverse-nginx
     profiles:
       - dev
@@ -132,7 +159,7 @@ services:
       dockerfile: deployments/develop/NginxReverse.Dockerfile
     restart: always
     ports:
-      - "6060:80"
+      - "3050:80"
     networks:
       - backend
 
