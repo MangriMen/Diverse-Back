@@ -121,7 +121,7 @@ services:
       - backend
 
   web-prod:
-    container_name: diverse-nginx
+    container_name: diverse-nginx-prod
     profiles:
       - prod
     build:
@@ -134,7 +134,7 @@ services:
       - backend
 
   web-test:
-    container_name: diverse-nginx
+    container_name: diverse-nginx-test
     profiles:
       - test
     build:
@@ -147,7 +147,7 @@ services:
       - backend
 
   web-dev:
-    container_name: diverse-nginx
+    container_name: diverse-nginx-dev
     profiles:
       - dev
     build:
