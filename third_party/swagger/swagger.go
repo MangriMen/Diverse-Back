@@ -1,6 +1,6 @@
 // Package classification Diverse API.
 // Schemes: http, https
-// Host: localhost:3030
+// Host: localhost:3040
 // BasePath: /api/v1
 // Version: 0.0.1
 //

@@ -405,7 +405,7 @@ definitions:
         title: UserUpdateRequestBody includes the new email, username, name or password for the user.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
-host: localhost:3030
+host: localhost:3040
 info:
     title: Diverse API.
     version: 0.0.1

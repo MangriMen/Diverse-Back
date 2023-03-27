@@ -1,83 +1,59 @@
 version: "3.9"
 
+x-nginx:
+  &nginx
+  container_name: diverse-nginx-$COMPOSE_PROJECT_NAME
+  restart: always
+  pull_policy: build
+  build:
+    context: .
+    dockerfile: deployments/NginxReverse.Dockerfile
+    target: $COMPOSE_PROJECT_NAME
+
+x-backend:
+  &backend
+  container_name: diverse-backend-$COMPOSE_PROJECT_NAME
+  restart: always
+  pull_policy: always
+  env_file: .env
+  build:
+    context: .
+    dockerfile: deployments/Backend.Dockerfile
+    target: $COMPOSE_PROJECT_NAME
+  depends_on:
+    postgres:
+      condition: service_healthy
+  volumes:
+    - "backend-data:/var/lib/backend-data"
+
 services:
-  go-prod:
+  backend:
+    <<: *backend
     image: ghcr.io/mangrimen/diverse-back:latest
-    container_name: diverse-prod
-    restart: always
-    profiles:
-      - prod
-    pull_policy: if_not_present
-    build:
-      context: .
-      dockerfile: deployments/production/Dockerfile
-    env_file:
-      - .env
-    networks:
-      - backend
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - "backend-data:/var/lib/backend-data"
+    profiles: [ prod ]
 
-  go-test:
+  backend-test:
+    <<: *backend
     image: ghcr.io/mangrimen/diverse-back:develop
-    container_name: diverse-test
-    restart: always
-    profiles:
-      - test
-    pull_policy: if_not_present
-    build:
-      context: .
-      dockerfile: deployments/production/Dockerfile
-    env_file:
-      - .env
-    environment:
-      - SERVER_PORT=${TEST_SERVER_PORT}
-    networks:
-      - backend
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - "backend-data:/var/lib/backend-data"
+    profiles: [ test ]
 
-  go-dev:
-    container_name: diverse-dev
-    restart: always
-    profiles:
-      - dev
-    build:
-      context: .
-      dockerfile: deployments/develop/Dockerfile
-    env_file:
-      - .env
-    environment:
-      - SERVER_PORT=${TEST_SERVER_PORT}
+  backend-dev:
+    <<: *backend
+    profiles: [ dev ]
     ports:
       - "40000:40000"
-    networks:
-      - backend
     volumes:
       - ".:/app:rw,delegated"
-      - "backend-data:/var/lib/backend-data"
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   postgres:
-    container_name: diverse-postgres
+    container_name: diverse-postgres-$COMPOSE_PROJECT_NAME
     image: postgres:14.5-alpine
     restart: always
-    env_file:
-      - .env
+    env_file: .env
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
-    networks:
-      - backend
     volumes:
       - "./scripts/postgres-initd:/docker-entrypoint-initdb.d:ro"
       - "postgres-data:/var/lib/postgresql/data"
@@ -88,82 +64,46 @@ services:
       retries: 5
 
   pgadmin:
-    container_name: diverse-pgadmin
+    container_name: diverse-pgadmin-$COMPOSE_PROJECT_NAME
     image: dpage/pgadmin4
     restart: always
-    env_file:
-      - .env
+    env_file: .env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
-    ports:
-      - 3033:3033
-    networks:
-      - backend
+    volumes:
+      - "pgadmin-data:/var/lib/pgadmin"
 
   swagger:
-    container_name: diverse-swagger
+    container_name: diverse-swagger-$COMPOSE_PROJECT_NAME
     image: quay.io/goswagger/swagger
     restart: always
-    working_dir: "/docs"
+    env_file: .env
     command:
       [
-        'serve',
-        'swagger.yml',
-        '--no-open',
-        '--port=3032',
-        '--base-path=/api/v1/'
+        "serve",
+        "swagger.yml",
+        "--flavor=swagger",
+        "--no-open",
+        "--base-path=/api/v1/",
+        "--port=$SWAGGER_PORT"
       ]
+    working_dir: "/docs"
     volumes:
       - "./docs:/docs"
-    networks:
-      - backend
 
-  web-prod:
-    container_name: diverse-nginx-prod
-    profiles:
-      - prod
-    build:
-      context: .
-      dockerfile: deployments/production/NginxReverse.Dockerfile
-    restart: always
-    ports:
-      - "3030:80"
-    networks:
-      - backend
+  nginx:
+    <<: *nginx
+    profiles: [ prod ]
+    ports: [ "3030:80" ]
 
-  web-test:
-    container_name: diverse-nginx-test
-    profiles:
-      - test
-    build:
-      context: .
-      dockerfile: deployments/develop/NginxReverse.Dockerfile
-    restart: always
-    ports:
-      - "3040:80"
-    networks:
-      - backend
-
-  web-dev:
-    container_name: diverse-nginx-dev
-    profiles:
-      - dev
-    build:
-      context: .
-      dockerfile: deployments/develop/NginxReverse.Dockerfile
-    restart: always
-    ports:
-      - "3050:80"
-    networks:
-      - backend
+  nginx-dev:
+    <<: *nginx
+    profiles: [ test, dev ]
+    ports: [ "3040:80" ]
 
 volumes:
   postgres-data:
+  pgadmin-data:
   backend-data:
-
-
-networks:
-  backend:
-    driver: bridge
