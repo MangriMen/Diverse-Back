@@ -139,7 +139,7 @@ services:
       - test
     build:
       context: .
-      dockerfile: deployments/production/NginxReverse.Dockerfile
+      dockerfile: deployments/develop/NginxReverse.Dockerfile
     restart: always
     ports:
       - "3040:80"
