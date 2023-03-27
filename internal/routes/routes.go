@@ -1,26 +1,25 @@
+// Package routes provides routes aggregation for application
 package routes
 
 import (
-	"github.com/MangriMen/Diverse-Back/internal/controllers"
-	"github.com/MangriMen/Diverse-Back/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
+// PublicRoutes sets up public routes for an API version X
+// by defining a group of routes under the prefix "/api/vX".
 func PublicRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
-	route.Get("/users", controllers.GetUsers)
-	route.Get("/users/:id", controllers.GetUser)
-
-	route.Post("/login", controllers.LoginUser)
-	route.Post("/register", controllers.CreateUser)
+	UserPublicRoutes(route)
+	DataPublicRoutes(route)
 }
 
+// PrivateRoutes sets up private routes for an API version X
+// by defining a group of routes under the prefix "/api/vX".
 func PrivateRoutes(a *fiber.App) {
 	route := a.Group("/api/v1")
 
-	route.Get("/fetch", middleware.JWTProtected(), controllers.FetchUser)
-
-	route.Patch("/users/:id", middleware.JWTProtected(), controllers.UpdateUser)
-	route.Delete("/users/:id", middleware.JWTProtected(), controllers.DeleteUser)
+	UserPrivateRoutes(route)
+	PostPrivateRoutes(route)
+	DataPrivateRoutes(route)
 }

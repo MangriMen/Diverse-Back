@@ -5,9 +5,9 @@ tmp_dir = "tmp"
 
 [build]
 bin = "tmp/server"
-cmd = "go build -o ./tmp/server cmd/api/main.go"
+cmd = "go build -gcflags='all=-N -l' -o ./tmp/server cmd/api/main.go"
 
-full_bin = "APP_ENV=dev APP_USER=air ./tmp/server"
+full_bin = "APP_ENV=dev APP_USER=air dlv --accept-multiclient --headless --continue --listen=:40000 --api-version=2 exec ./tmp/server"
 log = "air_errors.log"
 
 exclude_dir = ["assets", "tmp"]

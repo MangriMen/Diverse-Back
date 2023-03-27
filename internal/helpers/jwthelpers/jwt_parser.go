@@ -1,4 +1,4 @@
-package helpers
+package jwthelpers
 
 import (
 	"os"
@@ -8,11 +8,24 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// TokenMetadata is a struct that represents the metadata associated with a JWT access token.
+// It contains expires and id fields.
 type TokenMetadata struct {
 	Expires int64
-	Id      string
+	ID      string
 }
 
+// CustomClaims is a struct that represents the custom claims associated with a JWT access token.
+// It contains expires and id fields.
+type CustomClaims struct {
+	Expires float64 `json:"exp"`
+	ID      string  `json:"id"`
+
+	jwt.StandardClaims
+}
+
+// GetTokenMetadata verifying the token and extracting its expiration time and ID from the JWT claims.
+// Returns the TokenMetadata struct.
 func GetTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 	token, err := verifyToken(c)
 
@@ -20,15 +33,15 @@ func GetTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(CustomClaims)
 
 	if ok && token.Valid {
-		expires := int64(claims["exp"].(float64))
-		id := claims["id"].(string)
+		expires := int64(claims.Expires)
+		id := claims.ID
 
 		return &TokenMetadata{
 			Expires: expires,
-			Id:      id,
+			ID:      id,
 		}, nil
 	}
 
@@ -36,11 +49,13 @@ func GetTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 }
 
 func getToken(c *fiber.Ctx) string {
+	const maxTokenParts = 2
+
 	bearToken := c.Get("Authorization")
 
 	onlyToken := strings.Split(bearToken, " ")
 
-	if len(onlyToken) == 2 {
+	if len(onlyToken) == maxTokenParts {
 		return onlyToken[1]
 	}
 
@@ -59,6 +74,6 @@ func verifyToken(c *fiber.Ctx) (*jwt.Token, error) {
 	return token, nil
 }
 
-func jwtKeyFunc(token *jwt.Token) (interface{}, error) {
+func jwtKeyFunc(_ *jwt.Token) (interface{}, error) {
 	return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 }

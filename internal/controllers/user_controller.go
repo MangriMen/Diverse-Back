@@ -5,13 +5,16 @@ import (
 
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
+	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
 
-// swagger:route GET /users getUsers
+// swagger:route GET /users User allowempty
 // Returns a list of all users
 //
 // Produces:
@@ -23,39 +26,29 @@ import (
 //   200: GetUsersResponse
 //   default: ErrorResponse
 
+// GetUsers is used to fetch users from database with request parameters.
 func GetUsers(c *fiber.Ctx) error {
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	users, err := db.GetUsers()
+	dbUsers, err := db.GetUsers()
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "users not found",
-			"count":   0,
-			"users":   nil,
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "Users not found")
 	}
 
-	users = lo.Map(users, func(item models.User, index int) models.User {
-		item.PrepareToSend()
-		return item
+	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
+		return item.ToUser()
 	})
 
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"count":   len(users),
-		"users":   users,
+	return c.JSON(responses.GetUsersResponseBody{
+		Count: len(usersToSend),
+		Users: usersToSend,
 	})
 }
 
-// swagger:route GET /users/{id} getUser
+// swagger:route GET /users/{user} User getUser
 // Returns the user by given id
 //
 // Produces:
@@ -67,41 +60,29 @@ func GetUsers(c *fiber.Ctx) error {
 //   200: GetUserResponse
 //   default: ErrorResponse
 
+// GetUser is used to fetch user from database by ID.
 func GetUser(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	user, err := db.GetUser(id)
+	dbUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with given id was not found",
-			"user":    nil,
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "User with given id was not found")
 	}
 
-	user.PrepareToSend()
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"user":    user,
+	return c.JSON(responses.GetUserResponseBody{
+		User: dbUser.ToUser(),
 	})
 }
 
-// swagger:route POST /login loginUser
+// swagger:route POST /login User loginUser
 // Returns the user and token by given credentials
 //
 // Produces:
@@ -113,56 +94,39 @@ func GetUser(c *fiber.Ctx) error {
 //   200: RegisterLoginUserResponse
 //   default: ErrorResponse
 
+// LoginUser is used to generate token to existing user.
 func LoginUser(c *fiber.Ctx) error {
-	user := &models.User{}
-	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+	loginRequestBody, err := helpers.GetBodyAndValidate[parameters.LoginRequestBody](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	foundUser, err := db.GetUserByEmail(user.Email)
+	foundDBUser, err := db.GetUserByEmail(loginRequestBody.Email)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this email not found",
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	if ok := helpers.CheckPasswordHash(user.Password, foundUser.Password); !ok {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error":   true,
-			"message": "wrong password",
-		})
+	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
+		return helpers.Response(c, fiber.StatusForbidden, "Wrong email or password")
 	}
 
-	token, err := helpers.GenerateNewAccessToken(foundUser.Id)
+	token, err := jwthelpers.GenerateNewAccessToken(foundDBUser.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	foundUser.PrepareToSend()
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"token":   token,
-		"user":    foundUser,
+	return c.JSON(responses.RegisterLoginUserResponseBody{
+		Token: token,
+		User:  foundDBUser.ToUser(),
 	})
 }
 
-// swagger:route POST /register createUser
+// swagger:route POST /register User createUser
 // Returns the user and token by given credentials
 //
 // Produces:
@@ -174,84 +138,65 @@ func LoginUser(c *fiber.Ctx) error {
 //   200: RegisterLoginUserResponse
 //   default: ErrorResponse
 
+// CreateUser is used to create new user.
 func CreateUser(c *fiber.Ctx) error {
-	user := &models.User{}
-	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+	registerRequestBody, err := helpers.GetBodyAndValidate[parameters.RegisterRequestBody](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	if _, err := db.GetUserByEmail(user.Email); err == nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this email already exists",
-		})
-	}
-
-	_, errEmail := db.GetUserByEmail(user.Email)
-	_, errUsername := db.GetUserByUsername(user.Username)
+	_, errEmail := db.GetUserByEmail(registerRequestBody.Email)
+	_, errUsername := db.GetUserByUsername(registerRequestBody.Username)
 	if errEmail == nil || errUsername == nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this email or username already exists",
-		})
+		return helpers.Response(
+			c,
+			fiber.StatusConflict,
+			"User with this email or username already exists",
+		)
 	}
 
-	user.Id = uuid.New()
-	user.CreatedAt = time.Now()
+	user := &models.DBUser{
+		BaseUser: models.BaseUser{
+			ID:        uuid.New(),
+			Email:     registerRequestBody.Email,
+			Username:  registerRequestBody.Username,
+			CreatedAt: time.Now(),
+		},
+	}
 	user.UpdatedAt = user.CreatedAt
 
+	user.Password, err = helpers.HashPassword(registerRequestBody.Password)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, "Cannot create user")
+	}
+
 	validate := helpers.NewValidator()
-	if err := validate.Struct(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+	if err = validate.Struct(user); err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
-	user.Password, err = helpers.HashPassword(user.Password)
+	if err = db.CreateUser(user); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
+	}
+
+	token, err := jwthelpers.GenerateNewAccessToken(user.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": "cannot create user",
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	if err := db.CreateUser(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
+	return c.JSON(
+		responses.RegisterLoginUserResponseBody{
+			Token: token,
+			User:  user.ToUser(),
 		})
-	}
-
-	token, err := helpers.GenerateNewAccessToken(user.Id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	user.PrepareToSend()
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"token":   token,
-		"user":    user,
-	})
 }
 
-// swagger:route Get /fetch fetchUser
+// swagger:route Get /fetch User fetchUser
 // Get user and new token if user exists
 //
 // Produces:
@@ -259,70 +204,42 @@ func CreateUser(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   201: RegisterLoginUserResponse
 //   default: ErrorResponse
 
+// FetchUser is used to regenerate user token and fetch info.
 func FetchUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
-	claims, err := helpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
-	}
-
-	id, err := uuid.Parse(claims.Id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	user, err := db.GetUser(id)
+	dbUser, err := db.GetUser(userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, "User with this ID not found")
 	}
 
-	token, err := helpers.GenerateNewAccessToken(id)
+	token, err := jwthelpers.GenerateNewAccessToken(userID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	user.PrepareToSend()
-	return c.JSON(fiber.Map{
-		"error":   false,
-		"message": nil,
-		"token":   token,
-		"user":    user,
+	return c.JSON(responses.RegisterLoginUserResponseBody{
+		Token: token,
+		User:  dbUser.ToUser(),
 	})
 }
 
-// swagger:route PATCH /users/{id} updateUser
+// swagger:route PATCH /users/{user} User updateUser
 // Update user by id with given fields
 //
 // Produces:
@@ -330,88 +247,61 @@ func FetchUser(c *fiber.Ctx) error {
 //
 // Schemes: http, https
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   201: UpdateUserResponse
 //   default: ErrorResponse
 
+// UpdateUser is used to update the user by ID.
 func UpdateUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
-	claims, err := helpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
-	}
-
-	id, err := uuid.Parse(claims.Id)
+	userUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.UserUpdateRequestBody](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	user := &models.User{}
-	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	foundUser, err := db.GetUser(id)
+	foundUser, err := db.GetUser(userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "user with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, "User with this id not found")
 	}
 
-	user.Id = foundUser.Id
-	user.Email = helpers.GetNotEmpty(user.Email, foundUser.Email)
-	user.Password = helpers.GetNotEmpty(user.Password, foundUser.Password)
-	user.Username = helpers.GetNotEmpty(user.Username, foundUser.Username)
-	user.Name = helpers.GetNotEmpty(user.Name, foundUser.Name)
-	user.CreatedAt = foundUser.CreatedAt
+	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
+	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
+	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
 
-	user.UpdatedAt = time.Now()
+	if userUpdateRequestBody.Password != "" {
+		foundUser.Password, err = helpers.HashPassword(userUpdateRequestBody.Password)
+		if err != nil {
+			return helpers.Response(c, fiber.StatusInternalServerError, "Cannot update password")
+		}
 
-	validate := helpers.NewValidator()
-	if err := validate.Struct(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
-	}
+		foundUser.UpdatedAt = time.Now()
 
-	if err := db.UpdateUser(foundUser.Id, user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"erorr":   true,
-			"message": err.Error(),
-		})
+		validate := helpers.NewValidator()
+		if err = validate.Struct(foundUser); err != nil {
+			return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+		}
+
+		if err = db.UpdateUser(&foundUser); err != nil {
+			return helpers.Response(c, fiber.StatusInternalServerError, err)
+		}
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /users/{id} deleteUser
+// swagger:route DELETE /users/{user} User deleteUser
 // Delete user by id
 //
 // Schemes: http, https
@@ -419,57 +309,37 @@ func UpdateUser(c *fiber.Ctx) error {
 // Produces:
 //   - application/json
 //
+// Security:
+//   bearerAuth:
+//
 // Responses:
 //   204: DeleteUserResponse
 //   default: ErrorResponse
 
+// DeleteUser is used to delete the user by ID.
 func DeleteUser(c *fiber.Ctx) error {
-	now := time.Now().Unix()
-
-	claims, err := helpers.GetTokenMetadata(c)
+	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	if claims.Expires < now {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "unathorized, check expiration time of your token",
-		})
-	}
-
-	id, err := uuid.Parse(claims.Id)
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	idToDelete, err := uuid.Parse(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	if id != idToDelete {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to delete user",
-		})
-	}
-
-	user := &models.User{BaseUser: models.BaseUser{Id: idToDelete}}
 	validate := helpers.NewValidator()
-	if err := validate.StructPartial(user, "id"); err != nil {
+	if err = validate.Struct(userIDParams); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": helpers.ValidatorErrors(err),
+		})
+	}
+
+	if userID != userIDParams.User {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error":   true,
+			"message": "not enough permission to delete user",
 		})
 	}
 
@@ -477,15 +347,12 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"erorr":   true,
-			"message": "book with this ID not found",
+			"message": "book with this id not found",
 		})
 	}
 
-	if err := db.DeleteUser(user.Id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+	if err = db.DeleteUser(userIDParams.User); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

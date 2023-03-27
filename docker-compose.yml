@@ -7,6 +7,10 @@ services:
     restart: always
     profiles:
       - prod
+    pull_policy: if_not_present
+    build:
+      context: .
+      dockerfile: deployments/production/Dockerfile
     env_file:
       - .env
     ports:
@@ -16,6 +20,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   go-test:
     image: ghcr.io/mangrimen/diverse-back:develop
@@ -23,6 +29,10 @@ services:
     restart: always
     profiles:
       - test
+    pull_policy: if_not_present
+    build:
+      context: .
+      dockerfile: deployments/production/Dockerfile
     env_file:
       - .env
     environment:
@@ -34,6 +44,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   go-dev:
     container_name: diverse-dev
@@ -47,10 +59,14 @@ services:
       - .env
     environment:
       - SERVER_PORT=${TEST_SERVER_PORT}
+    ports:
+      - "3030:3030"
+      - "40000:40000"
     networks:
       - backend
     volumes:
-      - ".:/app"
+      - ".:/app:rw,delegated"
+      - "backend-data:/var/lib/backend-data"
     depends_on:
       postgres:
         condition: service_healthy
@@ -122,6 +138,7 @@ services:
 
 volumes:
   postgres-data:
+  backend-data:
 
 
 networks:
