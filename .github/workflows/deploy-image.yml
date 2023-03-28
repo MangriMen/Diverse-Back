@@ -6,7 +6,9 @@ env:
 
 on:
   push:
-    branches: ["develop"]
+    branches:
+      - develop
+      - "setup-deploy"
   release:
     types: ["published"]
   workflow_dispatch:
@@ -51,7 +53,13 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     needs: build
+
+    env:
+      REPO: ${{ github.repository }}
+      TOKEN: ${{ github.token }}
+      PROJECT_ROOT: ${{ vars.PROJECT_ROOT }}
 
     steps:
       - uses: actions/checkout@v3
@@ -61,18 +69,14 @@ jobs:
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
 
-      - name: Setup base environment
-        run: |
-          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-          echo "TOKEN=${{ github.token }}" >> $GITHUB_ENV
-          echo "BASE_DIR=diverse" >> $GITHUB_ENV
-
       - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
         run: |
           echo "PROFILE=prod" >> $GITHUB_ENV
           echo "CHECKOUT_BRANCH=main" >> $GITHUB_ENV
 
-      - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
+      - if: |
+          ${{ steps.extract_branch.outputs.branch == 'develop' }} ||
+          ${{ steps.extract_branch.outputs.branch =~ 'fix/deploy.*' }}
         run: |
           echo "PROFILE=test" >> $GITHUB_ENV
           echo "CHECKOUT_BRANCH=develop" >> $GITHUB_ENV
@@ -84,11 +88,13 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: true
           script: |
-            cd ~/$BASE_DIR
+            procjet_profile_root=$PROJECT_ROOT/$REPO-$PROFILE
 
-            git clone https://$TOKEN@github.com/$REPO.git $REPO-$PROFILE
-            cd $REPO-$PROFILE
+            git clone https://$TOKEN@github.com/$REPO.git "$procjet_profile_root"
+            cd "$procjet_profile_root"
+
             git restore .
             git checkout $CHECKOUT_BRANCH
             git pull
