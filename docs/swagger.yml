@@ -34,6 +34,11 @@ definitions:
                 format: uuid
                 type: string
                 x-go-name: ID
+            likes:
+                description: Number of likes
+                format: int64
+                type: integer
+                x-go-name: Likes
             updated_at:
                 description: The time the comment was updated
                 format: date-time
@@ -761,9 +766,70 @@ paths:
                 - bearerAuth: []
             tags:
                 - Post
+    /posts/{post}/comments/{comment}/like:
+        delete:
+            description: Unset like to the comment by ID
+            operationId: unlikeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the comment by ID
+            operationId: likeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
     /posts/{post}/like:
         delete:
-            description: Set like to the post by ID
+            description: Unset like to the post by ID
             operationId: unlikePost
             parameters:
                 - format: uuid

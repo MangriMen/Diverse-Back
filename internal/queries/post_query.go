@@ -79,20 +79,8 @@ func (q *UserQueries) UpdatePost(b *models.DBPost) error {
 	return nil
 }
 
-// DeletePost deletes post based on the given ID.
-func (q *PostQueries) DeletePost(id uuid.UUID) error {
-	query := `DELETE FROM posts WHERE id = $1`
-
-	_, err := q.Exec(query, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // LikePost sets like the post by ID.
-func (q *PostQueries) LikePost(l *models.DBLike) error {
+func (q *PostQueries) LikePost(l *models.DBPostLike) error {
 	query := `INSERT INTO post_likes VALUES ($1, $2, $3)`
 
 	_, err := q.Exec(query, l.ID, l.PostID, l.UserID)
@@ -104,7 +92,7 @@ func (q *PostQueries) LikePost(l *models.DBLike) error {
 }
 
 // UnlikePost sets like the post by ID.
-func (q *PostQueries) UnlikePost(l *models.DBLike) error {
+func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
 	query := `DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2`
 
 	_, err := q.Exec(query, l.PostID, l.UserID)
@@ -115,16 +103,14 @@ func (q *PostQueries) UnlikePost(l *models.DBLike) error {
 	return nil
 }
 
-// GetLikesCount get likes count from the post by ID.
-func (q *PostQueries) GetLikesCount(id uuid.UUID) (int, error) {
-	query := `SELECT Count(*) FROM post_likes WHERE id = $1`
+// DeletePost deletes post based on the given ID.
+func (q *PostQueries) DeletePost(id uuid.UUID) error {
+	query := `DELETE FROM posts WHERE id = $1`
 
-	rowCount := 0
-
-	err := q.Get(&rowCount, query, id)
+	_, err := q.Exec(query, id)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return rowCount, nil
+	return nil
 }

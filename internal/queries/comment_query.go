@@ -59,9 +59,9 @@ func (q *PostQueries) GetComment(id uuid.UUID) (models.DBComment, error) {
 
 // AddComment add a single comment to the database based on the given comment object.
 func (q *PostQueries) AddComment(b *models.DBComment) error {
-	query := `INSERT INTO comments VALUES ($1, $2, $3, $4, $5, $6)`
+	query := `INSERT INTO comments VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
-	_, err := q.Exec(query, b.ID, b.PostID, b.UserID, b.Content, b.CreatedAt, b.UpdatedAt)
+	_, err := q.Exec(query, b.ID, b.PostID, b.UserID, b.Content, b.CreatedAt, b.UpdatedAt, b.Likes)
 	if err != nil {
 		return err
 	}
@@ -78,6 +78,30 @@ func (q *UserQueries) UpdateComment(b *models.DBComment) error {
 		WHERE id = $1`
 
 	_, err := q.Exec(query, b.ID, b.Content, b.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// LikeComment sets like the comment by ID.
+func (q *PostQueries) LikeComment(l *models.DBCommentLike) error {
+	query := `INSERT INTO comment_likes VALUES ($1, $2, $3)`
+
+	_, err := q.Exec(query, l.ID, l.CommentID, l.UserID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UnlikeComment sets like the comment by ID.
+func (q *PostQueries) UnlikeComment(l *models.DBCommentLike) error {
+	query := `DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2`
+
+	_, err := q.Exec(query, l.CommentID, l.UserID)
 	if err != nil {
 		return err
 	}

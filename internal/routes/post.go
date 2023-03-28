@@ -36,7 +36,11 @@ func PostCommentPrivateRoutes(route fiber.Router) {
 
 	posts.Post("/comments", middleware.JWTProtected(), controllers.AddComment)
 
+	posts.Post("/comments/:comment/like", middleware.JWTProtected(), controllers.LikeComment)
+
 	posts.Patch("/comments/:comment", middleware.JWTProtected(), controllers.UpdateComment)
 
 	posts.Delete("/comments/:comment", middleware.JWTProtected(), controllers.DeleteComment)
+
+	posts.Delete("/comments/:comment/like", middleware.JWTProtected(), controllers.UnlikeComment)
 }
