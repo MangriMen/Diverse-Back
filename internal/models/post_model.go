@@ -52,6 +52,7 @@ type Post struct {
 	Comments []Comment `json:"comments"`
 }
 
+// DBLike represents a like struct from database.
 type DBLike struct {
 	// The id for this like
 	// required: true
@@ -66,6 +67,8 @@ type DBLike struct {
 	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
+// Like represents the like for this application
+// swagger:model
 type Like struct {
 	User User
 }
