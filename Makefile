@@ -17,9 +17,9 @@ prod:
 BASE_DIR=diverse
 
 deploy:
-	@if [ $(profile) = "prod" ]; then\
+	ifeq ($(profile), prod)
         sed -i 's/:3040/:3030/g' docs/swagger.yml
-    fi
+    endif
 
 	sudo docker compose -p $(profile) --profile $(profile) down
 	sudo docker compose -p $(profile) --profile $(profile) pull
