@@ -617,7 +617,7 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/CreateUpdatePostResponse'
+                    $ref: '#/responses/GetPostResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:

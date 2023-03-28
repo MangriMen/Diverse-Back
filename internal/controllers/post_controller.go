@@ -171,7 +171,7 @@ func CreatePost(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   201: CreateUpdatePostResponse
+//   201: GetPostResponse
 //   default: ErrorResponse
 
 // UpdatePost is used to update the post by ID.
@@ -228,7 +228,11 @@ func UpdatePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.SendStatus(fiber.StatusCreated)
+	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+
+	return c.JSON(responses.GetPostResponseBody{
+		Post: postToSend,
+	})
 }
 
 // swagger:route POST /posts/{post}/like Post likePost

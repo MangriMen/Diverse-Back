@@ -222,7 +222,11 @@ func UpdateComment(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	return c.SendStatus(fiber.StatusCreated)
+	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
+
+	return c.JSON(responses.GetCommentResponseBody{
+		Comment: commentToSend,
+	})
 }
 
 // swagger:route POST /posts/{post}/comments/{comment}/like Post likeComment
