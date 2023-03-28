@@ -68,21 +68,22 @@ jobs:
           REPO: ${{ github.repository }}
           TOKEN: ${{ github.token }}
           BASE_DIR: diverse
+          PROFILE: prod
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/$(BASE_DIR)
+            cd ~/$BASE_DIR
 
-            git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
-            cd $REPO-$(profile)
+            git clone https://$TOKEN@github.com/$REPO.git $REPO-$PROFILE
+            cd $REPO-$PROFILE
             git restore .
             git checkout develop
             git pull
 
-            make deploy profile=prod
+            make deploy profile=$PROFILE
 
       - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
         name: Deploy on test server
@@ -91,18 +92,19 @@ jobs:
           REPO: ${{ github.repository }}
           TOKEN: ${{ github.token }}
           BASE_DIR: diverse
+          PROFILE: test
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/$(BASE_DIR)
+            cd ~/$BASE_DIR
 
-            git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
-            cd $REPO-$(profile)
+            git clone https://$TOKEN@github.com/$REPO.git $REPO-$PROFILE
+            cd $REPO-$PROFILE
             git restore .
             git checkout develop
             git pull
 
-            make deploy profile=test
+            make deploy profile=$PROFILE
