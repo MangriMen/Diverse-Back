@@ -83,7 +83,7 @@ jobs:
           echo "PROFILE=test" >> $GITHUB_ENV
           echo "CHECKOUT_BRANCH=develop" >> $GITHUB_ENV
 
-      - name: Deploy on $PROFILE server
+      - name: Deploy on server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -94,7 +94,6 @@ jobs:
           script: |
             procjet_profile_root=$PROJECT_REPO_PATH-$PROFILE
 
-            ls
             git clone https://$TOKEN@github.com/$REPO.git "$procjet_profile_root"
             cd "$procjet_profile_root"
 
