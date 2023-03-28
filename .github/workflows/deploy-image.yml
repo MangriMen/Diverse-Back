@@ -61,6 +61,7 @@ jobs:
       TOKEN: ${{ github.token }}
       PROJECT_ROOT: ${{ vars.PROJECT_ROOT }}
       PROJECT_REPO_PATH: ${{ vars.PROJECT_ROOT }}/${{ github.event.repository.name }}
+      BASE_HOST: ${{ vars.BASE_HOST }}
 
     steps:
       - uses: actions/checkout@v3
