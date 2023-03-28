@@ -76,7 +76,7 @@ jobs:
 
       - if: |
           ${{ steps.extract_branch.outputs.branch == 'develop' }} ||
-          ${{ steps.extract_branch.outputs.branch =~ 'fix/deploy.*' }}
+          ${{ steps.extract_branch.outputs.branch == 'setup-deploy.*' }}
         run: |
           echo "PROFILE=test" >> $GITHUB_ENV
           echo "CHECKOUT_BRANCH=develop" >> $GITHUB_ENV
