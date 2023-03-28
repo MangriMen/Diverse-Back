@@ -88,7 +88,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: true
+          envs: REPO,TOKEN,PROJECT_ROOT,PROFILE,CHECKOUT_BRANCH
           script: |
             procjet_profile_root=$PROJECT_ROOT/$REPO-$PROFILE
 
