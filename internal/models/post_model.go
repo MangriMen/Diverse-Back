@@ -51,3 +51,21 @@ type Post struct {
 
 	Comments []Comment `json:"comments"`
 }
+
+type DBLike struct {
+	// The id for this like
+	// required: true
+	ID uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
+
+	// Parent post id
+	// required: true
+	PostID uuid.UUID `db:"post_id" json:"post_id" validate:"required,uuid"`
+
+	// Id of the user who wrote the comment
+	// required: true
+	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
+}
+
+type Like struct {
+	User User
+}

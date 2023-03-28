@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/jackc/pgconn"
 	"github.com/samber/lo"
 )
 
@@ -119,6 +121,11 @@ func GetPost(c *fiber.Ctx) error {
 
 // CreatePost is used to create a new post.
 func CreatePost(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postCreateRequestBody, err := helpers.GetBodyAndValidate[parameters.PostCreateRequestBody](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -132,7 +139,7 @@ func CreatePost(c *fiber.Ctx) error {
 			Likes:       0,
 			CreatedAt:   time.Now(),
 		},
-		UserID: postCreateRequestBody.UserID,
+		UserID: userID,
 	}
 
 	validate := helpers.NewValidator()
@@ -232,6 +239,118 @@ func UpdatePost(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
+}
+
+// swagger:route POST /posts/{post}/like Post likePost
+// Set like to the post by ID
+//
+// Produces:
+//   - application/json
+//
+// Schemes: http, https
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   201: GetPostResponse
+//   default: ErrorResponse
+
+// LikePost is used to like the post by ID.
+func LikePost(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	like := &models.DBLike{
+		ID:     uuid.New(),
+		PostID: postIDParams.Post,
+		UserID: userID,
+	}
+
+	if err = db.LikePost(like); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == configs.DBDuplicateError {
+			return helpers.Response(c, fiber.StatusConflict, err.Error())
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	foundPost, err := db.GetPost(like.PostID)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+	}
+
+	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+
+	return c.JSON(responses.GetPostResponseBody{
+		Post: postToSend,
+	})
+}
+
+// swagger:route DELETE /posts/{post}/like Post unlikePost
+// Set like to the post by ID
+//
+// Produces:
+//   - application/json
+//
+// Schemes: http, https
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   201: GetPostResponse
+//   default: ErrorResponse
+
+// UnlikePost is used to unlike the post by ID.
+func UnlikePost(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	like := &models.DBLike{
+		PostID: postIDParams.Post,
+		UserID: userID,
+	}
+
+	if err = db.UnlikePost(like); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	foundPost, err := db.GetPost(like.PostID)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+	}
+
+	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+
+	return c.JSON(responses.GetPostResponseBody{
+		Post: postToSend,
+	})
 }
 
 // swagger:route DELETE /posts/{post} Post deletePost

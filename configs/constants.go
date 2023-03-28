@@ -33,3 +33,8 @@ func GetAllowedMIMEBaseTypes() []string {
 
 // WebpQuality is webp quality for saved images.
 const WebpQuality = 85
+
+// Constants for postgres errors.
+const (
+	DBDuplicateError = "23505"
+)

@@ -15,7 +15,7 @@ type PostIDParams struct {
 
 // PostIDRequest is used to represent a request that requires a post id parameter,
 // such as fetching a specific post or deleting a post.
-// swagger:parameters getPost updatePost deletePost
+// swagger:parameters getPost updatePost deletePost likePost unlikePost
 type PostIDRequest struct {
 	PostIDParams
 }
@@ -28,9 +28,6 @@ type PostCreateRequestBody struct {
 	// required: true
 	// max length: 2048
 	Description string `json:"description" validate:"lte=2048"`
-
-	// required: true
-	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 // PostCreateRequest is used for creating a new post.

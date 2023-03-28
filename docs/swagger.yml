@@ -265,14 +265,9 @@ definitions:
                 maxLength: 2048
                 type: string
                 x-go-name: Description
-            user_id:
-                format: uuid
-                type: string
-                x-go-name: UserID
         required:
             - content
             - description
-            - user_id
         title: PostCreateRequestBody includes the content, description and id of the user creating the post.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
@@ -734,6 +729,55 @@ paths:
             responses:
                 "201":
                     $ref: '#/responses/CreateUpdateCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/like:
+        delete:
+            description: Set like to the post by ID
+            operationId: unlikePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the post by ID
+            operationId: likePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:
