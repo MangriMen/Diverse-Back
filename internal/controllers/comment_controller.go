@@ -60,7 +60,7 @@ func GetComments(c *fiber.Ctx) error {
 
 	dbPosts, err := db.GetComments(postCommentIDParams.Post, commentsFetchRequestQuery)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Posts not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentsNotFoundError)
 	}
 
 	commentsToSend := lo.Map(dbPosts, func(item models.DBComment, index int) models.Comment {
@@ -115,11 +115,11 @@ func AddComment(c *fiber.Ctx) error {
 	}
 
 	if _, err = db.GetUser(userID); err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "User with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
 	}
 
 	if _, err = db.GetPost(commentAddRequestParams.Post); err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	newComment := &models.DBComment{
@@ -187,27 +187,24 @@ func UpdateComment(c *fiber.Ctx) error {
 
 	foundComment, err := db.GetComment(postCommentIDParams.Comment)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
 	if userID != foundComment.UserID {
 		return helpers.Response(
 			c,
-			fiber.StatusNotFound,
-			"Not enough permission to update comment",
+			fiber.StatusForbidden,
+			configs.ForbiddenError,
 		)
 	}
 
-	if foundComment.CreatedAt.Add(configs.PostCommentEditTimeSinceCreated).
-		UTC().
+	if foundComment.CreatedAt.Add(configs.PostCommentEditTimeSinceCreated).UTC().
 		Before(time.Now().UTC()) {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": true,
-			"message": fmt.Sprintf(
-				"can't edit comment after %s",
-				configs.PostCommentEditTimeSinceCreated.String(),
-			),
-		})
+		return helpers.Response(c, fiber.StatusForbidden, fmt.Sprintf(
+			configs.CantEditAfterErrorFormat,
+			"comment",
+			configs.PostCommentEditTimeSinceCreated.String(),
+		))
 	}
 
 	foundComment.Content = helpers.GetNotEmpty(
@@ -277,7 +274,7 @@ func LikeComment(c *fiber.Ctx) error {
 
 	foundComment, err := db.GetComment(like.CommentID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
 	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
@@ -330,7 +327,7 @@ func UnlikeComment(c *fiber.Ctx) error {
 
 	foundComment, err := db.GetComment(like.CommentID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
 	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
@@ -374,15 +371,11 @@ func DeleteComment(c *fiber.Ctx) error {
 
 	foundComment, err := db.GetComment(postCommentIDParams.Comment)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Comment with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
 	if userID != foundComment.UserID {
-		return helpers.Response(
-			c,
-			fiber.StatusNotFound,
-			"Not enough permission to delete comment",
-		)
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	if err = db.DeleteComment(foundComment.ID); err != nil {

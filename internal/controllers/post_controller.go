@@ -52,7 +52,7 @@ func GetPosts(c *fiber.Ctx) error {
 
 	dbPosts, err := db.GetPosts(postsFetchRequestQuery)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Posts not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostsNotFoundError)
 	}
 
 	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
@@ -94,7 +94,7 @@ func GetPost(c *fiber.Ctx) error {
 
 	dbPost, err := db.GetPost(postIDParams.Post)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Post with given id was not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	postToSend := posthelpers.PreparePostToSend(dbPost, db)
@@ -198,27 +198,20 @@ func UpdatePost(c *fiber.Ctx) error {
 
 	foundPost, err := db.GetPost(postIDParams.Post)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error":   true,
-			"message": "post with this ID not found",
-		})
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	if userID != foundPost.UserID {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to update post",
-		})
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
-	if foundPost.CreatedAt.Add(configs.PostEditTimeSinceCreated).UTC().Before(time.Now().UTC()) {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": true,
-			"message": fmt.Sprintf(
-				"can't edit post after %s",
-				configs.PostEditTimeSinceCreated.String(),
-			),
-		})
+	if foundPost.CreatedAt.Add(configs.PostEditTimeSinceCreated).UTC().
+		Before(time.Now().UTC()) {
+		return helpers.Response(c, fiber.StatusForbidden, fmt.Sprintf(
+			configs.CantEditAfterErrorFormat,
+			"post",
+			configs.PostEditTimeSinceCreated.String(),
+		))
 	}
 
 	foundPost.Description = helpers.GetNotEmpty(
@@ -232,10 +225,7 @@ func UpdatePost(c *fiber.Ctx) error {
 	}
 
 	if err = db.UpdatePost(&foundPost); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"erorr":   true,
-			"message": err.Error(),
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
@@ -290,7 +280,7 @@ func LikePost(c *fiber.Ctx) error {
 
 	foundPost, err := db.GetPost(like.PostID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	postToSend := posthelpers.PreparePostToSend(foundPost, db)
@@ -343,7 +333,7 @@ func UnlikePost(c *fiber.Ctx) error {
 
 	foundPost, err := db.GetPost(like.PostID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	postToSend := posthelpers.PreparePostToSend(foundPost, db)
@@ -387,11 +377,11 @@ func DeletePost(c *fiber.Ctx) error {
 
 	foundPost, err := db.GetPost(postIDParams.Post)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Post with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
 	if userID != foundPost.UserID {
-		return helpers.Response(c, fiber.StatusNotFound, "Not enough permission to delete post")
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	if err = db.DeletePost(foundPost.ID); err != nil {
