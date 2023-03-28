@@ -64,32 +64,45 @@ jobs:
       - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
         name: Deploy on prod server
         uses: appleboy/ssh-action@master
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ github.token }}
+          BASE_DIR: diverse
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/diverse/Diverse-Back-prod
-            git checkout main
+            cd ~/$(BASE_DIR)
+
+            git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
+            cd $REPO-$(profile)
+            git restore .
+            git checkout develop
             git pull
-            sed -i 's/:3040/:3030/g' docs/swagger.yml
-            sudo docker compose -p prod --profile prod down
-            sudo docker compose -p prod --profile prod pull
-            sudo docker compose -p prod --profile prod up -d
+
+            make deploy profile=prod
 
       - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
         name: Deploy on test server
         uses: appleboy/ssh-action@master
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ github.token }}
+          BASE_DIR: diverse
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/diverse/Diverse-Back-test
+            cd ~/$(BASE_DIR)
+
+            git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
+            cd $REPO-$(profile)
+            git restore .
             git checkout develop
             git pull
-            sudo docker compose -p test --profile test down
-            sudo docker compose -p test --profile test pull
-            sudo docker compose -p test --profile test up -d
+
+            make deploy profile=test
