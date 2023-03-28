@@ -34,6 +34,11 @@ definitions:
                 format: uuid
                 type: string
                 x-go-name: ID
+            likes:
+                description: Number of likes
+                format: int64
+                type: integer
+                x-go-name: Likes
             updated_at:
                 description: The time the comment was updated
                 format: date-time
@@ -265,14 +270,9 @@ definitions:
                 maxLength: 2048
                 type: string
                 x-go-name: Description
-            user_id:
-                format: uuid
-                type: string
-                x-go-name: UserID
         required:
             - content
             - description
-            - user_id
         title: PostCreateRequestBody includes the content, description and id of the user creating the post.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
@@ -424,6 +424,29 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/UploadDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            tags:
+                - Data
+    /data/image/raw/{image}:
+        get:
+            description: Returns the image by id
+            operationId: getImageRaw
+            parameters:
+                - in: path
+                  name: image
+                  required: true
+                  type: string
+                  x-go-name: Image
+            produces:
+                - image/webp
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/StatusOk'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:
@@ -594,7 +617,7 @@ paths:
                 - application/json
             responses:
                 "201":
-                    $ref: '#/responses/CreateUpdatePostResponse'
+                    $ref: '#/responses/GetPostResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:
@@ -734,6 +757,116 @@ paths:
             responses:
                 "201":
                     $ref: '#/responses/CreateUpdateCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/comments/{comment}/like:
+        delete:
+            description: Unset like to the comment by ID
+            operationId: unlikeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the comment by ID
+            operationId: likeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/like:
+        delete:
+            description: Unset like to the post by ID
+            operationId: unlikePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the post by ID
+            operationId: likePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:

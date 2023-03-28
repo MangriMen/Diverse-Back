@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/jwt/v3 v3.3.6
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/h2non/bimg v1.1.6
+	github.com/jackc/pgconn v1.13.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/samber/lo v1.37.0
 	golang.org/x/crypto v0.5.0
@@ -18,7 +19,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect

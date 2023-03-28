@@ -18,7 +18,7 @@ type PostCommentIDParams struct {
 
 // PostCommentIDRequest is used to represent a request thet requires a
 // post id and comment id parameters, such as deleting comment.
-// swagger:parameters deleteComment
+// swagger:parameters deleteComment likeComment unlikeComment
 type PostCommentIDRequest struct {
 	PostCommentIDParams
 }

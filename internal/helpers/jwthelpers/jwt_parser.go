@@ -33,7 +33,7 @@ func GetTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(CustomClaims)
+	claims, ok := token.Claims.(*CustomClaims)
 
 	if ok && token.Valid {
 		expires := int64(claims.Expires)
@@ -65,7 +65,7 @@ func getToken(c *fiber.Ctx) string {
 func verifyToken(c *fiber.Ctx) (*jwt.Token, error) {
 	tokenString := getToken(c)
 
-	token, err := jwt.Parse(tokenString, jwtKeyFunc)
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, jwtKeyFunc)
 
 	if err != nil {
 		return nil, err

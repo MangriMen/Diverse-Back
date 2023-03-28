@@ -24,6 +24,9 @@ type BaseComment struct {
 	// The time the comment was updated
 	// required: true
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+
+	// Number of likes
+	Likes int `db:"likes" json:"likes"`
 }
 
 // DBComment represents a comment struct from database.
@@ -50,4 +53,19 @@ type Comment struct {
 	BaseComment
 
 	User *User `json:"user"`
+}
+
+// DBCommentLike represents a comment like struct from database.
+type DBCommentLike struct {
+	// The id for this like
+	// required: true
+	ID uuid.UUID `db:"id" json:"id" validate:"required,uuid"`
+
+	// Parent post id
+	// required: true
+	CommentID uuid.UUID `db:"comment_id" json:"comment_id" validate:"required,uuid"`
+
+	// Id of the user who wrote the comment
+	// required: true
+	UserID uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }

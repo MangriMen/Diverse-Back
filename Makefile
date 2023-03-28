@@ -9,10 +9,10 @@ all:
 	@echo "\tdeploy profile=\t-\tdeploy with profile prod or test"
 
 dev:
-	docker-compose --profile dev up --build
+	docker-compose -p dev --profile dev up --build
 
 prod:
-	docker-compose --profile prod up --build
+	docker-compose -p prod --profile prod up --build
 
 deploy:
 ifeq ($(profile),)

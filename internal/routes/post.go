@@ -17,9 +17,13 @@ func PostPrivateRoutes(route fiber.Router) {
 
 	route.Post("/posts", middleware.JWTProtected(), controllers.CreatePost)
 
+	route.Post("/posts/:post/like", middleware.JWTProtected(), controllers.LikePost)
+
 	route.Patch("/posts/:post", middleware.JWTProtected(), controllers.UpdatePost)
 
 	route.Delete("/posts/:post", middleware.JWTProtected(), controllers.DeletePost)
+
+	route.Delete("/posts/:post/like", middleware.JWTProtected(), controllers.UnlikePost)
 
 	PostCommentPrivateRoutes(route)
 }
@@ -32,7 +36,11 @@ func PostCommentPrivateRoutes(route fiber.Router) {
 
 	posts.Post("/comments", middleware.JWTProtected(), controllers.AddComment)
 
+	posts.Post("/comments/:comment/like", middleware.JWTProtected(), controllers.LikeComment)
+
 	posts.Patch("/comments/:comment", middleware.JWTProtected(), controllers.UpdateComment)
 
 	posts.Delete("/comments/:comment", middleware.JWTProtected(), controllers.DeleteComment)
+
+	posts.Delete("/comments/:comment/like", middleware.JWTProtected(), controllers.UnlikeComment)
 }
