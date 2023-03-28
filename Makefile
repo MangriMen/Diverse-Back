@@ -17,13 +17,6 @@ prod:
 BASE_DIR=diverse
 
 deploy:
-	cd ~/$(BASE_DIR)
-
-	git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
-	cd $REPO-$(profile)
-	git checkout develop
-	git pull
-
 	@if [ $(profile) = "prod" ]; then\
         sed -i 's/:3040/:3030/g' docs/swagger.yml
     fi
