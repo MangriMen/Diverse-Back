@@ -61,38 +61,24 @@ jobs:
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
 
+      - name: Setup base environment
+        run: |
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ github.token }}" >> $GITHUB_ENV
+          echo "BASE_DIR=diverse" >> $GITHUB_ENV
+
       - if: ${{ steps.extract_branch.outputs.branch != 'develop' }}
-        name: Deploy on prod server
-        uses: appleboy/ssh-action@master
-        env:
-          REPO: ${{ github.repository }}
-          TOKEN: ${{ github.token }}
-          BASE_DIR: diverse
-          PROFILE: prod
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~/$BASE_DIR
-
-            git clone https://$TOKEN@github.com/$REPO.git $REPO-$PROFILE
-            cd $REPO-$PROFILE
-            git restore .
-            git checkout develop
-            git pull
-
-            make deploy profile=$PROFILE
+        run: |
+          echo "PROFILE=prod" >> $GITHUB_ENV
+          echo "CHECKOUT_BRANCH=main" >> $GITHUB_ENV
 
       - if: ${{ steps.extract_branch.outputs.branch == 'develop' }}
-        name: Deploy on test server
+        run: |
+          echo "PROFILE=test" >> $GITHUB_ENV
+          echo "CHECKOUT_BRANCH=develop" >> $GITHUB_ENV
+
+      - name: Deploy on $PROFILE server
         uses: appleboy/ssh-action@master
-        env:
-          REPO: ${{ github.repository }}
-          TOKEN: ${{ github.token }}
-          BASE_DIR: diverse
-          PROFILE: test
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -104,7 +90,7 @@ jobs:
             git clone https://$TOKEN@github.com/$REPO.git $REPO-$PROFILE
             cd $REPO-$PROFILE
             git restore .
-            git checkout develop
+            git checkout $CHECKOUT_BRANCH
             git pull
 
             make deploy profile=$PROFILE
