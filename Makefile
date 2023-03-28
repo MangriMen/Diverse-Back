@@ -14,12 +14,20 @@ dev:
 prod:
 	docker-compose --profile prod up --build
 
-BASE_DIR=diverse
-
 deploy:
+ifeq ($(profile),)
+	(error profile argument not set)
+endif
+
+ifeq ($(BASE_HOST),)
+	(BASE_HOST environment variable not set)
+endif
+
 ifeq ($(profile),prod)
 	sed -i 's/:3040/:3030/g' docs/swagger.yml
 endif
+
+	sed -i 's/host: localhost/host: $(BASE_HOST)/g' docs/swagger.yml
 
 	sudo docker compose -p $(profile) --profile $(profile) down
 	sudo docker compose -p $(profile) --profile $(profile) pull
