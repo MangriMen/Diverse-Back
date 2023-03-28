@@ -60,6 +60,7 @@ jobs:
       REPO: ${{ github.repository }}
       TOKEN: ${{ github.token }}
       PROJECT_ROOT: ${{ vars.PROJECT_ROOT }}
+      PROJECT_REPO_PATH: ${{ vars.PROJECT_ROOT }}/${{ github.event.repository.name }}
 
     steps:
       - uses: actions/checkout@v3
@@ -88,9 +89,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: REPO,TOKEN,PROJECT_ROOT,PROFILE,CHECKOUT_BRANCH
+          envs: REPO,TOKEN,PROJECT_ROOT,PROJECT_REPO_PATH,PROFILE,CHECKOUT_BRANCH
           script: |
-            procjet_profile_root=$PROJECT_ROOT/$REPO-$PROFILE
+            procjet_profile_root=$PROJECT_REPO_PATH-$PROFILE
 
             git clone https://$TOKEN@github.com/$REPO.git "$procjet_profile_root"
             cd "$procjet_profile_root"
