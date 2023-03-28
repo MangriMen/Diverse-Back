@@ -426,6 +426,29 @@ paths:
                 - https
             tags:
                 - Data
+    /data/image/raw/{image}:
+        get:
+            description: Returns the image by id
+            operationId: getImageRaw
+            parameters:
+                - in: path
+                  name: image
+                  required: true
+                  type: string
+                  x-go-name: Image
+            produces:
+                - image/webp
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/StatusOk'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            tags:
+                - Data
     /fetch:
         get:
             description: Get user and new token if user exists
