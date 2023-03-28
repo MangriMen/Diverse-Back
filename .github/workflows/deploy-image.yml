@@ -67,6 +67,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           TOKEN: ${{ github.token }}
+          BASE_DIR: diverse
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -77,6 +78,7 @@ jobs:
 
             git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
             cd $REPO-$(profile)
+            git restore .
             git checkout develop
             git pull
 
@@ -88,6 +90,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           TOKEN: ${{ github.token }}
+          BASE_DIR: diverse
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -98,6 +101,7 @@ jobs:
 
             git clone https://$TOKEN@github.com/$REPO.git $REPO-$(profile)
             cd $REPO-$(profile)
+            git restore .
             git checkout develop
             git pull
 
