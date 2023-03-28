@@ -31,7 +31,6 @@ func PreparePostToSend(post models.DBPost, db *database.Queries) models.Post {
 			LastSeenCommentCreatedAt: time.Now(),
 		},
 	)
-
 	if err == nil {
 		preparedPost.Comments = lo.Map(
 			comments,

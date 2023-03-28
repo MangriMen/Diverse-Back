@@ -79,6 +79,30 @@ func (q *UserQueries) UpdatePost(b *models.DBPost) error {
 	return nil
 }
 
+// LikePost sets like the post by ID.
+func (q *PostQueries) LikePost(l *models.DBPostLike) error {
+	query := `INSERT INTO post_likes VALUES ($1, $2, $3)`
+
+	_, err := q.Exec(query, l.ID, l.PostID, l.UserID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UnlikePost sets like the post by ID.
+func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
+	query := `DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2`
+
+	_, err := q.Exec(query, l.PostID, l.UserID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // DeletePost deletes post based on the given ID.
 func (q *PostQueries) DeletePost(id uuid.UUID) error {
 	query := `DELETE FROM posts WHERE id = $1`

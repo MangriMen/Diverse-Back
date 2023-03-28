@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MangriMen/Diverse-Back/api/database"
+	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
@@ -35,7 +36,7 @@ func GetUsers(c *fiber.Ctx) error {
 
 	dbUsers, err := db.GetUsers()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "Users not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
 	}
 
 	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
@@ -74,7 +75,7 @@ func GetUser(c *fiber.Ctx) error {
 
 	dbUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "User with given id was not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
 	}
 
 	return c.JSON(responses.GetUserResponseBody{
@@ -112,7 +113,7 @@ func LoginUser(c *fiber.Ctx) error {
 	}
 
 	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
-		return helpers.Response(c, fiber.StatusForbidden, "Wrong email or password")
+		return helpers.Response(c, fiber.StatusForbidden, configs.WrongEmailOrPasswordError)
 	}
 
 	token, err := jwthelpers.GenerateNewAccessToken(foundDBUser.ID)
@@ -156,7 +157,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return helpers.Response(
 			c,
 			fiber.StatusConflict,
-			"User with this email or username already exists",
+			configs.UserAlreadyExistsError,
 		)
 	}
 
@@ -172,7 +173,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	user.Password, err = helpers.HashPassword(registerRequestBody.Password)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, "Cannot create user")
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	validate := helpers.NewValidator()
@@ -225,7 +226,7 @@ func FetchUser(c *fiber.Ctx) error {
 
 	dbUser, err := db.GetUser(userID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, "User with this ID not found")
+		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
 	}
 
 	token, err := jwthelpers.GenerateNewAccessToken(userID)
@@ -273,7 +274,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	foundUser, err := db.GetUser(userID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, "User with this id not found")
+		return helpers.Response(c, fiber.StatusInternalServerError, configs.UserNotFoundError)
 	}
 
 	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
@@ -283,7 +284,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	if userUpdateRequestBody.Password != "" {
 		foundUser.Password, err = helpers.HashPassword(userUpdateRequestBody.Password)
 		if err != nil {
-			return helpers.Response(c, fiber.StatusInternalServerError, "Cannot update password")
+			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 		}
 
 		foundUser.UpdatedAt = time.Now()
@@ -330,25 +331,16 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	validate := helpers.NewValidator()
 	if err = validate.Struct(userIDParams); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": helpers.ValidatorErrors(err),
-		})
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	if userID != userIDParams.User {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   true,
-			"message": "not enough permission to delete user",
-		})
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"erorr":   true,
-			"message": "book with this id not found",
-		})
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	if err = db.DeleteUser(userIDParams.User); err != nil {

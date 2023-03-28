@@ -33,3 +33,27 @@ func GetAllowedMIMEBaseTypes() []string {
 
 // WebpQuality is webp quality for saved images.
 const WebpQuality = 85
+
+// Constants for postgres errors.
+const (
+	DBDuplicateError = "23505"
+)
+
+// Constants for response.
+const (
+	UserNotFoundError      = "User with this ID not found"
+	UsersNotFoundError     = "Users not found"
+	UserAlreadyExistsError = "User with this email or username already exists"
+	/* #nosec */
+	WrongEmailOrPasswordError = "Wrong email or password"
+
+	PostNotFoundError  = "Post with this ID not found"
+	PostsNotFoundError = "Posts not found"
+
+	CommentNotFoundError  = "Comment with this ID not found"
+	CommentsNotFoundError = "Comments not found"
+
+	ForbiddenError = "Not enough permission"
+
+	CantEditAfterErrorFormat = "Can't edit %s after %s"
+)
