@@ -161,6 +161,31 @@ definitions:
         title: GetPostsResponseBody includes the slice of posts.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            relation:
+                items:
+                    $ref: '#/definitions/Relation'
+                type: array
+                x-go-name: Relations
+        required:
+            - error
+            - message
+            - count
+            - relation
+        title: GetRelationResponseBody includes the slice of relations.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetUserResponseBody:
         properties:
             error:
@@ -321,6 +346,27 @@ definitions:
         title: RegisterRequestBody includes the email, username, and password of the user being created.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    Relation:
+        description: Relation represents the relation for this application
+        properties:
+            id:
+                description: The id for this relation
+                format: uuid
+                type: string
+                x-go-name: ID
+            relation_user:
+                $ref: '#/definitions/User'
+            type:
+                $ref: '#/definitions/RelationType'
+        required:
+            - id
+            - type
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    RelationType:
+        title: RelationType is type for relations between users.
+        type: string
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     UploadDataResponseBody:
         properties:
             error:
@@ -990,6 +1036,102 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/{user}/relations:
+        get:
+            description: Returns a list of users from given relation
+            operationId: getRelation
+            parameters:
+                - format: uuid
+                  in: query
+                  name: last_seen_relation_id
+                  type: string
+                  x-go-name: LastSeenRelationID
+                - description: nolint:lll
+                  format: date-time
+                  in: query
+                  name: last_seen_relation_created_at
+                  type: string
+                  x-go-name: LastSeenRelationCreatedAt
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        post:
+            description: Add realtion with given info
+            operationId: addRelation
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/AddRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations/{relation}:
+        delete:
+            description: Returns relation by id
+            operationId: deleteRelation
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/DeleteRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations/{relationUser}:
+        get:
+            description: Returns a true or false from given relation
+            operationId: getRelationByUser
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationByUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
 produces:
     - application/json
 responses:
@@ -1029,6 +1171,10 @@ responses:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: '#/definitions/GetPostsResponseBody'
+    GetRelationResponse:
+        description: GetRelationResponse represent the response retrived on get relation request.
+        schema:
+            $ref: '#/definitions/GetRelationResponseBody'
     GetUserResponse:
         description: GetUserResponse represent the response retrived on get user request.
         schema:
