@@ -12,7 +12,7 @@ import (
 	"github.com/samber/lo"
 )
 
-// swagger:route GET /users/{user}/relations User getRelation
+// swagger:route GET /users/{user}/relations User getRelations
 // Returns a list of users from given relation
 //
 // Produces:
@@ -27,8 +27,8 @@ import (
 //   200: GetRelationResponse
 //   default: ErrorResponse
 
-// GetRelation is used to fetch relation between users from database with request parameters.
-func GetRelation(c *fiber.Ctx) error {
+// GetRelations is used to fetch relation between users from database with request parameters.
+func GetRelations(c *fiber.Ctx) error {
 	userID, err := helpers.GetUserIDFromToken(c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -48,7 +48,7 @@ func GetRelation(c *fiber.Ctx) error {
 
 	dbRelations, err := db.GetRelations(userID, relationGetRequestQuery)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+		return helpers.Response(c, fiber.StatusNotFound, configs.RelationsNotFoundError)
 	}
 
 	relationsToSend := lo.Map(

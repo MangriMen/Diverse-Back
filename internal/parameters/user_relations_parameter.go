@@ -28,7 +28,7 @@ type RelationGetRequestQuery struct {
 }
 
 // RelationGetRequest is a struct that encapsulates a query used to fetch relation.
-// swagger:parameters getRelation
+// swagger:parameters getRelations
 type RelationGetRequest struct {
 	RelationGetRequestQuery
 }

@@ -23,7 +23,7 @@ func (q *PostQueries) GetRelations(
 		FROM user_relations
 		WHERE created_at < $1
 		AND user_id = $3
-		AND relation_type = $4
+		AND type = $4
 		ORDER BY created_at DESC
 		FETCH FIRST $2 ROWS ONLY`
 

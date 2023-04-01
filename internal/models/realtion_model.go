@@ -1,6 +1,10 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // RelationType is type for relations between users.
 type RelationType string
@@ -21,6 +25,10 @@ type BaseRelation struct {
 	// Relation type
 	// required: true
 	Type RelationType `db:"type" json:"type" validate:"required"`
+
+	// The time the relation was created
+	// required: true
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
 // DBRelation represents a relations struct from database.

@@ -2,16 +2,12 @@
 package main
 
 import (
-	"log"
-
 	"github.com/MangriMen/Diverse-Back/api/server"
-	"github.com/joho/godotenv"
+	"github.com/MangriMen/Diverse-Back/internal/helpers"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Print("environment variables were not loaded")
-	}
+	helpers.LoadEnvironment(".env")
 
-	server.InitAPI()
+	server.SetupAPI()
 }

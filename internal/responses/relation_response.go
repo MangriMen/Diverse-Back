@@ -19,3 +19,7 @@ type GetRelationResponse struct {
 	// in: body
 	Body GetRelationResponseBody
 }
+
+// AddRelationResponse represents response for successfully create relation.
+// swagger:response
+type AddRelationResponse string

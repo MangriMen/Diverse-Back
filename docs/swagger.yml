@@ -349,6 +349,11 @@ definitions:
     Relation:
         description: Relation represents the relation for this application
         properties:
+            created_at:
+                description: The time the relation was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
             id:
                 description: The id for this relation
                 format: uuid
@@ -361,6 +366,7 @@ definitions:
         required:
             - id
             - type
+            - created_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     RelationType:
@@ -1039,7 +1045,7 @@ paths:
     /users/{user}/relations:
         get:
             description: Returns a list of users from given relation
-            operationId: getRelation
+            operationId: getRelations
             parameters:
                 - format: uuid
                   in: query
@@ -1135,6 +1141,10 @@ paths:
 produces:
     - application/json
 responses:
+    AddRelationResponse:
+        description: AddRelationResponse represents response for successfully create relation.
+        schema:
+            type: string
     CreateUpdateCommentResponse:
         description: CreateUpdateCommentResponse represents response for successfully create or update comment request.
         schema:

@@ -26,6 +26,8 @@ func UserPrivateRoutes(route fiber.Router) {
 	route.Patch("/users/:user", middleware.JWTProtected(), controllers.UpdateUser)
 
 	route.Delete("/users/:user", middleware.JWTProtected(), controllers.DeleteUser)
+
+	UserRelationPrivateRoutes(route)
 }
 
 // UserRelationPrivateRoutes sets up private routes for authenticated users.
@@ -34,7 +36,7 @@ func UserPrivateRoutes(route fiber.Router) {
 func UserRelationPrivateRoutes(route fiber.Router) {
 	users := route.Group("/users/:user")
 
-	users.Get("/relations", middleware.JWTProtected(), controllers.GetRelation)
+	users.Get("/relations", middleware.JWTProtected(), controllers.GetRelations)
 
 	users.Get("/relations/:relationUser", middleware.JWTProtected(), controllers.IsRelationWithUser)
 
