@@ -37,7 +37,7 @@ func PostgreSQLConnection() (*sqlx.DB, error) {
 	db.SetConnMaxLifetime(time.Duration(maxLifetimeConn))
 
 	if err = db.Ping(); err != nil {
-		defer helpers.CloseDBQuietly(db)
+		defer helpers.CloseQuietly(db)
 		return nil, fmt.Errorf("error, not sent ping to database, %w", err)
 	}
 
