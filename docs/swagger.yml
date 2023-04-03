@@ -1058,11 +1058,6 @@ paths:
                   name: last_seen_relation_created_at
                   type: string
                   x-go-name: LastSeenRelationCreatedAt
-                - in: query
-                  name: type
-                  required: true
-                  type: string
-                  x-go-name: Type
                 - format: int64
                   in: query
                   maximum: 50
@@ -1071,6 +1066,25 @@ paths:
                   required: true
                   type: integer
                   x-go-name: Count
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - description: The id of the user id between which the relationship
+                  format: uuid
+                  in: query
+                  name: relation_user_id
+                  required: true
+                  type: string
+                  x-go-name: RelationUserID
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
             produces:
                 - application/json
             responses:
@@ -1085,6 +1099,7 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/{user}/relations/:
         post:
             description: Add realtion with given info
             operationId: addRelation

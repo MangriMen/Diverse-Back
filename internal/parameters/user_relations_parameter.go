@@ -32,3 +32,26 @@ type RelationGetRequestQuery struct {
 type RelationGetRequest struct {
 	RelationGetRequestQuery
 }
+
+// RelationAddRequestParams includes the type of the relation to add.
+type RelationAddRequestParams struct {
+	UserIDParams
+}
+
+// RelationAddRequestBody includes the ID of the user to add.
+type RelationAddRequestBody struct {
+	// The id of the user id between which the relationship
+	// required: true
+	RelationUserID uuid.UUID `db:"relation_user_id" json:"relation_user_id" validate:"required,uuid"`
+
+	// Relation type
+	// required: true
+	Type models.RelationType `json:"type" validate:"required"`
+}
+
+// RelationAddRequest is a struct that encapsulates a body used to add relation.
+// swagger:parameters getRelations
+type RelationAddRequest struct {
+	RelationAddRequestParams
+	RelationAddRequestBody
+}

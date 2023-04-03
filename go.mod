@@ -3,6 +3,7 @@ module github.com/MangriMen/Diverse-Back
 go 1.20
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.20.2
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/gofiber/jwt/v3 v3.3.6

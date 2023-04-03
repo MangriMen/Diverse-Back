@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"time"
+
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
@@ -9,6 +11,7 @@ import (
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
 
@@ -101,7 +104,7 @@ func IsRelationWithUser(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route POST /users/{user}/relations User addRelation
+// swagger:route POST /users/{user}/relations/ User addRelation
 // Add realtion with given info
 //
 // Produces:
@@ -118,24 +121,49 @@ func IsRelationWithUser(c *fiber.Ctx) error {
 
 // AddRelation is used to add relation between users with request parameters.
 func AddRelation(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	relationAddRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddRequestBody](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if userID != userIDParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
+	}
+
 	db, err := database.OpenDBConnection()
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	dbUsers, err := db.GetUsers()
-	if err != nil {
+	relation := &models.DBRelation{
+		BaseRelation: models.BaseRelation{
+			ID:        uuid.New(),
+			Type:      relationAddRequestBody.Type,
+			CreatedAt: time.Now(),
+		},
+		UserID:         userID,
+		RelationUserID: relationAddRequestBody.RelationUserID,
+	}
+
+	if err = db.AddRelation(relation); err != nil {
 		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
 	}
 
-	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
-		return item.ToUser()
-	})
-
-	return c.JSON(responses.GetUsersResponseBody{
-		Count: len(usersToSend),
-		Users: usersToSend,
-	})
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 // swagger:route DELETE /users/{user}/relations/{relation} User deleteRelation

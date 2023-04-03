@@ -13,7 +13,7 @@ type RelationQueries struct {
 }
 
 // GetRelations retrieves a list of given relation type between users.
-func (q *PostQueries) GetRelations(
+func (q *RelationQueries) GetRelations(
 	userID uuid.UUID,
 	relationGetRequestQuery *parameters.RelationGetRequestQuery,
 ) ([]models.DBRelation, error) {
@@ -40,4 +40,16 @@ func (q *PostQueries) GetRelations(
 	}
 
 	return relations, nil
+}
+
+// AddRelation is used to add new relation with given parameters.
+func (q *RelationQueries) AddRelation(r *models.DBRelation) error {
+	query := `INSERT INTO user_relations VALUES ($1, $2, $3, $4, $5)`
+
+	_, err := q.Exec(query, r.ID, r.UserID, r.RelationUserID, r.Type, r.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

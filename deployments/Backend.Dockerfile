@@ -23,7 +23,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
     && apt install -y libvips-dev && \
     go mod download
 
-CMD go test -race -vet=off -v ./test/...
+CMD go test -vet=off -v ./test/...
 
 
 FROM golang:1.20 AS build

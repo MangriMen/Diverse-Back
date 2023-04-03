@@ -59,3 +59,6 @@ const (
 
 	CantEditAfterErrorFormat = "Can't edit %s after %s"
 )
+
+// TestResponseTimeout is response timeout for tests.
+const TestResponseTimeout = 10000

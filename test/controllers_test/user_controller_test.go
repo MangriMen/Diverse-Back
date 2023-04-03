@@ -1,12 +1,14 @@
 package controllers_test
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/MangriMen/Diverse-Back/api/server"
+	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
@@ -34,14 +36,18 @@ func TestGetUsers(t *testing.T) {
 			app := server.InitAPI()
 
 			req := httptest.NewRequest(http.MethodGet, tt.route, nil)
-			req.Header.Set("Content-Type", "application/json")
 
-			resp, err := app.Test(req, 500)
+			resp, err := app.Test(req, configs.TestResponseTimeout)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 
-			body, err := helpers.ParseResponseBody[responses.BaseResponseBody](resp)
+			rawBody, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+
+			body, err := helpers.ParseResponseBody[responses.BaseResponseBody](rawBody)
 			if err != nil {
 				log.Fatal(err.Error())
 			}

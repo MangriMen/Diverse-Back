@@ -40,7 +40,7 @@ func UserRelationPrivateRoutes(route fiber.Router) {
 
 	users.Get("/relations/:relationUser", middleware.JWTProtected(), controllers.IsRelationWithUser)
 
-	users.Post("/relations/:relation", middleware.JWTProtected(), controllers.AddRelation)
+	users.Post("/relations/", middleware.JWTProtected(), controllers.AddRelation)
 
 	users.Delete("/relations/:relation", middleware.JWTProtected(), controllers.DeleteRelation)
 }

@@ -8,26 +8,22 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 )
 
 // ParseResponseBody is used to unmarshall response body to T.
 // Returns T object.
 func ParseResponseBody[T responses.ResponseBody](
-	resp *http.Response,
+	rawBody []byte,
 ) (T, error) {
 	var response T
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return response, err
-	}
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
+	if err := json.Unmarshal(rawBody, &response); err != nil {
 		return response, err
 	}
 
@@ -52,24 +48,30 @@ func GetMessageFromResponseBody(
 // RegisterUserForTest is used to register temp user for using token with private routes.
 func RegisterUserForTest(app *fiber.App) (*models.User, string, error) {
 	registerRequestBody := &parameters.RegisterRequestBody{
-		Email:    "test@gmail.com",
-		Username: "test",
-		Password: "testtest",
+		Email:    gofakeit.Email(),
+		Username: gofakeit.Username(),
+		Password: gofakeit.Password(true, true, true, true, false, 8),
 	}
 
-	stringBody, err := json.Marshal(&registerRequestBody)
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(registerRequestBody); err != nil {
+		return nil, "", err
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/register", &buf)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req, configs.TestResponseTimeout)
 	if err != nil {
 		return nil, "", err
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/register", bytes.NewReader(stringBody))
-
-	resp, err := app.Test(req, 500)
+	rawBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, "", err
 	}
 
-	body, err := ParseResponseBody[responses.BaseResponseBody](resp)
+	body, err := ParseResponseBody[responses.BaseResponseBody](rawBody)
 	if err != nil {
 		return nil, "", err
 	}
@@ -78,7 +80,7 @@ func RegisterUserForTest(app *fiber.App) (*models.User, string, error) {
 		return nil, "", fmt.Errorf(body.Message.(string))
 	}
 
-	trueBody, err := ParseResponseBody[responses.RegisterLoginUserResponseBody](resp)
+	trueBody, err := ParseResponseBody[responses.RegisterLoginUserResponseBody](rawBody)
 	if err != nil {
 		return nil, "", err
 	}
