@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/MangriMen/Diverse-Back/api/database"
@@ -36,7 +38,7 @@ func GetUsers(c *fiber.Ctx) error {
 
 	dbUsers, err := db.GetUsers()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
@@ -75,7 +77,11 @@ func GetUser(c *fiber.Ctx) error {
 
 	dbUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(responses.GetUserResponseBody{
@@ -109,6 +115,10 @@ func LoginUser(c *fiber.Ctx) error {
 
 	foundDBUser, err := db.GetUserByEmail(loginRequestBody.Email)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -136,7 +146,7 @@ func LoginUser(c *fiber.Ctx) error {
 // Schemes: http, https
 //
 // Responses:
-//   200: RegisterLoginUserResponse
+//   201: RegisterLoginUserResponse
 //   default: ErrorResponse
 
 // CreateUser is used to create new user.
@@ -190,7 +200,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(
+	return c.Status(fiber.StatusCreated).JSON(
 		responses.RegisterLoginUserResponseBody{
 			Token: token,
 			User:  user.ToUser(),
@@ -209,7 +219,7 @@ func CreateUser(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   201: RegisterLoginUserResponse
+//   200: RegisterLoginUserResponse
 //   default: ErrorResponse
 
 // FetchUser is used to regenerate user token and fetch info.
@@ -226,7 +236,11 @@ func FetchUser(c *fiber.Ctx) error {
 
 	dbUser, err := db.GetUser(userID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	token, err := jwthelpers.GenerateNewAccessToken(userID)
@@ -262,9 +276,18 @@ func UpdateUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
 	userUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.UserUpdateRequestBody](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if userID != userIDParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	db, err := database.OpenDBConnection()
@@ -272,9 +295,13 @@ func UpdateUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	foundUser, err := db.GetUser(userID)
+	foundUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, configs.UserNotFoundError)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
@@ -327,11 +354,6 @@ func DeleteUser(c *fiber.Ctx) error {
 	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
-	validate := helpers.NewValidator()
-	if err = validate.Struct(userIDParams); err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
 	}
 
 	if userID != userIDParams.User {

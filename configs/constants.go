@@ -47,8 +47,6 @@ const (
 	/* #nosec */
 	WrongEmailOrPasswordError = "Wrong email or password"
 
-	RelationsNotFoundError = "Relations for this user not found"
-
 	PostNotFoundError  = "Post with this ID not found"
 	PostsNotFoundError = "Posts not found"
 

@@ -3,7 +3,7 @@ package parameters
 // RequestParams is interface to union all request parameters in one type.
 type RequestParams interface {
 	UserIDParams |
-		RelationAddRequestParams |
+		RelationGetStatusParams |
 		PostIDParams |
 		PostCommentIDParams |
 		CommentAddRequestParams
@@ -21,7 +21,7 @@ type RequestBody interface {
 	LoginRequestBody |
 		RegisterRequestBody |
 		UserUpdateRequestBody |
-		RelationAddRequestBody |
+		RelationAddDeleteRequestBody |
 		PostCreateRequestBody |
 		PostUpdateRequestBody |
 		CommentAddRequestBody |

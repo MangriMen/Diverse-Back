@@ -173,7 +173,7 @@ definitions:
                 x-go-name: Error
             message:
                 x-go-name: Message
-            relation:
+            relations:
                 items:
                     $ref: '#/definitions/Relation'
                 type: array
@@ -182,7 +182,7 @@ definitions:
             - error
             - message
             - count
-            - relation
+            - relations
         title: GetRelationResponseBody includes the slice of relations.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
@@ -513,7 +513,7 @@ paths:
             produces:
                 - application/json
             responses:
-                "201":
+                "200":
                     $ref: '#/responses/RegisterLoginUserResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
@@ -941,7 +941,7 @@ paths:
             produces:
                 - application/json
             responses:
-                "200":
+                "201":
                     $ref: '#/responses/RegisterLoginUserResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
@@ -1072,13 +1072,6 @@ paths:
                   required: true
                   type: string
                   x-go-name: User
-                - description: The id of the user id between which the relationship
-                  format: uuid
-                  in: query
-                  name: relation_user_id
-                  required: true
-                  type: string
-                  x-go-name: RelationUserID
                 - description: Relation type
                   in: query
                   name: type
@@ -1099,32 +1092,27 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
-    /users/{user}/relations/:
-        post:
-            description: Add realtion with given info
-            operationId: addRelation
-            produces:
-                - application/json
-            responses:
-                "200":
-                    $ref: '#/responses/AddRelationResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            schemes:
-                - http
-                - https
-            security:
-                - bearerAuth: []
-            tags:
-                - User
-    /users/{user}/relations/{relation}:
+    /users/{user}/relations/{relationUser}:
         delete:
             description: Returns relation by id
-            operationId: deleteRelation
+            operationId: deleteRelations
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
             produces:
                 - application/json
             responses:
-                "200":
+                "204":
                     $ref: '#/responses/DeleteRelationResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
@@ -1135,15 +1123,44 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
-    /users/{user}/relations/{relationUser}:
         get:
             description: Returns a true or false from given relation
-            operationId: getRelationByUser
+            operationId: getRelationStatus
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relation_user
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
             produces:
                 - application/json
             responses:
                 "200":
-                    $ref: '#/responses/GetRelationByUserResponse'
+                    $ref: '#/responses/GetRelationStatusResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        post:
+            description: Add realtion with given info
+            operationId: addRelations
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/AddRelationResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             schemes:
@@ -1172,6 +1189,8 @@ responses:
         description: DeleteCommentResponse represents response for successfully delete comment request.
     DeletePostResponse:
         description: DeletePostResponse represents response for successfully delete post.
+    DeleteRelationResponse:
+        description: DeleteRelationResponse represents response for successfully delete relation request.
     DeleteUserResponse:
         description: DeleteUserResponse represents response for successfully delete user requestt.
     ErrorResponse:
@@ -1200,6 +1219,17 @@ responses:
         description: GetRelationResponse represent the response retrived on get relation request.
         schema:
             $ref: '#/definitions/GetRelationResponseBody'
+    GetRelationStatusResponse:
+        description: |-
+            GetRelationStatusResponse represent the response retrived on
+            get relation by relation user request.
+        headers:
+            blocked:
+                type: boolean
+            follower:
+                type: boolean
+            following:
+                type: boolean
     GetUserResponse:
         description: GetUserResponse represent the response retrived on get user request.
         schema:

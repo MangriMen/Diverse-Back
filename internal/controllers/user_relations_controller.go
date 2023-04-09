@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"time"
 
 	"github.com/MangriMen/Diverse-Back/api/database"
@@ -12,6 +13,7 @@ import (
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/jackc/pgconn"
 	"github.com/samber/lo"
 )
 
@@ -37,6 +39,13 @@ func GetRelations(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
 	relationGetRequestQuery, err := helpers.GetQueryAndValidate[parameters.RelationGetRequestQuery](
 		c,
 	)
@@ -44,14 +53,22 @@ func GetRelations(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
+	if relationGetRequestQuery.LastSeenRelationCreatedAt.IsZero() {
+		relationGetRequestQuery.LastSeenRelationCreatedAt = time.Now()
+	}
+
+	if userID != userIDParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
+	}
+
 	db, err := database.OpenDBConnection()
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	dbRelations, err := db.GetRelations(userID, relationGetRequestQuery)
+	dbRelations, err := db.GetRelations(userIDParams.User, relationGetRequestQuery)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.RelationsNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	relationsToSend := lo.Map(
@@ -67,7 +84,7 @@ func GetRelations(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route GET /users/{user}/relations/{relationUser} User getRelationByUser
+// swagger:route GET /users/{user}/relations/{relationUser} User getRelationStatus
 // Returns a true or false from given relation
 //
 // Produces:
@@ -79,32 +96,47 @@ func GetRelations(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   200: GetRelationByUserResponse
+//   200: GetRelationStatusResponse
 //   default: ErrorResponse
 
-// IsRelationWithUser is used to fetch relation existence between users from database with request parameters.
-func IsRelationWithUser(c *fiber.Ctx) error {
+// GetRelationStatus is used to fetch relation existence between users from database with request parameters.
+func GetRelationStatus(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	relationGetStatusParams, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if userID != relationGetStatusParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
+	}
+
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	dbUsers, err := db.GetUsers()
+	relationStatus, err := db.GetRelationStatus(relationGetStatusParams)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
-		return item.ToUser()
-	})
+	statusToSend := userhelpers.PrepareRelationStatusToSend(relationStatus)
 
-	return c.JSON(responses.GetUsersResponseBody{
-		Count: len(usersToSend),
-		Users: usersToSend,
+	return c.JSON(responses.GetRelationStatusResponseBody{
+		Follower:  statusToSend[models.Follower],
+		Following: statusToSend[models.Following],
+		Blocked:   statusToSend[models.Blocked],
 	})
 }
 
-// swagger:route POST /users/{user}/relations/ User addRelation
+// swagger:route POST /users/{user}/relations/{relationUser} User addRelations
 // Add realtion with given info
 //
 // Produces:
@@ -116,7 +148,7 @@ func IsRelationWithUser(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   200: AddRelationResponse
+//   201: AddRelationResponse
 //   default: ErrorResponse
 
 // AddRelation is used to add relation between users with request parameters.
@@ -126,21 +158,21 @@ func AddRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
+	relationGetStatusParams, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
 		c,
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	relationAddRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddRequestBody](
+	relationAddDeleteRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddDeleteRequestBody](
 		c,
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	if userID != userIDParams.User {
+	if userID != relationGetStatusParams.User {
 		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
@@ -152,21 +184,26 @@ func AddRelation(c *fiber.Ctx) error {
 	relation := &models.DBRelation{
 		BaseRelation: models.BaseRelation{
 			ID:        uuid.New(),
-			Type:      relationAddRequestBody.Type,
+			Type:      relationAddDeleteRequestBody.Type,
 			CreatedAt: time.Now(),
 		},
-		UserID:         userID,
-		RelationUserID: relationAddRequestBody.RelationUserID,
+		UserID:         relationGetStatusParams.User,
+		RelationUserID: relationGetStatusParams.RelationUser,
 	}
 
 	if err = db.AddRelation(relation); err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == configs.DBDuplicateError {
+			return helpers.Response(c, fiber.StatusConflict, err.Error())
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /users/{user}/relations/{relation} User deleteRelation
+// swagger:route DELETE /users/{user}/relations/{relationUser} User deleteRelations
 // Returns relation by id
 //
 // Produces:
@@ -178,27 +215,42 @@ func AddRelation(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   200: DeleteRelationResponse
+//   204: DeleteRelationResponse
 //   default: ErrorResponse
 
 // DeleteRelation is used to delete relation between users.
 func DeleteRelation(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	relationGetStatusParams, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	relationAddDeleteRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddDeleteRequestBody](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if userID != relationGetStatusParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
+	}
+
 	db, err := database.OpenDBConnection()
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	dbUsers, err := db.GetUsers()
-	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+	if err = db.DeleteRelation(relationGetStatusParams, relationAddDeleteRequestBody); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
-		return item.ToUser()
-	})
-
-	return c.JSON(responses.GetUsersResponseBody{
-		Count: len(usersToSend),
-		Users: usersToSend,
-	})
+	return c.SendStatus(fiber.StatusNoContent)
 }

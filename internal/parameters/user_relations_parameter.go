@@ -7,6 +7,20 @@ import (
 	"github.com/google/uuid"
 )
 
+// RelationUserIDParams includes the id of the relation user.
+type RelationUserIDParams struct {
+	// in: path
+	// required: true
+	RelationUser uuid.UUID `params:"relationUser" json:"relation_user"`
+}
+
+// RelationUserIDRequest is used to represent a request that requires a relation user id parameter,
+// such as fetching a specific relation for user or deleting a relation .
+// swagger:parameters
+type RelationUserIDRequest struct {
+	RelationUserIDParams
+}
+
 // RelationGetRequestQuery includes the ID of the user and relation type to fetch.
 type RelationGetRequestQuery struct {
 	// in: query
@@ -33,25 +47,29 @@ type RelationGetRequest struct {
 	RelationGetRequestQuery
 }
 
-// RelationAddRequestParams includes the type of the relation to add.
-type RelationAddRequestParams struct {
+// RelationGetStatusParams includes the ID of the user.
+type RelationGetStatusParams struct {
 	UserIDParams
+	RelationUserIDParams
 }
 
-// RelationAddRequestBody includes the ID of the user to add.
-type RelationAddRequestBody struct {
-	// The id of the user id between which the relationship
-	// required: true
-	RelationUserID uuid.UUID `db:"relation_user_id" json:"relation_user_id" validate:"required,uuid"`
+// RelationGetStatusRequest is a struct that encapsulates a query used to
+// fetch relation with specific user.
+// swagger:parameters getRelationStatus
+type RelationGetStatusRequest struct {
+	RelationGetStatusParams
+}
 
+// RelationAddDeleteRequestBody includes the ID of the user to add.
+type RelationAddDeleteRequestBody struct {
 	// Relation type
 	// required: true
 	Type models.RelationType `json:"type" validate:"required"`
 }
 
-// RelationAddRequest is a struct that encapsulates a body used to add relation.
-// swagger:parameters getRelations
-type RelationAddRequest struct {
-	RelationAddRequestParams
-	RelationAddRequestBody
+// RelationAddDeleteRequest is a struct that encapsulates a body used to add relation.
+// swagger:parameters getRelations deleteRelations
+type RelationAddDeleteRequest struct {
+	UserIDParams
+	RelationAddDeleteRequestBody
 }
