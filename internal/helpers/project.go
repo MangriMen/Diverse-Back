@@ -28,7 +28,7 @@ func dir(envFile string) string {
 
 	for {
 		goModPath := filepath.Join(currentDir, "go.mod")
-		if _, err := os.Stat(goModPath); err == nil {
+		if _, err = os.Stat(goModPath); err == nil {
 			break
 		}
 
