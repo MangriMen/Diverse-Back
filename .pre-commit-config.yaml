@@ -18,3 +18,9 @@ repos:
         language: system
         verbose: true
         files: .go$
+      - id: linter
+        name: linter
+        entry: bash -c "githooks/linter.sh"
+        language: system
+        verbose: true
+        files: .go$

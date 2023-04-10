@@ -10,7 +10,7 @@ import (
 )
 
 // InitAPI is used for initialize a new instance of fiber web application.
-func InitAPI() {
+func InitAPI() *fiber.App {
 	config := configs.FiberConfig()
 	app := fiber.New(config)
 
@@ -20,5 +20,11 @@ func InitAPI() {
 	routes.PublicRoutes(app)
 	routes.PrivateRoutes(app)
 
+	return app
+}
+
+// SetupAPI is used for run instance of fiber web application.
+func SetupAPI() {
+	app := InitAPI()
 	helpers.StartServerWithGracefulShutdown(app)
 }

@@ -13,6 +13,18 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 CMD air
 
+FROM golang:1.20 as testing
+WORKDIR /app
+
+COPY go.mod .
+COPY go.sum .
+
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
+    && apt install -y libvips-dev && \
+    go mod download
+
+CMD go test -vet=off -v ./test/...
+
 
 FROM golang:1.20 AS build
 LABEL stage="gobuilder"

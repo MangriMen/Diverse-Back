@@ -50,13 +50,13 @@ func GetParamsAndValidate[T parameters.RequestParams](
 func GetQueryAndValidate[T parameters.RequestQuery](
 	c *fiber.Ctx,
 ) (*T, error) {
-	var params T
-	if err := c.QueryParser(&params); err != nil {
+	var query T
+	if err := c.QueryParser(&query); err != nil {
 		return nil, err
 	}
 
 	validate := NewValidator()
-	if err := validate.Struct(&params); err != nil {
+	if err := validate.Struct(&query); err != nil {
 		errorMessage, marshalErr := json.Marshal(ValidatorErrors(err))
 		if marshalErr != nil {
 			return nil, marshalErr
@@ -64,20 +64,20 @@ func GetQueryAndValidate[T parameters.RequestQuery](
 		return nil, fmt.Errorf(string(errorMessage))
 	}
 
-	return &params, nil
+	return &query, nil
 }
 
 // GetBodyAndValidate get body from request to struct, validate it and returns.
 func GetBodyAndValidate[T parameters.RequestBody](
 	c *fiber.Ctx,
 ) (*T, error) {
-	var params T
-	if err := c.BodyParser(&params); err != nil {
+	var body T
+	if err := c.BodyParser(&body); err != nil {
 		return nil, err
 	}
 
 	validate := NewValidator()
-	if err := validate.Struct(&params); err != nil {
+	if err := validate.Struct(&body); err != nil {
 		errorMessage, marshalErr := json.Marshal(ValidatorErrors(err))
 		if marshalErr != nil {
 			return nil, marshalErr
@@ -85,5 +85,5 @@ func GetBodyAndValidate[T parameters.RequestBody](
 		return nil, fmt.Errorf(string(errorMessage))
 	}
 
-	return &params, nil
+	return &body, nil
 }

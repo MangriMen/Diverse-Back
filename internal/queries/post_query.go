@@ -22,13 +22,15 @@ func (q *PostQueries) GetPosts(
 	query := `SELECT *
 		FROM posts
 		WHERE created_at < $1
+		AND id <> $2
 		ORDER BY created_at DESC
-		FETCH FIRST $2 ROWS ONLY`
+		FETCH FIRST $3 ROWS ONLY`
 
 	err := q.Select(
 		&posts,
 		query,
 		postsFetchRequestQuery.LastSeenPostCreatedAt,
+		postsFetchRequestQuery.LastSeenPostID,
 		postsFetchRequestQuery.Count,
 	)
 	if err != nil {

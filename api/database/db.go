@@ -8,6 +8,7 @@ import (
 // Queries is struct for storing various queries.
 type Queries struct {
 	*queries.UserQueries
+	*queries.RelationQueries
 	*queries.PostQueries
 	*queries.CommentQueries
 }
@@ -21,8 +22,9 @@ func OpenDBConnection() (*Queries, error) {
 	}
 
 	return &Queries{
-		UserQueries:    &queries.UserQueries{DB: db},
-		PostQueries:    &queries.PostQueries{DB: db},
-		CommentQueries: &queries.CommentQueries{DB: db},
+		UserQueries:     &queries.UserQueries{DB: db},
+		RelationQueries: &queries.RelationQueries{DB: db},
+		PostQueries:     &queries.PostQueries{DB: db},
+		CommentQueries:  &queries.CommentQueries{DB: db},
 	}, nil
 }
