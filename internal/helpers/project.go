@@ -41,3 +41,12 @@ func dir(envFile string) string {
 
 	return filepath.Join(currentDir, envFile)
 }
+
+// IsRunningInContainer return the status of program instance,
+// running in docker container or not.
+func IsRunningInContainer() bool {
+	if _, err := os.Stat("/.dockerenv"); err != nil {
+		return false
+	}
+	return true
+}

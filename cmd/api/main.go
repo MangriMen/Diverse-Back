@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	helpers.LoadEnvironment(".env")
+	if !helpers.IsRunningInContainer() {
+		helpers.LoadEnvironment(".env")
+	}
 
 	server.SetupAPI()
 }
