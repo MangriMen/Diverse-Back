@@ -85,6 +85,7 @@ type UserUpdateRequestBody struct {
 // including fields such as email, username, name or password
 // swagger:parameters updateUser
 type UserUpdateRequest struct {
+	UserIDParams
 	// in: body
 	// required: true
 	Body UserUpdateRequestBody

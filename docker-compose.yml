@@ -45,6 +45,13 @@ services:
     volumes:
       - ".:/app:rw,delegated"
 
+  backend-testing:
+    <<: *backend
+    restart: "no"
+    profiles: [ testing ]
+    volumes:
+      - ".:/app:rw,delegated"
+
   postgres:
     container_name: diverse-postgres-$COMPOSE_PROJECT_NAME
     image: postgres:14.5-alpine

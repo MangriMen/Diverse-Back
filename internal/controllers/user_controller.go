@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/MangriMen/Diverse-Back/api/database"
@@ -31,12 +33,12 @@ import (
 func GetUsers(c *fiber.Ctx) error {
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	dbUsers, err := db.GetUsers()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UsersNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	usersToSend := lo.Map(dbUsers, func(item models.DBUser, index int) models.User {
@@ -75,7 +77,11 @@ func GetUser(c *fiber.Ctx) error {
 
 	dbUser, err := db.GetUser(userIDParams.User)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(responses.GetUserResponseBody{
@@ -104,12 +110,16 @@ func LoginUser(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	foundDBUser, err := db.GetUserByEmail(loginRequestBody.Email)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
@@ -118,7 +128,7 @@ func LoginUser(c *fiber.Ctx) error {
 
 	token, err := jwthelpers.GenerateNewAccessToken(foundDBUser.ID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(responses.RegisterLoginUserResponseBody{
@@ -136,7 +146,7 @@ func LoginUser(c *fiber.Ctx) error {
 // Schemes: http, https
 //
 // Responses:
-//   200: RegisterLoginUserResponse
+//   201: RegisterLoginUserResponse
 //   default: ErrorResponse
 
 // CreateUser is used to create new user.
@@ -148,7 +158,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	_, errEmail := db.GetUserByEmail(registerRequestBody.Email)
@@ -182,15 +192,15 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	if err = db.CreateUser(user); err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	token, err := jwthelpers.GenerateNewAccessToken(user.ID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(
+	return c.Status(fiber.StatusCreated).JSON(
 		responses.RegisterLoginUserResponseBody{
 			Token: token,
 			User:  user.ToUser(),
@@ -209,7 +219,7 @@ func CreateUser(c *fiber.Ctx) error {
 //   bearerAuth:
 //
 // Responses:
-//   201: RegisterLoginUserResponse
+//   200: RegisterLoginUserResponse
 //   default: ErrorResponse
 
 // FetchUser is used to regenerate user token and fetch info.
@@ -221,17 +231,21 @@ func FetchUser(c *fiber.Ctx) error {
 
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	dbUser, err := db.GetUser(userID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	token, err := jwthelpers.GenerateNewAccessToken(userID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(responses.RegisterLoginUserResponseBody{
@@ -262,19 +276,32 @@ func UpdateUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
 	userUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.UserUpdateRequestBody](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	db, err := database.OpenDBConnection()
-	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+	if userID != userIDParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
-	foundUser, err := db.GetUser(userID)
+	db, err := database.OpenDBConnection()
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, configs.UserNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	foundUser, err := db.GetUser(userIDParams.User)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
@@ -295,7 +322,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		}
 
 		if err = db.UpdateUser(&foundUser); err != nil {
-			return helpers.Response(c, fiber.StatusInternalServerError, err)
+			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 		}
 	}
 
@@ -329,11 +356,6 @@ func DeleteUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	validate := helpers.NewValidator()
-	if err = validate.Struct(userIDParams); err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
-	}
-
 	if userID != userIDParams.User {
 		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
@@ -344,7 +366,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	if err = db.DeleteUser(userIDParams.User); err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

@@ -161,6 +161,31 @@ definitions:
         title: GetPostsResponseBody includes the slice of posts.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            relations:
+                items:
+                    $ref: '#/definitions/Relation'
+                type: array
+                x-go-name: Relations
+        required:
+            - error
+            - message
+            - count
+            - relations
+        title: GetRelationResponseBody includes the slice of relations.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetUserResponseBody:
         properties:
             error:
@@ -321,6 +346,33 @@ definitions:
         title: RegisterRequestBody includes the email, username, and password of the user being created.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    Relation:
+        description: Relation represents the relation for this application
+        properties:
+            created_at:
+                description: The time the relation was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            id:
+                description: The id for this relation
+                format: uuid
+                type: string
+                x-go-name: ID
+            relation_user:
+                $ref: '#/definitions/User'
+            type:
+                $ref: '#/definitions/RelationType'
+        required:
+            - id
+            - type
+            - created_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    RelationType:
+        title: RelationType is type for relations between users.
+        type: string
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     UploadDataResponseBody:
         properties:
             error:
@@ -461,7 +513,7 @@ paths:
             produces:
                 - application/json
             responses:
-                "201":
+                "200":
                     $ref: '#/responses/RegisterLoginUserResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
@@ -889,7 +941,7 @@ paths:
             produces:
                 - application/json
             responses:
-                "200":
+                "201":
                     $ref: '#/responses/RegisterLoginUserResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
@@ -990,9 +1042,141 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/{user}/relations:
+        get:
+            description: Returns a list of users from given relation
+            operationId: getRelations
+            parameters:
+                - format: uuid
+                  in: query
+                  name: last_seen_relation_id
+                  type: string
+                  x-go-name: LastSeenRelationID
+                - description: nolint:lll
+                  format: date-time
+                  in: query
+                  name: last_seen_relation_created_at
+                  type: string
+                  x-go-name: LastSeenRelationCreatedAt
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations/{relationUser}:
+        delete:
+            description: Returns relation by id
+            operationId: deleteRelations
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        get:
+            description: Returns a true or false from given relation
+            operationId: getRelationStatus
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relation_user
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
+            produces:
+                - application/json
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationStatusResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        post:
+            description: Add realtion with given info
+            operationId: addRelations
+            produces:
+                - application/json
+            responses:
+                "201":
+                    $ref: '#/responses/AddRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
 produces:
     - application/json
 responses:
+    AddRelationResponse:
+        description: AddRelationResponse represents response for successfully create relation.
+        schema:
+            type: string
     CreateUpdateCommentResponse:
         description: CreateUpdateCommentResponse represents response for successfully create or update comment request.
         schema:
@@ -1005,6 +1189,8 @@ responses:
         description: DeleteCommentResponse represents response for successfully delete comment request.
     DeletePostResponse:
         description: DeletePostResponse represents response for successfully delete post.
+    DeleteRelationResponse:
+        description: DeleteRelationResponse represents response for successfully delete relation request.
     DeleteUserResponse:
         description: DeleteUserResponse represents response for successfully delete user requestt.
     ErrorResponse:
@@ -1029,6 +1215,21 @@ responses:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: '#/definitions/GetPostsResponseBody'
+    GetRelationResponse:
+        description: GetRelationResponse represent the response retrived on get relation request.
+        schema:
+            $ref: '#/definitions/GetRelationResponseBody'
+    GetRelationStatusResponse:
+        description: |-
+            GetRelationStatusResponse represent the response retrived on
+            get relation by relation user request.
+        headers:
+            blocked:
+                type: boolean
+            follower:
+                type: boolean
+            following:
+                type: boolean
     GetUserResponse:
         description: GetUserResponse represent the response retrived on get user request.
         schema:
