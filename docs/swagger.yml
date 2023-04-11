@@ -561,6 +561,15 @@ paths:
                   name: last_seen_post_created_at
                   type: string
                   x-go-name: LastSeenPostCreatedAt
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - format: uuid
+                  in: query
+                  name: user_id
+                  type: string
+                  x-go-name: UserID
                 - format: int64
                   in: query
                   maximum: 50

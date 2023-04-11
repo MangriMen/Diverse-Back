@@ -16,14 +16,16 @@ type PostQueries struct {
 // Returns a slice of posts.
 func (q *PostQueries) GetPosts(
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
+	postFromCondition string,
 ) ([]models.DBPost, error) {
 	posts := []models.DBPost{}
 
 	query := `SELECT *
 		FROM posts
 		WHERE created_at < $1
-		AND id <> $2
-		ORDER BY created_at DESC
+		AND id <> $2` +
+		"\n" + postFromCondition + "\n" +
+		`ORDER BY created_at DESC
 		FETCH FIRST $3 ROWS ONLY`
 
 	err := q.Select(

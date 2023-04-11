@@ -6,6 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// PostFetchType is type for relations between users.
+type PostFetchType string
+
+// Enum for relation type.
+const (
+	Subscriptions PostFetchType = "subscriptions"
+	User          PostFetchType = "user"
+	All           PostFetchType = "all"
+)
+
 // PostIDParams includes the id of the post.
 type PostIDParams struct {
 	// in: path
@@ -64,6 +74,12 @@ type PostsFetchRequestQuery struct {
 
 	// in: query
 	LastSeenPostCreatedAt time.Time `json:"last_seen_post_created_at" validate:"uuid,required_with=last_seen_post_id"`
+
+	// in: query
+	Type PostFetchType `json:"type" validate:"required"`
+
+	// in: query
+	UserID uuid.UUID `json:"user_id" validate:"uuid,required_with=type"`
 
 	// in: query
 	// required: true

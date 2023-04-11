@@ -3,13 +3,17 @@
 package posthelpers
 
 import (
+	"fmt"
+	"math"
 	"time"
 
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/userhelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
 
@@ -56,4 +60,64 @@ func PrepareCommentToPost(comment models.DBComment, db *database.Queries) models
 	}
 
 	return preparedComment
+}
+
+// GenerateFilter TODO
+func GenerateFilter(
+	userID uuid.UUID,
+	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
+	db *database.Queries,
+) (string, error) {
+	var postFromCondition string
+
+	rawRelationStatus, err := db.GetRelationStatus(&parameters.RelationGetStatusParams{
+		UserIDParams: parameters.UserIDParams{User: userID},
+		RelationUserIDParams: parameters.RelationUserIDParams{
+			RelationUser: postsFetchRequestQuery.UserID,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	relationStatus := userhelpers.PrepareRelationStatusToSend(rawRelationStatus)
+
+	switch postsFetchRequestQuery.Type {
+	case parameters.Subscriptions:
+		if relationStatus["blocked"] {
+			return "", fmt.Errorf("can't get posts, blocked by user")
+		}
+
+		rawRelations, rawRelationsErr := db.GetRelations(
+			userID,
+			&parameters.RelationGetRequestQuery{
+				Type:  models.Following,
+				Count: math.MaxInt64,
+			},
+		)
+		if rawRelationsErr != nil {
+			return "", rawRelationsErr
+		}
+
+		relations := lo.Map(
+			rawRelations,
+			func(item models.DBRelation, index int) models.Relation {
+				return *userhelpers.PrepareRelationToSend(item, db)
+			},
+		)
+
+		for _, relation := range relations {
+			postFromCondition += fmt.Sprintf("AND user_id='%s'", relation.RelationUser.ID.String())
+		}
+	case parameters.User:
+		if relationStatus["blocked"] {
+			return "", fmt.Errorf("can't get posts, blocked by user")
+		}
+
+		postFromCondition = fmt.Sprintf("AND user_id='%s'", postsFetchRequestQuery.UserID)
+	case parameters.All:
+		postFromCondition = ""
+	}
+
+	return postFromCondition, nil
 }

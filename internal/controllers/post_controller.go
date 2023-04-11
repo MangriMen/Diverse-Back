@@ -36,6 +36,11 @@ import (
 
 // GetPosts is used to fetch posts from database with request parameters.
 func GetPosts(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.PostsFetchRequestQuery](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -50,9 +55,14 @@ func GetPosts(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	dbPosts, err := db.GetPosts(postsFetchRequestQuery)
+	filter, err := posthelpers.GenerateFilter(userID, postsFetchRequestQuery, db)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.PostsNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	dbPosts, err := db.GetPosts(postsFetchRequestQuery, filter)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
