@@ -49,7 +49,7 @@ func UploadData(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(
 		responses.UploadDataResponseBody{
-			ID: filename,
+			Path: filepath.Join("/data", baseType, "raw", filename),
 		},
 	)
 }

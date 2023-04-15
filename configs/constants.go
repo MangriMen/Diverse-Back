@@ -19,7 +19,7 @@ const PostFetchCommentCount = 20
 const DataPath = "/var/lib/backend-data/"
 
 // BodyLimit is limit for body size in bits.
-const BodyLimit = 1024 * 1024 * 1024
+const BodyLimit = 1024 * 1024 * 1024 * 8
 
 // Constants for MIME base types.
 const (

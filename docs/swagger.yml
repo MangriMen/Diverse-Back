@@ -379,15 +379,15 @@ definitions:
                 example: false
                 type: boolean
                 x-go-name: Error
-            id:
-                type: string
-                x-go-name: ID
             message:
                 x-go-name: Message
+            path:
+                type: string
+                x-go-name: Path
         required:
             - error
             - message
-            - id
+            - path
         title: UploadDataResponseBody includes the id of uploaded data.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
@@ -556,7 +556,8 @@ paths:
                   name: last_seen_post_id
                   type: string
                   x-go-name: LastSeenPostID
-                - format: date-time
+                - description: nolint:lll
+                  format: date-time
                   in: query
                   name: last_seen_post_created_at
                   type: string
