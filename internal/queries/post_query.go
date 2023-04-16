@@ -107,6 +107,20 @@ func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
 	return nil
 }
 
+// GetIsLiked gets status of like for given post and user.
+func (q *PostQueries) GetIsLiked(postID uuid.UUID, userID uuid.UUID) (bool, error) {
+	likesCount := 0
+
+	query := `SELECT Count(*) FROM post_likes WHERE post_id = $1 AND user_id = $2`
+
+	err := q.Get(&likesCount, query, postID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return likesCount > 0, nil
+}
+
 // DeletePost deletes post based on the given ID.
 func (q *PostQueries) DeletePost(id uuid.UUID) error {
 	query := `DELETE FROM posts WHERE id = $1`

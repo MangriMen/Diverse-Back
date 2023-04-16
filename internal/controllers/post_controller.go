@@ -66,7 +66,7 @@ func GetPosts(c *fiber.Ctx) error {
 	}
 
 	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
-		return posthelpers.PreparePostToSend(item, db)
+		return posthelpers.PreparePostToSend(item, userID, db)
 	})
 
 	return c.JSON(responses.GetPostsResponseBody{
@@ -92,6 +92,11 @@ func GetPosts(c *fiber.Ctx) error {
 
 // GetPost is used to fetch post from database by ID.
 func GetPost(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -107,7 +112,7 @@ func GetPost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(dbPost, db)
+	postToSend := posthelpers.PreparePostToSend(dbPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
 		Post: postToSend,
@@ -238,7 +243,7 @@ func UpdatePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
 		Post: postToSend,
@@ -297,7 +302,7 @@ func LikePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
 		Post: postToSend,
@@ -350,7 +355,7 @@ func UnlikePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
 		Post: postToSend,

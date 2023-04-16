@@ -34,6 +34,9 @@ definitions:
                 format: uuid
                 type: string
                 x-go-name: ID
+            liked_by_me:
+                type: boolean
+                x-go-name: LikedByMe
             likes:
                 description: Number of likes
                 format: int64
@@ -272,6 +275,9 @@ definitions:
                 format: uuid
                 type: string
                 x-go-name: ID
+            liked_by_me:
+                type: boolean
+                x-go-name: LikedByMe
             likes:
                 description: Number of likes
                 format: int64

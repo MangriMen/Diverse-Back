@@ -4,6 +4,7 @@ package posthelpers
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"time"
 
@@ -20,8 +21,15 @@ import (
 // PreparePostToSend prepares a post object for sending by fetching additional data from the database
 // such as the user associated with the post and the comments associated with the post.
 // The function then returns the prepared post object.
-func PreparePostToSend(post models.DBPost, db *database.Queries) models.Post {
+func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Queries) models.Post {
 	preparedPost := post.ToPost()
+
+	log.Print(post.ID, userID)
+
+	isLikedByRequester, err := db.GetIsLiked(post.ID, userID)
+	if err == nil {
+		preparedPost.LikedByMe = isLikedByRequester
+	}
 
 	user, err := db.GetUser(post.UserID)
 	if err == nil {
