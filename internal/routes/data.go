@@ -17,12 +17,10 @@ func DataPublicRoutes(route fiber.Router) {
 	//
 	// Produces:
 	//   - image/webp
-	//   - application/json
-	//
-	// Schemes: http, https
 	//
 	// Responses:
-	//   200: StatusOk
+	//   200: SuccessResponse
+	//   304: SuccessResponse
 	//   default: ErrorResponse
 
 	route.Static(

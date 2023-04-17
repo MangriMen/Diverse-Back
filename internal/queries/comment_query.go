@@ -15,7 +15,6 @@ type CommentQueries struct {
 
 // GetComments is used to fetch comments related to a post based
 // on a provided post ID.
-// Returns a slice of comments and a error.
 func (q *PostQueries) GetComments(
 	postID uuid.UUID,
 	commentsFetchRequestQuery *parameters.CommentsFetchRequestQuery,

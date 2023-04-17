@@ -13,7 +13,6 @@ type PostQueries struct {
 }
 
 // GetPosts is used to fetch posts.
-// Returns a slice of posts.
 func (q *PostQueries) GetPosts(
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
 	postFromCondition string,

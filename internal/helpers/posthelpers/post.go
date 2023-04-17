@@ -20,7 +20,6 @@ import (
 
 // PreparePostToSend prepares a post object for sending by fetching additional data from the database
 // such as the user associated with the post and the comments associated with the post.
-// The function then returns the prepared post object.
 func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Queries) models.Post {
 	preparedPost := post.ToPost()
 
@@ -56,9 +55,7 @@ func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Querie
 }
 
 // PrepareCommentToPost prepares a comment object for inclusion in a post object
-// by fetching additional data from the database
-// such as the user associated with the comment.
-// The function then returns the prepared comment object.
+// by fetching additional data from the database such as the user associated with the comment.
 func PrepareCommentToPost(comment models.DBComment, db *database.Queries) models.Comment {
 	preparedComment := comment.ToComment()
 
@@ -70,7 +67,7 @@ func PrepareCommentToPost(comment models.DBComment, db *database.Queries) models
 	return preparedComment
 }
 
-// GenerateFilter TODO
+// GenerateFilter generates a filter for SQL query to fetch posts by the specified parameters.
 func GenerateFilter(
 	userID uuid.UUID,
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,

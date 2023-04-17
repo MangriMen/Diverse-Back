@@ -21,11 +21,6 @@ import (
 // swagger:route GET /posts/{post}/comments Post getComments
 // Returns a list of post comments
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -75,11 +70,6 @@ func GetComments(c *fiber.Ctx) error {
 
 // swagger:route POST /posts/{post}/comments Post addComment
 // Add comment to the given post
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -148,11 +138,6 @@ func AddComment(c *fiber.Ctx) error {
 
 // swagger:route PATCH /posts/{post}/comments/{comment} Post updateComment
 // Update comment content by comment ID with given post ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -232,11 +217,6 @@ func UpdateComment(c *fiber.Ctx) error {
 // swagger:route POST /posts/{post}/comments/{comment}/like Post likeComment
 // Set like to the comment by ID
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -290,11 +270,6 @@ func LikeComment(c *fiber.Ctx) error {
 
 // swagger:route DELETE /posts/{post}/comments/{comment}/like Post unlikeComment
 // Unset like to the comment by ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:

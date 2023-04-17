@@ -6,17 +6,13 @@ import (
 
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/datahelpers"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 )
 
 // swagger:route POST /data Data uploadData
 // Returns the ID of uploaded data
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Responses:
 //   200: UploadDataResponse
@@ -29,12 +25,15 @@ func UploadData(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	baseType, _, err := helpers.ValidateContentType(receivedFile, configs.GetAllowedMIMEBaseTypes())
+	baseType, _, err := datahelpers.ValidateContentType(
+		receivedFile,
+		configs.GetAllowedMIMEBaseTypes(),
+	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusUnsupportedMediaType, err.Error())
 	}
 
-	filename := helpers.GenerateUniqueFilename()
+	filename := datahelpers.GenerateUniqueFilename()
 	pathToFolder := filepath.Join(configs.DataPath, baseType)
 
 	err = os.MkdirAll(pathToFolder, os.ModePerm)
@@ -42,7 +41,7 @@ func UploadData(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	err = helpers.ProcessFile(receivedFile, filepath.Join(pathToFolder, filename))
+	err = datahelpers.ProcessFile(receivedFile, filepath.Join(pathToFolder, filename))
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}

@@ -22,11 +22,6 @@ import (
 // swagger:route GET /posts Post getPosts
 // Returns a list of all posts
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -78,11 +73,6 @@ func GetPosts(c *fiber.Ctx) error {
 // swagger:route GET /posts/{post} Post getPost
 // Returns the post by given ID
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -121,11 +111,6 @@ func GetPost(c *fiber.Ctx) error {
 
 // swagger:route POST /posts Post createPost
 // Creates the post with given info
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -176,11 +161,6 @@ func CreatePost(c *fiber.Ctx) error {
 
 // swagger:route PATCH /posts/{post} Post updatePost
 // Update post by ID with given fields
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -253,11 +233,6 @@ func UpdatePost(c *fiber.Ctx) error {
 // swagger:route POST /posts/{post}/like Post likePost
 // Set like to the post by ID
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -311,11 +286,6 @@ func LikePost(c *fiber.Ctx) error {
 
 // swagger:route DELETE /posts/{post}/like Post unlikePost
 // Unset like to the post by ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:

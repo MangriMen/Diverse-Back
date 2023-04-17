@@ -1,3 +1,4 @@
+// Package helpers provides a set of helper functions for handling various tasks
 package helpers
 
 import (
@@ -6,26 +7,29 @@ import (
 
 	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
+	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-// GetUserIDFromToken parse JWT token and returns user ID.
+// GetUserIDFromToken parses the JWT token and returns the user id.
 func GetUserIDFromToken(c *fiber.Ctx) (uuid.UUID, error) {
-	claims, err := jwthelpers.GetTokenMetadata(c)
+	userID := uuid.UUID{}
+
+	claims, err := jwthelpers.GetTokenClaims(c)
 	if err != nil {
-		return uuid.UUID{}, err
+		return userID, err
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	userID, err = uuid.Parse(claims.ID)
 	if err != nil {
-		return uuid.UUID{}, err
+		return userID, err
 	}
 
 	return userID, nil
 }
 
-// GetParamsAndValidate get parameters from request to struct, validate it and returns.
+// GetParamsAndValidate parses parameters from the request to the structure, validate it and returns.
 func GetParamsAndValidate[T parameters.RequestParams](
 	c *fiber.Ctx,
 ) (*T, error) {
@@ -46,7 +50,7 @@ func GetParamsAndValidate[T parameters.RequestParams](
 	return &params, nil
 }
 
-// GetQueryAndValidate get query from request to struct, validate it and returns.
+// GetQueryAndValidate parses query from the request to the structure, validate it and returns.
 func GetQueryAndValidate[T parameters.RequestQuery](
 	c *fiber.Ctx,
 ) (*T, error) {
@@ -67,7 +71,7 @@ func GetQueryAndValidate[T parameters.RequestQuery](
 	return &query, nil
 }
 
-// GetBodyAndValidate get body from request to struct, validate it and returns.
+// GetBodyAndValidate parses body from the request to the structure, validate it and returns.
 func GetBodyAndValidate[T parameters.RequestBody](
 	c *fiber.Ctx,
 ) (*T, error) {
@@ -86,4 +90,12 @@ func GetBodyAndValidate[T parameters.RequestBody](
 	}
 
 	return &body, nil
+}
+
+// Response used to compact return default error response.
+func Response(c *fiber.Ctx, responseStatus int, err interface{}) error {
+	return c.Status(responseStatus).JSON(responses.BaseResponseBody{
+		Error:   true,
+		Message: &err,
+	})
 }

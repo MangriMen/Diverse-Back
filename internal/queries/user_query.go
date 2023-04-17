@@ -11,8 +11,7 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-// GetUsers is used to fetch users
-// Returns a slice of users.
+// GetUsers is used to fetch users.
 func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 	users := []models.DBUser{}
 
