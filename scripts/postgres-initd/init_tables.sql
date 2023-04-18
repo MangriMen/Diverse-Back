@@ -5,7 +5,7 @@
 -- Dumped from database version 14.5
 -- Dumped by pg_dump version 14.7
 
--- Started on 2023-04-17 19:32:48 UTC
+-- Started on 2023-04-18 17:26:44 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -27,7 +27,7 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
 
 
 --
--- TOC entry 3401 (class 0 OID 0)
+-- TOC entry 3403 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION pg_stat_statements; Type: COMMENT; Schema: -; Owner:
 --
@@ -267,6 +267,15 @@ ALTER TABLE ONLY public.comments
 
 
 --
+-- TOC entry 3239 (class 2606 OID 24696)
+-- Name: users email; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT email UNIQUE (email);
+
+
+--
 -- TOC entry 3231 (class 2606 OID 16456)
 -- Name: post_likes post_likes_pkey; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
@@ -285,12 +294,12 @@ ALTER TABLE ONLY public.posts
 
 
 --
--- TOC entry 3227 (class 2606 OID 16460)
+-- TOC entry 3227 (class 2606 OID 24692)
 -- Name: comment_likes user_comment; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
 ALTER TABLE ONLY public.comment_likes
-    ADD CONSTRAINT user_comment UNIQUE (comment_id) INCLUDE (user_id);
+    ADD CONSTRAINT user_comment UNIQUE (comment_id, user_id);
 
 
 --
@@ -303,16 +312,16 @@ ALTER TABLE ONLY public.user_info
 
 
 --
--- TOC entry 3233 (class 2606 OID 16464)
+-- TOC entry 3233 (class 2606 OID 24690)
 -- Name: post_likes user_post; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
 ALTER TABLE ONLY public.post_likes
-    ADD CONSTRAINT user_post UNIQUE (post_id) INCLUDE (user_id);
+    ADD CONSTRAINT user_post UNIQUE (post_id, user_id);
 
 
 --
--- TOC entry 3241 (class 2606 OID 16466)
+-- TOC entry 3243 (class 2606 OID 16466)
 -- Name: user_relations user_relations_pkey; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -321,7 +330,7 @@ ALTER TABLE ONLY public.user_relations
 
 
 --
--- TOC entry 3239 (class 2606 OID 16468)
+-- TOC entry 3241 (class 2606 OID 16468)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -330,7 +339,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3253 (class 2620 OID 16469)
+-- TOC entry 3255 (class 2620 OID 16469)
 -- Name: users add_user_info_trigger; Type: TRIGGER; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -338,7 +347,7 @@ CREATE TRIGGER add_user_info_trigger AFTER INSERT ON public.users FOR EACH ROW E
 
 
 --
--- TOC entry 3251 (class 2620 OID 16470)
+-- TOC entry 3253 (class 2620 OID 16470)
 -- Name: comment_likes update_likes_count_on_post_trigger; Type: TRIGGER; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -346,7 +355,7 @@ CREATE TRIGGER update_likes_count_on_post_trigger AFTER INSERT OR DELETE ON publ
 
 
 --
--- TOC entry 3252 (class 2620 OID 16471)
+-- TOC entry 3254 (class 2620 OID 16471)
 -- Name: post_likes update_likes_count_on_post_trigger; Type: TRIGGER; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -354,7 +363,7 @@ CREATE TRIGGER update_likes_count_on_post_trigger AFTER INSERT OR DELETE ON publ
 
 
 --
--- TOC entry 3242 (class 2606 OID 16472)
+-- TOC entry 3244 (class 2606 OID 16472)
 -- Name: comment_likes comment_fk; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -363,16 +372,16 @@ ALTER TABLE ONLY public.comment_likes
 
 
 --
--- TOC entry 3244 (class 2606 OID 16477)
+-- TOC entry 3247 (class 2606 OID 24707)
 -- Name: comments fk_post; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
 ALTER TABLE ONLY public.comments
-    ADD CONSTRAINT fk_post FOREIGN KEY (post_id) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT fk_post FOREIGN KEY (post_id) REFERENCES public.posts(id) NOT VALID;
 
 
 --
--- TOC entry 3248 (class 2606 OID 16482)
+-- TOC entry 3250 (class 2606 OID 24702)
 -- Name: posts fk_post_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -381,7 +390,7 @@ ALTER TABLE ONLY public.posts
 
 
 --
--- TOC entry 3249 (class 2606 OID 16487)
+-- TOC entry 3251 (class 2606 OID 16487)
 -- Name: user_info fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -390,16 +399,7 @@ ALTER TABLE ONLY public.user_info
 
 
 --
--- TOC entry 3250 (class 2606 OID 16497)
--- Name: user_relations fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
---
-
-ALTER TABLE ONLY public.user_relations
-    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE NOT VALID;
-
-
---
--- TOC entry 3245 (class 2606 OID 16502)
+-- TOC entry 3246 (class 2606 OID 16502)
 -- Name: comments fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -408,7 +408,7 @@ ALTER TABLE ONLY public.comments
 
 
 --
--- TOC entry 3243 (class 2606 OID 16507)
+-- TOC entry 3245 (class 2606 OID 16507)
 -- Name: comment_likes fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -417,7 +417,7 @@ ALTER TABLE ONLY public.comment_likes
 
 
 --
--- TOC entry 3247 (class 2606 OID 16512)
+-- TOC entry 3249 (class 2606 OID 16512)
 -- Name: post_likes fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -426,7 +426,16 @@ ALTER TABLE ONLY public.post_likes
 
 
 --
--- TOC entry 3246 (class 2606 OID 16492)
+-- TOC entry 3252 (class 2606 OID 24712)
+-- Name: user_relations fk_user; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
+--
+
+ALTER TABLE ONLY public.user_relations
+    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES public.users(id) NOT VALID;
+
+
+--
+-- TOC entry 3248 (class 2606 OID 16492)
 -- Name: post_likes post_fk; Type: FK CONSTRAINT; Schema: public; Owner: ea1fb999-4aab-4142-9101-facdc7d5b83b
 --
 
@@ -434,7 +443,7 @@ ALTER TABLE ONLY public.post_likes
     ADD CONSTRAINT post_fk FOREIGN KEY (post_id) REFERENCES public.posts(id);
 
 
--- Completed on 2023-04-17 19:32:48 UTC
+-- Completed on 2023-04-18 17:26:44 UTC
 
 --
 -- PostgreSQL database dump complete
