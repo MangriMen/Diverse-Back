@@ -66,7 +66,7 @@ func GetPosts(c *fiber.Ctx) error {
 
 	return c.JSON(responses.GetPostsResponseBody{
 		Count: len(postsToSend),
-		Posts: postsToSend,
+		Data:  postsToSend,
 	})
 }
 
@@ -105,7 +105,7 @@ func GetPost(c *fiber.Ctx) error {
 	postToSend := posthelpers.PreparePostToSend(dbPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
@@ -226,7 +226,7 @@ func UpdatePost(c *fiber.Ctx) error {
 	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
@@ -280,7 +280,7 @@ func LikePost(c *fiber.Ctx) error {
 	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
@@ -328,7 +328,7 @@ func UnlikePost(c *fiber.Ctx) error {
 	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 

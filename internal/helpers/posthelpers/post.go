@@ -4,7 +4,6 @@ package posthelpers
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"time"
 
@@ -23,9 +22,7 @@ import (
 func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Queries) models.Post {
 	preparedPost := post.ToPost()
 
-	log.Print(post.ID, userID)
-
-	isLikedByRequester, err := db.GetIsLiked(post.ID, userID)
+	isLikedByRequester, err := db.GetPostIsLiked(post.ID, userID)
 	if err == nil {
 		preparedPost.LikedByMe = isLikedByRequester
 	}
@@ -46,7 +43,7 @@ func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Querie
 		preparedPost.Comments = lo.Map(
 			comments,
 			func(item models.DBComment, index int) models.Comment {
-				return PrepareCommentToPost(item, db)
+				return PrepareCommentToPost(item, userID, db)
 			},
 		)
 	}
@@ -56,8 +53,17 @@ func PreparePostToSend(post models.DBPost, userID uuid.UUID, db *database.Querie
 
 // PrepareCommentToPost prepares a comment object for inclusion in a post object
 // by fetching additional data from the database such as the user associated with the comment.
-func PrepareCommentToPost(comment models.DBComment, db *database.Queries) models.Comment {
+func PrepareCommentToPost(
+	comment models.DBComment,
+	userID uuid.UUID,
+	db *database.Queries,
+) models.Comment {
 	preparedComment := comment.ToComment()
+
+	isLikedByRequester, err := db.GetCommentIsLiked(comment.ID, userID)
+	if err == nil {
+		preparedComment.LikedByMe = isLikedByRequester
+	}
 
 	user, err := db.GetUser(comment.UserID)
 	if err == nil {

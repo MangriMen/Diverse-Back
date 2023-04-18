@@ -106,8 +106,8 @@ func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
 	return nil
 }
 
-// GetIsLiked gets status of like for given post and user.
-func (q *PostQueries) GetIsLiked(postID uuid.UUID, userID uuid.UUID) (bool, error) {
+// GetPostIsLiked gets status of like for given post and user.
+func (q *PostQueries) GetPostIsLiked(postID uuid.UUID, userID uuid.UUID) (bool, error) {
 	likesCount := 0
 
 	query := `SELECT Count(*) FROM post_likes WHERE post_id = $1 AND user_id = $2`

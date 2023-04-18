@@ -30,6 +30,11 @@ import (
 
 // GetComments is used to fetch the post comments by post ID.
 func GetComments(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](
 		c,
 	)
@@ -59,12 +64,12 @@ func GetComments(c *fiber.Ctx) error {
 	}
 
 	commentsToSend := lo.Map(dbPosts, func(item models.DBComment, index int) models.Comment {
-		return posthelpers.PrepareCommentToPost(item, db)
+		return posthelpers.PrepareCommentToPost(item, userID, db)
 	})
 
 	return c.JSON(responses.GetCommentsResponseBody{
-		Count:    len(commentsToSend),
-		Comments: commentsToSend,
+		Count: len(commentsToSend),
+		Data:  commentsToSend,
 	})
 }
 
@@ -207,10 +212,10 @@ func UpdateComment(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
+	commentToSend := posthelpers.PrepareCommentToPost(foundComment, userID, db)
 
 	return c.JSON(responses.GetCommentResponseBody{
-		Comment: commentToSend,
+		Data: commentToSend,
 	})
 }
 
@@ -261,10 +266,10 @@ func LikeComment(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
-	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
+	commentToSend := posthelpers.PrepareCommentToPost(foundComment, userID, db)
 
 	return c.JSON(responses.GetCommentResponseBody{
-		Comment: commentToSend,
+		Data: commentToSend,
 	})
 }
 
@@ -309,10 +314,10 @@ func UnlikeComment(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.CommentNotFoundError)
 	}
 
-	commentToSend := posthelpers.PrepareCommentToPost(foundComment, db)
+	commentToSend := posthelpers.PrepareCommentToPost(foundComment, userID, db)
 
 	return c.JSON(responses.GetCommentResponseBody{
-		Comment: commentToSend,
+		Data: commentToSend,
 	})
 }
 

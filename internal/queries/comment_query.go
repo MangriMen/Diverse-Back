@@ -108,6 +108,20 @@ func (q *PostQueries) UnlikeComment(l *models.DBCommentLike) error {
 	return nil
 }
 
+// GetCommentIsLiked gets status of like for given comment and user.
+func (q *PostQueries) GetCommentIsLiked(commentID uuid.UUID, userID uuid.UUID) (bool, error) {
+	likesCount := 0
+
+	query := `SELECT Count(*) FROM comment_likes WHERE comment_id = $1 AND user_id = $2`
+
+	err := q.Get(&likesCount, query, commentID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return likesCount > 0, nil
+}
+
 // DeleteComment deletes comment from database based on the given comment ID.
 func (q *PostQueries) DeleteComment(id uuid.UUID) error {
 	query := `DELETE FROM comments WHERE id = $1`

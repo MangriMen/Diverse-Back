@@ -81,7 +81,7 @@ definitions:
             GetCommentResponseBody includes the signle comment for a post
             based on given post and comment ID.
         properties:
-            comment:
+            data:
                 $ref: '#/definitions/Comment'
             error:
                 example: false
@@ -92,7 +92,7 @@ definitions:
         required:
             - error
             - message
-            - comment
+            - data
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetCommentsResponseBody:
@@ -100,15 +100,15 @@ definitions:
             GetCommentsResponseBody includes the slice of comments for a post
             and its count.
         properties:
-            comments:
-                items:
-                    $ref: '#/definitions/Comment'
-                type: array
-                x-go-name: Comments
             count:
                 format: int64
                 type: integer
                 x-go-name: Count
+            data:
+                items:
+                    $ref: '#/definitions/Comment'
+                type: array
+                x-go-name: Data
             error:
                 example: false
                 type: boolean
@@ -119,23 +119,23 @@ definitions:
             - error
             - message
             - count
-            - comments
+            - data
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostResponseBody:
         properties:
+            data:
+                $ref: '#/definitions/Post'
             error:
                 example: false
                 type: boolean
                 x-go-name: Error
             message:
                 x-go-name: Message
-            post:
-                $ref: '#/definitions/Post'
         required:
             - error
             - message
-            - post
+            - data
         title: GetPostResponseBody includes the signle post for a given ID.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
@@ -145,22 +145,22 @@ definitions:
                 format: int64
                 type: integer
                 x-go-name: Count
+            data:
+                items:
+                    $ref: '#/definitions/Post'
+                type: array
+                x-go-name: Data
             error:
                 example: false
                 type: boolean
                 x-go-name: Error
             message:
                 x-go-name: Message
-            posts:
-                items:
-                    $ref: '#/definitions/Post'
-                type: array
-                x-go-name: Posts
         required:
             - error
             - message
             - count
-            - posts
+            - data
         title: GetPostsResponseBody includes the slice of posts.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
@@ -441,6 +441,9 @@ definitions:
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
     UserUpdateRequestBody:
         properties:
+            avatar_url:
+                type: string
+                x-go-name: AvatarURL
             email:
                 maxLength: 255
                 minLength: 6
@@ -480,6 +483,40 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/UploadDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - Data
+    /data/{type}/{image}:
+        get:
+            description: Returns the requested data
+            operationId: getData
+            parameters:
+                - in: path
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+                - in: path
+                  name: image
+                  required: true
+                  type: string
+                  x-go-name: Image
+                - format: int64
+                  in: query
+                  name: width
+                  required: true
+                  type: integer
+                  x-go-name: Width
+                - format: int64
+                  in: query
+                  name: height
+                  required: true
+                  type: integer
+                  x-go-name: Height
+            responses:
+                "304":
+                    $ref: '#/responses/SuccessResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             tags:

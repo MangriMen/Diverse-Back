@@ -279,22 +279,24 @@ func UpdateUser(c *fiber.Ctx) error {
 	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
 	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
 
+	foundUser.AvatarURL = helpers.GetNotEmpty(userUpdateRequestBody.AvatarURL, foundUser.AvatarURL)
+
 	if userUpdateRequestBody.Password != "" {
 		foundUser.Password, err = userhelpers.HashPassword(userUpdateRequestBody.Password)
 		if err != nil {
 			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 		}
+	}
 
-		foundUser.UpdatedAt = time.Now()
+	foundUser.UpdatedAt = time.Now()
 
-		validate := helpers.NewValidator()
-		if err = validate.Struct(foundUser); err != nil {
-			return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
-		}
+	validate := helpers.NewValidator()
+	if err = validate.Struct(foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+	}
 
-		if err = db.UpdateUser(&foundUser); err != nil {
-			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
-		}
+	if err = db.UpdateUser(&foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)

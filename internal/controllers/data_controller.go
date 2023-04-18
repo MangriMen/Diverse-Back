@@ -3,13 +3,80 @@ package controllers
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/MangriMen/Diverse-Back/internal/helpers/datahelpers"
+	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
+	"github.com/h2non/bimg"
 )
+
+// swagger:route GET /data/{type}/{image} Data getData
+// Returns the requested data
+//
+// Responses:
+//   304: SuccessResponse
+//   default: ErrorResponse
+
+// GetData is used to get data with parameters.
+func GetData(c *fiber.Ctx) error {
+	getDataRequestParams, err := helpers.GetParamsAndValidate[parameters.GetDataRequestParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	getDataRequestQuery, err := helpers.GetQueryAndValidate[parameters.GetDataRequestQuery](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if getDataRequestParams.Type == configs.MIMEBaseImage {
+		file, err := bimg.Read(
+			filepath.Join(
+				configs.DataPath,
+				getDataRequestParams.Type,
+				getDataRequestParams.Image,
+			),
+		)
+		if err != nil {
+			return err
+		}
+
+		var options bimg.Options
+
+		switch {
+		case getDataRequestQuery.Width != nil:
+			options = bimg.Options{Width: *getDataRequestQuery.Width}
+		case getDataRequestQuery.Height != nil:
+			options = bimg.Options{Height: *getDataRequestQuery.Height}
+		default:
+			return helpers.Response(c, fiber.StatusBadRequest, "Specify width or height parameter")
+		}
+
+		image, err := bimg.NewImage(file).Process(options)
+		if err != nil {
+			return err
+		}
+
+		c.Set(
+			"Content-Type",
+			strings.Join(
+				[]string{
+					getDataRequestParams.Type,
+					bimg.ImageTypeName(bimg.DetermineImageType(image)),
+				},
+				"/",
+			),
+		)
+
+		return c.Send(image)
+	}
+
+	return helpers.Response(c, fiber.StatusBadRequest, "Invalid type")
+}
 
 // swagger:route POST /data Data uploadData
 // Returns the ID of uploaded data
@@ -48,7 +115,7 @@ func UploadData(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(
 		responses.UploadDataResponseBody{
-			Path: filepath.Join("/data", baseType, "raw", filename),
+			Path: filepath.Join("/data", baseType, filename),
 		},
 	)
 }
