@@ -34,15 +34,15 @@ func GetData(c *fiber.Ctx) error {
 	}
 
 	if getDataRequestParams.Type == configs.MIMEBaseImage {
-		file, err := bimg.Read(
+		file, fileErr := bimg.Read(
 			filepath.Join(
 				configs.DataPath,
 				getDataRequestParams.Type,
 				getDataRequestParams.Image,
 			),
 		)
-		if err != nil {
-			return err
+		if fileErr != nil {
+			return fileErr
 		}
 
 		var options bimg.Options
@@ -52,13 +52,11 @@ func GetData(c *fiber.Ctx) error {
 			options = bimg.Options{Width: *getDataRequestQuery.Width}
 		case getDataRequestQuery.Height != nil:
 			options = bimg.Options{Height: *getDataRequestQuery.Height}
-		default:
-			return helpers.Response(c, fiber.StatusBadRequest, "Specify width or height parameter")
 		}
 
-		image, err := bimg.NewImage(file).Process(options)
-		if err != nil {
-			return err
+		image, imageErr := bimg.NewImage(file).Process(options)
+		if imageErr != nil {
+			return imageErr
 		}
 
 		c.Set(
