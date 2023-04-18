@@ -8,7 +8,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
     && apt install -y git libvips-dev \
     make openssh-client
 
-RUN go install github.com/cosmtrek/air@${AIR_VERSION} \
+RUN go install github.com/cosmtrek/air@latest \
     && go install github.com/go-delve/delve/cmd/dlv@latest
 
 CMD air
