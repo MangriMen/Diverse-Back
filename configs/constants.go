@@ -41,21 +41,24 @@ const (
 
 // Constants for response.
 const (
-	UserNotFoundError      = "User with this ID not found"
-	UsersNotFoundError     = "Users not found"
-	UserAlreadyExistsError = "User with this email or username already exists"
+	UserNotFoundError      = "user with this ID not found"
+	UsersNotFoundError     = "users not found"
+	UserAlreadyExistsError = "user with this email or username already exists"
 	/* #nosec */
-	WrongEmailOrPasswordError = "Wrong email or password"
+	WrongEmailOrPasswordError = "wrong email or password"
+	UserBlocked               = "blocked by user"
+	RelationsGetError         = "relations getting error"
 
-	PostNotFoundError  = "Post with this ID not found"
-	PostsNotFoundError = "Posts not found"
+	PostNotFoundError  = "post with this ID not found"
+	PostsNotFoundError = "posts not found"
+	PostsInvalidFilter = "invalid filter option"
 
-	CommentNotFoundError  = "Comment with this ID not found"
-	CommentsNotFoundError = "Comments not found"
+	CommentNotFoundError  = "comment with this ID not found"
+	CommentsNotFoundError = "comments not found"
 
-	ForbiddenError = "Not enough permission"
+	ForbiddenError = "not enough permission"
 
-	CantEditAfterErrorFormat = "Can't edit %s after %s"
+	CantEditAfterErrorFormat = "can't edit %s after %s"
 )
 
 // TestResponseTimeout is response timeout for tests.

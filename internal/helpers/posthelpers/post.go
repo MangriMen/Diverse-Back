@@ -79,35 +79,24 @@ func GenerateFilter(
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
 	db *database.Queries,
 ) (string, error) {
-	var postFromCondition string
-
-	rawRelationStatus, err := db.GetRelationStatus(&parameters.RelationGetStatusParams{
-		UserIDParams: parameters.UserIDParams{User: userID},
-		RelationUserIDParams: parameters.RelationUserIDParams{
-			RelationUser: postsFetchRequestQuery.UserID,
-		},
-	})
-	if err != nil {
-		return "", err
-	}
-
-	relationStatus := userhelpers.PrepareRelationStatusToSend(rawRelationStatus)
+	const conditionFormatString = "AND user_id='%s'"
 
 	switch postsFetchRequestQuery.Type {
 	case parameters.Subscriptions:
-		if relationStatus["blocked"] {
-			return "", fmt.Errorf("can't get posts, blocked by user")
-		}
-
 		rawRelations, rawRelationsErr := db.GetRelations(
 			userID,
 			&parameters.RelationGetRequestQuery{
-				Type:  models.Following,
-				Count: math.MaxInt64,
+				Type:                      models.Following,
+				Count:                     math.MaxInt64,
+				LastSeenRelationCreatedAt: time.Now(),
 			},
 		)
 		if rawRelationsErr != nil {
 			return "", rawRelationsErr
+		}
+
+		if len(rawRelations) == 0 {
+			return "", fmt.Errorf(configs.RelationsGetError)
 		}
 
 		relations := lo.Map(
@@ -117,18 +106,32 @@ func GenerateFilter(
 			},
 		)
 
+		condition := ""
 		for _, relation := range relations {
-			postFromCondition += fmt.Sprintf("AND user_id='%s'", relation.RelationUser.ID.String())
+			condition += fmt.Sprintf(conditionFormatString, relation.RelationUser.ID.String())
 		}
+		return condition, nil
 	case parameters.User:
-		if relationStatus["blocked"] {
-			return "", fmt.Errorf("can't get posts, blocked by user")
+		rawRelationStatus, err := db.GetRelationStatus(&parameters.RelationGetStatusParams{
+			UserIDParams: parameters.UserIDParams{User: userID},
+			RelationUserIDParams: parameters.RelationUserIDParams{
+				RelationUser: postsFetchRequestQuery.UserID,
+			},
+		})
+		if err != nil {
+			return "", err
 		}
 
-		postFromCondition = fmt.Sprintf("AND user_id='%s'", postsFetchRequestQuery.UserID)
-	case parameters.All:
-		postFromCondition = ""
-	}
+		relationStatus := userhelpers.PrepareRelationStatusToSend(rawRelationStatus)
 
-	return postFromCondition, nil
+		if relationStatus["blocked"] {
+			return "", fmt.Errorf(configs.UserBlocked)
+		}
+
+		return fmt.Sprintf(conditionFormatString, postsFetchRequestQuery.UserID), nil
+	case parameters.All:
+		return "", nil
+	default:
+		return "", fmt.Errorf(configs.PostsInvalidFilter)
+	}
 }
