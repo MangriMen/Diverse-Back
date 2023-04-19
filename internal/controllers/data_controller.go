@@ -45,12 +45,19 @@ func GetData(c *fiber.Ctx) error {
 			return fileErr
 		}
 
+		imageMetadata, metadataErr := bimg.Metadata(file)
+		if metadataErr != nil {
+			return metadataErr
+		}
+
 		var options bimg.Options
 
 		switch {
-		case getDataRequestQuery.Width != nil:
+		case getDataRequestQuery.Width != nil &&
+			*getDataRequestQuery.Width < imageMetadata.Size.Width:
 			options = bimg.Options{Width: *getDataRequestQuery.Width}
-		case getDataRequestQuery.Height != nil:
+		case getDataRequestQuery.Height != nil &&
+			*getDataRequestQuery.Height < imageMetadata.Size.Height:
 			options = bimg.Options{Height: *getDataRequestQuery.Height}
 		}
 
