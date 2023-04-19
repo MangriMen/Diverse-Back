@@ -13,9 +13,9 @@ type GetRelationResponseBody struct {
 	Relations []models.Relation `json:"relations"`
 }
 
-// GetRelationResponse represent the response retrived on get relation request.
+// GetRelationsResponse represent the response retrived on get relation request.
 // swagger:response
-type GetRelationResponse struct {
+type GetRelationsResponse struct {
 	// in: body
 	Body GetRelationResponseBody
 }

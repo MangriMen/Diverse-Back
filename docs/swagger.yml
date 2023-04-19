@@ -727,7 +727,7 @@ paths:
                   x-go-name: Count
             responses:
                 "200":
-                    $ref: '#/responses/GetPostsResponse'
+                    $ref: '#/responses/GetCommentsResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             security:
@@ -1009,6 +1009,12 @@ paths:
             operationId: getRelations
             parameters:
                 - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
                   in: query
                   name: last_seen_relation_id
                   type: string
@@ -1019,6 +1025,11 @@ paths:
                   name: last_seen_relation_created_at
                   type: string
                   x-go-name: LastSeenRelationCreatedAt
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
                 - format: int64
                   in: query
                   maximum: 50
@@ -1027,21 +1038,9 @@ paths:
                   required: true
                   type: integer
                   x-go-name: Count
-                - format: uuid
-                  in: path
-                  name: user
-                  required: true
-                  type: string
-                  x-go-name: User
-                - description: Relation type
-                  in: query
-                  name: type
-                  required: true
-                  type: string
-                  x-go-name: Type
             responses:
                 "200":
-                    $ref: '#/responses/GetRelationResponse'
+                    $ref: '#/responses/GetRelationsResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
             security:
@@ -1051,7 +1050,7 @@ paths:
     /users/{user}/relations/{relationUser}:
         delete:
             description: Returns relation by id
-            operationId: deleteRelations
+            operationId: deleteRelation
             parameters:
                 - format: uuid
                   in: path
@@ -1059,6 +1058,12 @@ paths:
                   required: true
                   type: string
                   x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relationUser
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
                 - description: Relation type
                   in: query
                   name: type
@@ -1086,7 +1091,7 @@ paths:
                   x-go-name: User
                 - format: uuid
                   in: path
-                  name: relation_user
+                  name: relationUser
                   required: true
                   type: string
                   x-go-name: RelationUser
@@ -1101,7 +1106,26 @@ paths:
                 - User
         post:
             description: Add realtion with given info
-            operationId: addRelations
+            operationId: addRelation
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relationUser
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
             responses:
                 "201":
                     $ref: '#/responses/AddRelationResponse'
@@ -1156,10 +1180,6 @@ responses:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: '#/definitions/GetPostsResponseBody'
-    GetRelationResponse:
-        description: GetRelationResponse represent the response retrived on get relation request.
-        schema:
-            $ref: '#/definitions/GetRelationResponseBody'
     GetRelationStatusResponse:
         description: |-
             GetRelationStatusResponse represent the response retrived on
@@ -1171,6 +1191,10 @@ responses:
                 type: boolean
             following:
                 type: boolean
+    GetRelationsResponse:
+        description: GetRelationsResponse represent the response retrived on get relation request.
+        schema:
+            $ref: '#/definitions/GetRelationResponseBody'
     GetUserResponse:
         description: GetUserResponse represent the response retrived on get user request.
         schema:

@@ -24,7 +24,7 @@ import (
 //   bearerAuth:
 //
 // Responses:
-//   200: GetRelationResponse
+//   200: GetRelationsResponse
 //   default: ErrorResponse
 
 // GetRelations is used to fetch relation between users from database with request parameters.
@@ -126,7 +126,7 @@ func GetRelationStatus(c *fiber.Ctx) error {
 	})
 }
 
-// swagger:route POST /users/{user}/relations/{relationUser} User addRelations
+// swagger:route POST /users/{user}/relations/{relationUser} User addRelation
 // Add realtion with given info
 //
 // Security:
@@ -188,7 +188,7 @@ func AddRelation(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// swagger:route DELETE /users/{user}/relations/{relationUser} User deleteRelations
+// swagger:route DELETE /users/{user}/relations/{relationUser} User deleteRelation
 // Returns relation by id
 //
 // Security:
