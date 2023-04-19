@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// GenerateNewAccessToken generates a new JWT access token based on the provided user ID.
+// GenerateNewAccessToken generates a new JWT token with id in claims.
 func GenerateNewAccessToken(id uuid.UUID) (string, error) {
 	secret := os.Getenv("JWT_SECRET_KEY")
 

@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// InitAPI is used for initialize a new instance of fiber web application.
+// InitAPI is used to initialize a new instance of fiber web application.
 func InitAPI() *fiber.App {
 	config := configs.FiberConfig()
 	app := fiber.New(config)
@@ -23,7 +23,7 @@ func InitAPI() *fiber.App {
 	return app
 }
 
-// SetupAPI is used for run instance of fiber web application.
+// SetupAPI is used to run instance of fiber web application.
 func SetupAPI() {
 	app := InitAPI()
 	helpers.StartServerWithGracefulShutdown(app)

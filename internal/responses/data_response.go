@@ -4,7 +4,7 @@ package responses
 type UploadDataResponseBody struct {
 	BaseResponseBody
 	// required: true
-	ID string `json:"id"`
+	Path string `json:"path"`
 }
 
 // UploadDataResponse represent the response retrived on upload data request.

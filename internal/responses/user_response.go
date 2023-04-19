@@ -54,7 +54,7 @@ type RegisterLoginUserResponse struct {
 // swagger:response
 type UpdateUserResponse string
 
-// DeleteUserResponse represents response for successfully delete user requestt.
+// DeleteUserResponse represents response for successfully delete user request.
 // swagger:response
 type DeleteUserResponse struct {
 }

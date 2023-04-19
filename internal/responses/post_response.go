@@ -10,7 +10,7 @@ type GetPostsResponseBody struct {
 	Count int `json:"count"`
 
 	// required: true
-	Posts []models.Post `json:"posts"`
+	Data []models.Post `json:"data"`
 }
 
 // GetPostsResponse represent the response retrived on get posts request.
@@ -25,7 +25,7 @@ type GetPostResponseBody struct {
 	BaseResponseBody
 
 	// required: true
-	Post models.Post `json:"post"`
+	Data models.Post `json:"data"`
 }
 
 // GetPostResponse represent the response retrived on get post request.

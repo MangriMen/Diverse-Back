@@ -50,6 +50,8 @@ type Post struct {
 	User *User `json:"user"`
 
 	Comments []Comment `json:"comments"`
+
+	LikedByMe bool `json:"liked_by_me"`
 }
 
 // DBPostLike represents a post like struct from database.

@@ -11,8 +11,7 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-// GetUsers is used to fetch users
-// Returns a slice of users.
+// GetUsers is used to fetch users.
 func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 	users := []models.DBUser{}
 
@@ -88,10 +87,20 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 			password = $3,
 			username = $4,
 			name = $5,
-			updated_at = $6
+			updated_at = $6,
+			avatar_url = $7
 		WHERE id = $1`
 
-	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.UpdatedAt)
+	_, err := q.Exec(
+		query,
+		b.ID,
+		b.Email,
+		b.Password,
+		b.Username,
+		b.Name,
+		b.UpdatedAt,
+		*b.AvatarURL,
+	)
 	if err != nil {
 		return err
 	}

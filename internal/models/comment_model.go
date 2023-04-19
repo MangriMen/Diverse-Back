@@ -53,6 +53,8 @@ type Comment struct {
 	BaseComment
 
 	User *User `json:"user"`
+
+	LikedByMe bool `json:"liked_by_me"`
 }
 
 // DBCommentLike represents a comment like struct from database.

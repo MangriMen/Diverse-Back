@@ -6,14 +6,16 @@ type RequestParams interface {
 		RelationGetStatusParams |
 		PostIDParams |
 		PostCommentIDParams |
-		CommentAddRequestParams
+		CommentAddRequestParams |
+		GetDataRequestParams
 }
 
 // RequestQuery is interface to union all request queries in one type.
 type RequestQuery interface {
 	PostsFetchRequestQuery |
 		CommentsFetchRequestQuery |
-		RelationGetRequestQuery
+		RelationGetRequestQuery |
+		GetDataRequestQuery
 }
 
 // RequestBody is interface to union all request body in one type.

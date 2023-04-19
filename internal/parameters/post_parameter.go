@@ -6,6 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// PostFetchType is type for relations between users.
+type PostFetchType string
+
+// Enum for relation type.
+const (
+	Subscriptions PostFetchType = "subscriptions"
+	User          PostFetchType = "user"
+	All           PostFetchType = "all"
+)
+
 // PostIDParams includes the id of the post.
 type PostIDParams struct {
 	// in: path
@@ -60,16 +70,23 @@ type PostUpdateRequest struct {
 // as well as a count of the number of posts to retrieve.
 type PostsFetchRequestQuery struct {
 	// in: query
-	LastSeenPostID uuid.UUID `json:"last_seen_post_id" validate:"uuid"`
+	LastSeenPostID uuid.UUID `query:"last_seen_post_id" json:"last_seen_post_id" validate:"uuid"`
+
+	//nolint:lll
+	// in: query
+	LastSeenPostCreatedAt time.Time `query:"last_seen_post_created_at" json:"last_seen_post_created_at" validate:"uuid,required_with=last_seen_post_id"`
 
 	// in: query
-	LastSeenPostCreatedAt time.Time `json:"last_seen_post_created_at" validate:"uuid,required_with=last_seen_post_id"`
+	Type PostFetchType `query:"type" json:"type" validate:"required"`
+
+	// in: query
+	UserID uuid.UUID `query:"user_id" json:"user_id" validate:"uuid,required_with=type"`
 
 	// in: query
 	// required: true
 	// min: 1
 	// max: 50
-	Count int `json:"count" validate:"required,min=1,max=50"`
+	Count int `query:"count" json:"count" validate:"required,min=1,max=50"`
 }
 
 // PostsFetchRequest is a struct that encapsulates a query used to fetch posts.

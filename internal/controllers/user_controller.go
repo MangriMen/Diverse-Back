@@ -9,6 +9,7 @@ import (
 	"github.com/MangriMen/Diverse-Back/configs"
 	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/MangriMen/Diverse-Back/internal/helpers/jwthelpers"
+	"github.com/MangriMen/Diverse-Back/internal/helpers/userhelpers"
 	"github.com/MangriMen/Diverse-Back/internal/models"
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
@@ -19,11 +20,6 @@ import (
 
 // swagger:route GET /users User allowempty
 // Returns a list of all users
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Responses:
 //   200: GetUsersResponse
@@ -53,11 +49,6 @@ func GetUsers(c *fiber.Ctx) error {
 
 // swagger:route GET /users/{user} User getUser
 // Returns the user by given id
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Responses:
 //   200: GetUserResponse
@@ -92,11 +83,6 @@ func GetUser(c *fiber.Ctx) error {
 // swagger:route POST /login User loginUser
 // Returns the user and token by given credentials
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Responses:
 //   200: RegisterLoginUserResponse
 //   default: ErrorResponse
@@ -122,7 +108,7 @@ func LoginUser(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	if ok := helpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
+	if ok := userhelpers.CheckPasswordHash(loginRequestBody.Password, foundDBUser.Password); !ok {
 		return helpers.Response(c, fiber.StatusForbidden, configs.WrongEmailOrPasswordError)
 	}
 
@@ -139,11 +125,6 @@ func LoginUser(c *fiber.Ctx) error {
 
 // swagger:route POST /register User createUser
 // Returns the user and token by given credentials
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Responses:
 //   201: RegisterLoginUserResponse
@@ -181,7 +162,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 	user.UpdatedAt = user.CreatedAt
 
-	user.Password, err = helpers.HashPassword(registerRequestBody.Password)
+	user.Password, err = userhelpers.HashPassword(registerRequestBody.Password)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
@@ -209,11 +190,6 @@ func CreateUser(c *fiber.Ctx) error {
 
 // swagger:route Get /fetch User fetchUser
 // Get user and new token if user exists
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -256,11 +232,6 @@ func FetchUser(c *fiber.Ctx) error {
 
 // swagger:route PATCH /users/{user} User updateUser
 // Update user by id with given fields
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -308,22 +279,24 @@ func UpdateUser(c *fiber.Ctx) error {
 	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
 	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
 
+	foundUser.AvatarURL = helpers.GetNotEmpty(userUpdateRequestBody.AvatarURL, foundUser.AvatarURL)
+
 	if userUpdateRequestBody.Password != "" {
-		foundUser.Password, err = helpers.HashPassword(userUpdateRequestBody.Password)
+		foundUser.Password, err = userhelpers.HashPassword(userUpdateRequestBody.Password)
 		if err != nil {
 			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 		}
+	}
 
-		foundUser.UpdatedAt = time.Now()
+	foundUser.UpdatedAt = time.Now()
 
-		validate := helpers.NewValidator()
-		if err = validate.Struct(foundUser); err != nil {
-			return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
-		}
+	validate := helpers.NewValidator()
+	if err = validate.Struct(foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+	}
 
-		if err = db.UpdateUser(&foundUser); err != nil {
-			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
-		}
+	if err = db.UpdateUser(&foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusCreated)

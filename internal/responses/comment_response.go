@@ -12,7 +12,7 @@ type GetCommentsResponseBody struct {
 	Count int `json:"count"`
 
 	// required: true
-	Comments []models.Comment `json:"comments"`
+	Data []models.Comment `json:"data"`
 }
 
 // GetCommentsResponse represent the response retrived on get comments request.
@@ -28,7 +28,7 @@ type GetCommentResponseBody struct {
 	BaseResponseBody
 
 	// required: true
-	Comment models.Comment `json:"comment"`
+	Data models.Comment `json:"data"`
 }
 
 // GetCommentResponse represent the response retrived on get comment request.

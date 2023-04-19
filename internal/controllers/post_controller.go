@@ -22,11 +22,6 @@ import (
 // swagger:route GET /posts Post getPosts
 // Returns a list of all posts
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -36,6 +31,11 @@ import (
 
 // GetPosts is used to fetch posts from database with request parameters.
 func GetPosts(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.PostsFetchRequestQuery](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -50,28 +50,28 @@ func GetPosts(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	dbPosts, err := db.GetPosts(postsFetchRequestQuery)
+	filter, err := posthelpers.GenerateFilter(userID, postsFetchRequestQuery, db)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusNotFound, configs.PostsNotFoundError)
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	dbPosts, err := db.GetPosts(postsFetchRequestQuery, filter)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	postsToSend := lo.Map(dbPosts, func(item models.DBPost, index int) models.Post {
-		return posthelpers.PreparePostToSend(item, db)
+		return posthelpers.PreparePostToSend(item, userID, db)
 	})
 
 	return c.JSON(responses.GetPostsResponseBody{
 		Count: len(postsToSend),
-		Posts: postsToSend,
+		Data:  postsToSend,
 	})
 }
 
 // swagger:route GET /posts/{post} Post getPost
 // Returns the post by given ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -82,6 +82,11 @@ func GetPosts(c *fiber.Ctx) error {
 
 // GetPost is used to fetch post from database by ID.
 func GetPost(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
 	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](c)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
@@ -97,20 +102,15 @@ func GetPost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(dbPost, db)
+	postToSend := posthelpers.PreparePostToSend(dbPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
 // swagger:route POST /posts Post createPost
 // Creates the post with given info
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -161,11 +161,6 @@ func CreatePost(c *fiber.Ctx) error {
 
 // swagger:route PATCH /posts/{post} Post updatePost
 // Update post by ID with given fields
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -228,20 +223,15 @@ func UpdatePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
 // swagger:route POST /posts/{post}/like Post likePost
 // Set like to the post by ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -287,20 +277,15 @@ func LikePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 
 // swagger:route DELETE /posts/{post}/like Post unlikePost
 // Unset like to the post by ID
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -340,10 +325,10 @@ func UnlikePost(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusNotFound, configs.PostNotFoundError)
 	}
 
-	postToSend := posthelpers.PreparePostToSend(foundPost, db)
+	postToSend := posthelpers.PreparePostToSend(foundPost, userID, db)
 
 	return c.JSON(responses.GetPostResponseBody{
-		Post: postToSend,
+		Data: postToSend,
 	})
 }
 

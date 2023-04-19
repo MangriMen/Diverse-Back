@@ -23,19 +23,21 @@ x-backend:
   depends_on:
     postgres:
       condition: service_healthy
-  volumes:
-    - "backend-data:/var/lib/backend-data"
 
 services:
   backend:
     <<: *backend
     image: ghcr.io/mangrimen/diverse-back:latest
     profiles: [ prod ]
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   backend-test:
     <<: *backend
     image: ghcr.io/mangrimen/diverse-back:develop
     profiles: [ test ]
+    volumes:
+      - "backend-data:/var/lib/backend-data"
 
   backend-dev:
     <<: *backend
@@ -44,6 +46,7 @@ services:
       - "40000:40000"
     volumes:
       - ".:/app:rw,delegated"
+      - "backend-data:/var/lib/backend-data"
 
   backend-testing:
     <<: *backend
@@ -51,6 +54,7 @@ services:
     profiles: [ testing ]
     volumes:
       - ".:/app:rw,delegated"
+      - "backend-data:/var/lib/backend-data"
 
   postgres:
     container_name: diverse-postgres-$COMPOSE_PROJECT_NAME
