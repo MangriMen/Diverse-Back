@@ -25,7 +25,7 @@ import (
 //   bearerAuth:
 //
 // Responses:
-//   200: GetPostsResponse
+//   200: GetCommentsResponse
 //   default: ErrorResponse
 
 // GetComments is used to fetch the post comments by post ID.
