@@ -12,7 +12,7 @@ import (
 )
 
 // PostgreSQLConnection open connection to postgres database
-// with parameters from environment and returns sqlx.DB struct.
+// with parameters from environment.
 func PostgreSQLConnection() (*sqlx.DB, error) {
 	maxConn, _ := strconv.Atoi(os.Getenv("DB_MAX_CONNECTIONS"))
 	maxIdleConn, _ := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNECTIONS"))

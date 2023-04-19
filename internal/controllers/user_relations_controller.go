@@ -20,11 +20,6 @@ import (
 // swagger:route GET /users/{user}/relations User getRelations
 // Returns a list of users from given relation
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -87,11 +82,6 @@ func GetRelations(c *fiber.Ctx) error {
 // swagger:route GET /users/{user}/relations/{relationUser} User getRelationStatus
 // Returns a true or false from given relation
 //
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
-//
 // Security:
 //   bearerAuth:
 //
@@ -138,11 +128,6 @@ func GetRelationStatus(c *fiber.Ctx) error {
 
 // swagger:route POST /users/{user}/relations/{relationUser} User addRelations
 // Add realtion with given info
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:
@@ -205,11 +190,6 @@ func AddRelation(c *fiber.Ctx) error {
 
 // swagger:route DELETE /users/{user}/relations/{relationUser} User deleteRelations
 // Returns relation by id
-//
-// Produces:
-//   - application/json
-//
-// Schemes: http, https
 //
 // Security:
 //   bearerAuth:

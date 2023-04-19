@@ -67,18 +67,20 @@ type RegisterRequest struct {
 type UserUpdateRequestBody struct {
 	// min length: 6
 	// max length: 255
-	Email string `json:"email" validate:"gte=6,lte=255"`
+	Email string `json:"email" validate:"omitempty,gte=6,lte=255"`
 
 	// min length: 1
 	// max length: 32
-	Username string `json:"username" validate:"gte=1,lte=32"`
+	Username string `json:"username" validate:"omitempty,gte=1,lte=32"`
 
 	// max length: 32
-	Name string `json:"name" validate:"lte=32"`
+	Name string `json:"name" validate:"omitempty,lte=32"`
 
 	// min length: 8
 	// max length: 256
-	Password string `json:"password" validate:"gte=8,lte=256"`
+	Password string `json:"password" validate:"omitempty,gte=8,lte=256"`
+
+	AvatarURL *string `json:"avatar_url" validate:"omitempty"`
 }
 
 // UserUpdateRequest represents a request to update a user's information,

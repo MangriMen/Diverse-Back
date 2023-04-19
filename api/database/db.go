@@ -13,7 +13,7 @@ type Queries struct {
 	*queries.CommentQueries
 }
 
-// OpenDBConnection open db connection, combine all queries and returns Queries object.
+// OpenDBConnection open db connection and combine all queries.
 func OpenDBConnection() (*Queries, error) {
 	db, err := PostgreSQLConnection()
 

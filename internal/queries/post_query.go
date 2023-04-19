@@ -13,17 +13,18 @@ type PostQueries struct {
 }
 
 // GetPosts is used to fetch posts.
-// Returns a slice of posts.
 func (q *PostQueries) GetPosts(
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
+	postFromCondition string,
 ) ([]models.DBPost, error) {
 	posts := []models.DBPost{}
 
 	query := `SELECT *
 		FROM posts
 		WHERE created_at < $1
-		AND id <> $2
-		ORDER BY created_at DESC
+		AND id <> $2` +
+		"\n" + postFromCondition + "\n" +
+		`ORDER BY created_at DESC
 		FETCH FIRST $3 ROWS ONLY`
 
 	err := q.Select(
@@ -103,6 +104,20 @@ func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
 	}
 
 	return nil
+}
+
+// GetPostIsLiked gets status of like for given post and user.
+func (q *PostQueries) GetPostIsLiked(postID uuid.UUID, userID uuid.UUID) (bool, error) {
+	likesCount := 0
+
+	query := `SELECT Count(*) FROM post_likes WHERE post_id = $1 AND user_id = $2`
+
+	err := q.Get(&likesCount, query, postID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return likesCount > 0, nil
 }
 
 // DeletePost deletes post based on the given ID.

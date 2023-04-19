@@ -13,6 +13,13 @@ type UploadDataRequest struct {
 	UploadDataRequestForm
 }
 
+// DataTypeParams includes the type of the data.
+type DataTypeParams struct {
+	// in: path
+	// required: true
+	Type string `params:"type" json:"type" validate:"required"`
+}
+
 // DataImageIDParams includes the id of the image.
 type DataImageIDParams struct {
 	// in: path
@@ -25,4 +32,28 @@ type DataImageIDParams struct {
 // swagger:parameters getImageRaw
 type DataImageIDRequest struct {
 	DataImageIDParams
+}
+
+// GetDataRequestParams TODO.
+type GetDataRequestParams struct {
+	DataTypeParams
+	DataImageIDParams
+}
+
+// GetDataRequestQuery TODO.
+type GetDataRequestQuery struct {
+	// in: query
+	// required: true
+	Width *int `query:"width" json:"width"`
+
+	// in: query
+	// required: true
+	Height *int `query:"height" json:"height"`
+}
+
+// GetDataRequest TODO.
+// swagger:parameters getData
+type GetDataRequest struct {
+	GetDataRequestParams
+	GetDataRequestQuery
 }

@@ -1,5 +1,4 @@
-// Package helpers provides common functionality for application
-package helpers
+package userhelpers
 
 import (
 	"github.com/MangriMen/Diverse-Back/configs"

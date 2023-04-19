@@ -1,4 +1,5 @@
-package helpers
+// Package datahelpers provides functions to work with media or document files.
+package datahelpers
 
 import (
 	"bytes"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/MangriMen/Diverse-Back/configs"
+	"github.com/MangriMen/Diverse-Back/internal/helpers"
 	"github.com/google/uuid"
 	"github.com/h2non/bimg"
 	"golang.org/x/exp/slices"
@@ -47,7 +49,7 @@ func readFileFromMultipart(fileheader *multipart.FileHeader) ([]byte, error) {
 		return nil, err
 	}
 
-	defer CloseFileQuietly(file)
+	defer helpers.CloseQuietly(file)
 
 	fileBuffer := bytes.NewBuffer(nil)
 	if _, err = io.Copy(fileBuffer, file); err != nil {
@@ -92,11 +94,4 @@ func processImage(buffer []byte, quality int, filepath string) error {
 	}
 
 	return nil
-}
-
-// CloseFileQuietly close db object quietly without returning error.
-func CloseFileQuietly(file multipart.File) {
-	if err := file.Close(); err != nil {
-		_ = file.Close()
-	}
 }
