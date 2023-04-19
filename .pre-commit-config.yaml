@@ -18,6 +18,12 @@ repos:
         language: system
         verbose: true
         files: .go$
+      - id: swagger-validate
+        name: swagger-generate
+        entry: bash -c "githooks/swagger-validate.sh"
+        language: system
+        verbose: true
+        files: .go$
       - id: linter
         name: linter
         entry: bash -c "githooks/linter.sh"

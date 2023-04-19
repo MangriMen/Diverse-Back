@@ -17,6 +17,7 @@ import (
 // swagger:route GET /data/{type}/{image} Data getData
 // Returns the requested data
 //
+//
 // Responses:
 //   304: SuccessResponse
 //   default: ErrorResponse

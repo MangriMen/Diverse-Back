@@ -11,14 +11,7 @@ import (
 type RelationUserIDParams struct {
 	// in: path
 	// required: true
-	RelationUser uuid.UUID `params:"relationUser" json:"relation_user"`
-}
-
-// RelationUserIDRequest is used to represent a request that requires a relation user id parameter,
-// such as fetching a specific relation for user or deleting a relation .
-// swagger:parameters
-type RelationUserIDRequest struct {
-	RelationUserIDParams
+	RelationUser uuid.UUID `params:"relationUser" json:"relationUser"`
 }
 
 // RelationGetRequestQuery includes the ID of the user and relation type to fetch.
@@ -41,9 +34,10 @@ type RelationGetRequestQuery struct {
 	Count int `query:"count" json:"count" validate:"required,min=1,max=50"`
 }
 
-// RelationGetRequest is a struct that encapsulates a query used to fetch relation.
+// RelationsGetRequest is a struct that encapsulates a query used to fetch relation.
 // swagger:parameters getRelations
-type RelationGetRequest struct {
+type RelationsGetRequest struct {
+	UserIDParams
 	RelationGetRequestQuery
 }
 
@@ -68,8 +62,9 @@ type RelationAddDeleteRequestBody struct {
 }
 
 // RelationAddDeleteRequest is a struct that encapsulates a body used to add relation.
-// swagger:parameters getRelations deleteRelations
+// swagger:parameters getRelation addRelation deleteRelation
 type RelationAddDeleteRequest struct {
 	UserIDParams
+	RelationUserIDParams
 	RelationAddDeleteRequestBody
 }
