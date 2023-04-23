@@ -79,11 +79,6 @@ func GetRelationsCount(c *fiber.Ctx) error {
 
 // GetRelations is used to fetch relation between users from database with request parameters.
 func GetRelations(c *fiber.Ctx) error {
-	userID, err := helpers.GetUserIDFromToken(c)
-	if err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
 	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
 		c,
 	)
@@ -100,10 +95,6 @@ func GetRelations(c *fiber.Ctx) error {
 
 	if relationGetRequestQuery.LastSeenRelationCreatedAt.IsZero() {
 		relationGetRequestQuery.LastSeenRelationCreatedAt = time.Now()
-	}
-
-	if userID != userIDParams.User {
-		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	db, err := database.OpenDBConnection()
@@ -141,20 +132,11 @@ func GetRelations(c *fiber.Ctx) error {
 
 // GetRelationStatus is used to fetch relation existence between users from database with request parameters.
 func GetRelationStatus(c *fiber.Ctx) error {
-	userID, err := helpers.GetUserIDFromToken(c)
-	if err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
 	relationGetStatusParams, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
 		c,
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
-	if userID != relationGetStatusParams.User {
-		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	db, err := database.OpenDBConnection()
