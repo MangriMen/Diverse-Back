@@ -90,7 +90,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           port: ${{ secrets.SSH_PORT }}
           source: ./
-          target: ${{ env.PROFILE_PATH }}
+          target: ~/${{ env.PROFILE_PATH }}
 
       - name: Deploy on server
         uses: appleboy/ssh-action@master
