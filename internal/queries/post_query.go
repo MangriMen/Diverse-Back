@@ -12,6 +12,26 @@ type PostQueries struct {
 	*sqlx.DB
 }
 
+// GetPostsCount is used to fetch posts count.
+func (q *PostQueries) GetPostsCount(postFromCondition string) (int, error) {
+	postsCount := 0
+
+	query := `SELECT Count(*)
+		FROM posts
+		WHERE 1 = 1` +
+		"\n" + postFromCondition + "\n"
+
+	err := q.Get(
+		&postsCount,
+		query,
+	)
+	if err != nil {
+		return postsCount, err
+	}
+
+	return postsCount, nil
+}
+
 // GetPosts is used to fetch posts.
 func (q *PostQueries) GetPosts(
 	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,

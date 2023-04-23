@@ -66,6 +66,22 @@ type PostUpdateRequest struct {
 	Body PostUpdateRequestBody
 }
 
+// PostsFetchCountRequestQuery includes the ID and creation time of the last seen post,
+// as well as a count of the number of posts to retrieve.
+type PostsFetchCountRequestQuery struct {
+	// in: query
+	Type PostFetchType `query:"type" json:"type" validate:"required"`
+
+	// in: query
+	UserID uuid.UUID `query:"user_id" json:"user_id" validate:"uuid,required_with=type"`
+}
+
+// PostsFetchCountRequest is a struct that encapsulates a query used to fetch posts count.
+// swagger:parameters getPostsCount
+type PostsFetchCountRequest struct {
+	PostsFetchCountRequestQuery
+}
+
 // PostsFetchRequestQuery includes the ID and creation time of the last seen post,
 // as well as a count of the number of posts to retrieve.
 type PostsFetchRequestQuery struct {

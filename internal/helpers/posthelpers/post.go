@@ -76,12 +76,13 @@ func PrepareCommentToPost(
 // GenerateFilter generates a filter for SQL query to fetch posts by the specified parameters.
 func GenerateFilter(
 	userID uuid.UUID,
-	postsFetchRequestQuery *parameters.PostsFetchRequestQuery,
+	postFetchType parameters.PostFetchType,
+	postsAuthorID uuid.UUID,
 	db *database.Queries,
 ) (string, error) {
 	const conditionFormatString = "AND user_id='%s'"
 
-	switch postsFetchRequestQuery.Type {
+	switch postFetchType {
 	case parameters.Subscriptions:
 		rawRelations, rawRelationsErr := db.GetRelations(
 			userID,
@@ -93,10 +94,6 @@ func GenerateFilter(
 		)
 		if rawRelationsErr != nil {
 			return "", rawRelationsErr
-		}
-
-		if len(rawRelations) == 0 {
-			return "", fmt.Errorf(configs.RelationsGetError)
 		}
 
 		relations := lo.Map(
@@ -115,7 +112,7 @@ func GenerateFilter(
 		rawRelationStatus, err := db.GetRelationStatus(&parameters.RelationGetStatusParams{
 			UserIDParams: parameters.UserIDParams{User: userID},
 			RelationUserIDParams: parameters.RelationUserIDParams{
-				RelationUser: postsFetchRequestQuery.UserID,
+				RelationUser: postsAuthorID,
 			},
 		})
 		if err != nil {
@@ -128,7 +125,7 @@ func GenerateFilter(
 			return "", fmt.Errorf(configs.UserBlocked)
 		}
 
-		return fmt.Sprintf(conditionFormatString, postsFetchRequestQuery.UserID), nil
+		return fmt.Sprintf(conditionFormatString, postsAuthorID), nil
 	case parameters.All:
 		return "", nil
 	default:

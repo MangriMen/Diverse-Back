@@ -17,6 +17,56 @@ import (
 	"github.com/samber/lo"
 )
 
+// swagger:route GET /users/{user}/relations/count User getRelationsCount
+// Returns a count of users from given relation
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   200: GetRelationCountResponse
+//   default: ErrorResponse
+
+// GetRelationsCount is used to fetch relation count with user.
+func GetRelationsCount(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	relationGetCountRequestQuery, err := helpers.GetQueryAndValidate[parameters.RelationGetCountRequestQuery](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	if userID != userIDParams.User {
+		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err)
+	}
+
+	relationsCount, err := db.GetRelationsCount(userIDParams.User, relationGetCountRequestQuery)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(responses.GetRelationCountResponseBody{
+		Count: relationsCount,
+	})
+}
+
 // swagger:route GET /users/{user}/relations User getRelations
 // Returns a list of users from given relation
 //
