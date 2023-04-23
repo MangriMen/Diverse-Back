@@ -13,6 +13,8 @@ func UserPublicRoutes(route fiber.Router) {
 	route.Get("/users", controllers.GetUsers)
 	route.Get("/users/:user", controllers.GetUser)
 
+	route.Get("/users/username/:username", controllers.GetUserByUsername)
+
 	route.Post("/login", controllers.LoginUser)
 	route.Post("/register", controllers.CreateUser)
 }

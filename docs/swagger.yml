@@ -1135,6 +1135,23 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/username/{username}:
+        get:
+            description: Returns the user by given username
+            operationId: getUserByUsername
+            parameters:
+                - in: path
+                  name: username
+                  required: true
+                  type: string
+                  x-go-name: Username
+            responses:
+                "200":
+                    $ref: '#/responses/GetUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
 produces:
     - application/json
 responses:
