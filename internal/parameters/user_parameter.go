@@ -16,6 +16,20 @@ type UserIDRequest struct {
 	UserIDParams
 }
 
+// UsernameIDParams includes the id of the user.
+type UsernameIDParams struct {
+	// in: path
+	// required: true
+	Username string `params:"username" json:"username"`
+}
+
+// UsernameIDRequest is used to represent a request that requires a user id parameter,
+// such as fetching a specific user, updating user, or deleting a user.
+// swagger:parameters getUserByUsername
+type UsernameIDRequest struct {
+	UsernameIDParams
+}
+
 // LoginRequestBody includes the email and password of the user.
 type LoginRequestBody struct {
 	// required: true
