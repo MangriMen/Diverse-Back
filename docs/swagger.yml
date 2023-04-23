@@ -139,6 +139,25 @@ definitions:
         title: GetPostResponseBody includes the signle post for a given ID.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostsCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetPostsCountResponseBody includes the slice of posts.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostsResponseBody:
         properties:
             count:
@@ -162,6 +181,25 @@ definitions:
             - count
             - data
         title: GetPostsResponseBody includes the slice of posts.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetRelationCountResponseBody includes the count of relations.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetRelationResponseBody:
@@ -909,6 +947,29 @@ paths:
                 - bearerAuth: []
             tags:
                 - Post
+    /posts/count:
+        get:
+            description: Returns a list of all posts
+            operationId: getPostsCount
+            parameters:
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - format: uuid
+                  in: query
+                  name: user_id
+                  type: string
+                  x-go-name: UserID
+            responses:
+                "200":
+                    $ref: '#/responses/GetPostsCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
     /register:
         post:
             description: Returns the user and token by given credentials
@@ -1033,7 +1094,7 @@ paths:
                 - format: int64
                   in: query
                   maximum: 50
-                  minimum: 1
+                  minimum: -1
                   name: count
                   required: true
                   type: integer
@@ -1135,6 +1196,31 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/{user}/relations/count:
+        get:
+            description: Returns a count of users from given relation
+            operationId: getRelationsCount
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
     /users/username/{username}:
         get:
             description: Returns the user by given username
@@ -1193,10 +1279,18 @@ responses:
         description: GetPostResponse represent the response retrived on get post request.
         schema:
             $ref: '#/definitions/GetPostResponseBody'
+    GetPostsCountResponse:
+        description: GetPostsCountResponse represent the response retrived on get posts request.
+        schema:
+            $ref: '#/definitions/GetPostsCountResponseBody'
     GetPostsResponse:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: '#/definitions/GetPostsResponseBody'
+    GetRelationCountResponse:
+        description: GetRelationCountResponse represent the response retrived on get relation count request.
+        schema:
+            $ref: '#/definitions/GetRelationCountResponseBody'
     GetRelationStatusResponse:
         description: |-
             GetRelationStatusResponse represent the response retrived on

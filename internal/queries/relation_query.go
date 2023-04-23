@@ -12,6 +12,26 @@ type RelationQueries struct {
 	*sqlx.DB
 }
 
+// GetRelationsCount retrieves a count of given relation type between users.
+func (q *RelationQueries) GetRelationsCount(
+	userID uuid.UUID,
+	relationGetRequestQuery *parameters.RelationGetCountRequestQuery,
+) (int, error) {
+	relationsCount := 0
+
+	query := `SELECT Count(*)
+		FROM user_relations
+		WHERE user_id = $1
+		AND type = $2`
+
+	err := q.Get(&relationsCount, query, userID, relationGetRequestQuery.Type)
+	if err != nil {
+		return relationsCount, err
+	}
+
+	return relationsCount, nil
+}
+
 // GetRelations retrieves a list of given relation type between users.
 func (q *RelationQueries) GetRelations(
 	userID uuid.UUID,

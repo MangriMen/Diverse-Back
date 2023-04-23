@@ -20,6 +20,21 @@ type GetRelationsResponse struct {
 	Body GetRelationResponseBody
 }
 
+// GetRelationCountResponseBody includes the count of relations.
+type GetRelationCountResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	Count int `json:"count"`
+}
+
+// GetRelationCountResponse represent the response retrived on get relation count request.
+// swagger:response
+type GetRelationCountResponse struct {
+	// in: body
+	Body GetRelationCountResponseBody
+}
+
 // AddRelationResponse represents response for successfully create relation.
 // swagger:response
 type AddRelationResponse string
