@@ -36,6 +36,8 @@ func UserPrivateRoutes(route fiber.Router) {
 func UserRelationPrivateRoutes(route fiber.Router) {
 	users := route.Group("/users/:user")
 
+	users.Get("/relations/count", middleware.JWTProtected(), controllers.GetRelationsCount)
+
 	users.Get("/relations", middleware.JWTProtected(), controllers.GetRelations)
 
 	users.Get("/relations/:relationUser", middleware.JWTProtected(), controllers.GetRelationStatus)

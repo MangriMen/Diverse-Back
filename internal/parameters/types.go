@@ -14,6 +14,7 @@ type RequestParams interface {
 type RequestQuery interface {
 	PostsFetchRequestQuery |
 		CommentsFetchRequestQuery |
+		RelationGetCountRequestQuery |
 		RelationGetRequestQuery |
 		GetDataRequestQuery
 }

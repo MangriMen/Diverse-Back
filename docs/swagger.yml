@@ -164,6 +164,17 @@ definitions:
         title: GetPostsResponseBody includes the slice of posts.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+        required:
+            - count
+        title: GetRelationCountResponseBody includes the count of relations.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetRelationResponseBody:
         properties:
             count:
@@ -1033,7 +1044,7 @@ paths:
                 - format: int64
                   in: query
                   maximum: 50
-                  minimum: 1
+                  minimum: -1
                   name: count
                   required: true
                   type: integer
@@ -1135,6 +1146,31 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/{user}/relations/count:
+        get:
+            description: Returns a count of users from given relation
+            operationId: getRelationsCount
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
 produces:
     - application/json
 responses:
@@ -1180,6 +1216,10 @@ responses:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:
             $ref: '#/definitions/GetPostsResponseBody'
+    GetRelationCountResponse:
+        description: GetRelationCountResponse represent the response retrived on get relation count request.
+        schema:
+            $ref: '#/definitions/GetRelationCountResponseBody'
     GetRelationStatusResponse:
         description: |-
             GetRelationStatusResponse represent the response retrived on
