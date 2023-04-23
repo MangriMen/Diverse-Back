@@ -80,6 +80,39 @@ func GetUser(c *fiber.Ctx) error {
 	})
 }
 
+// swagger:route GET /users/username/{username} User getUserByUsername
+// Returns the user by given username
+//
+// Responses:
+//   200: GetUserResponse
+//   default: ErrorResponse
+
+// GetUserByUsername is used to fetch user from database by username.
+func GetUserByUsername(c *fiber.Ctx) error {
+	usernameIDParams, err := helpers.GetParamsAndValidate[parameters.UsernameIDParams](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	dbUser, err := db.GetUserByUsername(usernameIDParams.Username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(responses.GetUserResponseBody{
+		User: dbUser.ToUser(),
+	})
+}
+
 // swagger:route POST /login User loginUser
 // Returns the user and token by given credentials
 //
