@@ -10,20 +10,20 @@ all:
 	@echo "\testing\t\t-\trun base services for testing"
 
 dev:
-	docker-compose -p dev --profile dev up --build
+	docker compose -p dev --profile dev up --build
 
 prod:
-	docker-compose -p prod --profile prod up --build
+	docker compose -p prod --profile prod up --build
 
 testing:
-	sudo docker compose -p testing --profile testing stop postgres backend-testing
+	docker compose -p testing --profile testing stop postgres backend-testing
 
-	sudo docker rm diverse-postgres-testing
-	sudo docker rm diverse-backend-testing
+	docker rm diverse-postgres-testing
+	docker rm diverse-backend-testing
 
-	sudo docker volume rm testing_postgres-data
+	docker volume rm testing_postgres-data
 
-	sudo docker compose -p testing --profile testing up postgres backend-testing --build
+	docker compose -p testing --profile testing up postgres backend-testing --build
 
 deploy:
 ifeq ($(profile),)
@@ -40,6 +40,6 @@ endif
 
 	sed -i 's/host: localhost/host: $(BASE_HOST)/g' docs/swagger.yml
 
-	sudo docker compose -p $(profile) --profile $(profile) down
-	sudo docker compose -p $(profile) --profile $(profile) pull
-	sudo docker compose -p $(profile) --profile $(profile) up -d
+	PROFILE=$(profile) docker compose --profile $(profile) down
+	PROFILE=$(profile) docker compose --profile $(profile) pull
+	PROFILE=$(profile) docker compose --profile $(profile) up -d
