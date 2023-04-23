@@ -189,7 +189,15 @@ definitions:
                 format: int64
                 type: integer
                 x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
         required:
+            - error
+            - message
             - count
         title: GetRelationCountResponseBody includes the count of relations.
         type: object

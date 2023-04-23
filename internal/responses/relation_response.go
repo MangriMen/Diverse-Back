@@ -22,6 +22,8 @@ type GetRelationsResponse struct {
 
 // GetRelationCountResponseBody includes the count of relations.
 type GetRelationCountResponseBody struct {
+	BaseResponseBody
+
 	// required: true
 	Count int `json:"count"`
 }
