@@ -66,7 +66,7 @@ jobs:
       - name: Setup environment
         shell: bash
         run: |
-          branch=$(echo ${GITHUB_REF#refs/heads/})"
+          branch=$(echo ${GITHUB_REF#refs/heads/})
           profile=''
           checkout_branch=''
 
