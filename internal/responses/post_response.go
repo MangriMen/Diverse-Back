@@ -2,6 +2,21 @@ package responses
 
 import "github.com/MangriMen/Diverse-Back/internal/models"
 
+// GetPostsCountResponseBody includes the slice of posts.
+type GetPostsCountResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	Count int `json:"count"`
+}
+
+// GetPostsCountResponse represent the response retrived on get posts request.
+// swagger:response
+type GetPostsCountResponse struct {
+	// in: body
+	Body GetPostsCountResponseBody
+}
+
 // GetPostsResponseBody includes the slice of posts.
 type GetPostsResponseBody struct {
 	BaseResponseBody

@@ -14,6 +14,20 @@ type RelationUserIDParams struct {
 	RelationUser uuid.UUID `params:"relationUser" json:"relationUser"`
 }
 
+// RelationGetCountRequestQuery includes the relation type to fetch.
+type RelationGetCountRequestQuery struct {
+	// in: query
+	// required: true
+	Type models.RelationType `query:"type" json:"type" validate:"required"`
+}
+
+// RelationGetCountRequest is a struct that encapsulates a query used to fetch relation count.
+// swagger:parameters getRelationsCount
+type RelationGetCountRequest struct {
+	UserIDParams
+	RelationGetCountRequestQuery
+}
+
 // RelationGetRequestQuery includes the ID of the user and relation type to fetch.
 type RelationGetRequestQuery struct {
 	// in: query
@@ -29,9 +43,9 @@ type RelationGetRequestQuery struct {
 
 	// in: query
 	// required: true
-	// min: 1
+	// min: -1
 	// max: 50
-	Count int `query:"count" json:"count" validate:"required,min=1,max=50"`
+	Count int `query:"count" json:"count" validate:"required,min=-1,max=50"`
 }
 
 // RelationsGetRequest is a struct that encapsulates a query used to fetch relation.
