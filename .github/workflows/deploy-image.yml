@@ -101,7 +101,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: PROFILE_PATH,PROFILE,CHECKOUT_BRANCH,BASE_HOST
           script: |
-            cd "$PROFILE_PATH"
+            cd $PROFILE_PATH
 
             git restore .
             git checkout $CHECKOUT_BRANCH
