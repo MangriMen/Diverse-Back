@@ -11,6 +11,8 @@ import (
 // for retrieving, creating, updating, and deleting posts.
 // Additionally, it sets up the private routes for post comments.
 func PostPrivateRoutes(route fiber.Router) {
+	route.Get("/posts/count", middleware.JWTProtected(), controllers.GetPostsCount)
+
 	route.Get("/posts", middleware.JWTProtected(), controllers.GetPosts)
 
 	route.Get("/posts/:post", middleware.JWTProtected(), controllers.GetPost)

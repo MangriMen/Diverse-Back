@@ -139,6 +139,25 @@ definitions:
         title: GetPostResponseBody includes the signle post for a given ID.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostsCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetPostsCountResponseBody includes the slice of posts.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostsResponseBody:
         properties:
             count:
@@ -920,6 +939,29 @@ paths:
                 - bearerAuth: []
             tags:
                 - Post
+    /posts/count:
+        get:
+            description: Returns a list of all posts
+            operationId: getPostsCount
+            parameters:
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - format: uuid
+                  in: query
+                  name: user_id
+                  type: string
+                  x-go-name: UserID
+            responses:
+                "200":
+                    $ref: '#/responses/GetPostsCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
     /register:
         post:
             description: Returns the user and token by given credentials
@@ -1212,6 +1254,10 @@ responses:
         description: GetPostResponse represent the response retrived on get post request.
         schema:
             $ref: '#/definitions/GetPostResponseBody'
+    GetPostsCountResponse:
+        description: GetPostsCountResponse represent the response retrived on get posts request.
+        schema:
+            $ref: '#/definitions/GetPostsCountResponseBody'
     GetPostsResponse:
         description: GetPostsResponse represent the response retrived on get posts request.
         schema:

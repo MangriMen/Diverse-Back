@@ -12,7 +12,8 @@ type RequestParams interface {
 
 // RequestQuery is interface to union all request queries in one type.
 type RequestQuery interface {
-	PostsFetchRequestQuery |
+	PostsFetchCountRequestQuery |
+		PostsFetchRequestQuery |
 		CommentsFetchRequestQuery |
 		RelationGetCountRequestQuery |
 		RelationGetRequestQuery |

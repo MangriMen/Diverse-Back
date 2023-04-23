@@ -19,6 +19,55 @@ import (
 	"github.com/samber/lo"
 )
 
+// swagger:route GET /posts/count Post getPostsCount
+// Returns a list of all posts
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   200: GetPostsCountResponse
+//   default: ErrorResponse
+
+// GetPostsCount is used to fetch posts count.
+func GetPostsCount(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	postsFetchCountRequestQuery, err := helpers.GetQueryAndValidate[parameters.PostsFetchCountRequestQuery](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	filter, err := posthelpers.GenerateFilter(
+		userID,
+		postsFetchCountRequestQuery.Type,
+		postsFetchCountRequestQuery.UserID,
+		db,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	postsCount, err := db.GetPostsCount(filter)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(responses.GetPostsCountResponseBody{
+		Count: postsCount,
+	})
+}
+
 // swagger:route GET /posts Post getPosts
 // Returns a list of all posts
 //
@@ -50,7 +99,12 @@ func GetPosts(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	filter, err := posthelpers.GenerateFilter(userID, postsFetchRequestQuery, db)
+	filter, err := posthelpers.GenerateFilter(
+		userID,
+		postsFetchRequestQuery.Type,
+		postsFetchRequestQuery.UserID,
+		db,
+	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
