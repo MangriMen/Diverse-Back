@@ -18,6 +18,7 @@ type RequestQuery interface {
 		CommentsFetchRequestQuery |
 		RelationGetCountRequestQuery |
 		RelationGetRequestQuery |
+		RelationAddDeleteRequestQuery |
 		GetDataRequestQuery
 }
 
@@ -26,7 +27,6 @@ type RequestBody interface {
 	LoginRequestBody |
 		RegisterRequestBody |
 		UserUpdateRequestBody |
-		RelationAddDeleteRequestBody |
 		PostCreateRequestBody |
 		PostUpdateRequestBody |
 		CommentAddRequestBody |
