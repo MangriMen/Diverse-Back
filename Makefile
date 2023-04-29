@@ -1,4 +1,13 @@
-.PHONY: dev prod deploy testing
+.PHONY: dev test deploy testing
+
+COMPOSE=docker compose
+
+UP_FLAGS_DEV=--build
+UP_FLAGS_DEPLOY=-d
+
+DEV_PROFILE=dev
+TEST_PROFILE=test
+PRODUCTION_PROFILE=prod
 
 all:
 	@echo "Usage: make BUILD_TARGET"
@@ -10,20 +19,10 @@ all:
 	@echo "\testing\t\t-\trun base services for testing"
 
 dev:
-	docker compose -p dev --profile dev up --build
+	PROFILE=$(DEV_PROFILE) $(COMPOSE) --profile $(DEV_PROFILE) up $(UP_FLAGS_DEV)
 
-prod:
-	docker compose -p prod --profile prod up --build
-
-testing:
-	docker compose -p testing --profile testing stop postgres backend-testing
-
-	docker rm diverse-postgres-testing
-	docker rm diverse-backend-testing
-
-	docker volume rm testing_postgres-data
-
-	docker compose -p testing --profile testing up postgres backend-testing --build
+test:
+	PROFILE=$(TEST_PROFILE) $(COMPOSE) --profile $(TEST_PROFILE) up $(UP_FLAGS_DEV)
 
 deploy:
 ifeq ($(profile),)
@@ -34,12 +33,12 @@ ifeq ($(BASE_HOST),)
 	(BASE_HOST environment variable not set)
 endif
 
-ifeq ($(profile),prod)
+ifeq ($(profile),$(PRODUCTION_PROFILE))
 	sed -i 's/:3040/:3030/g' docs/swagger.yml
 endif
 
 	sed -i 's/host: localhost/host: $(BASE_HOST)/g' docs/swagger.yml
 
-	PROFILE=$(profile) docker compose --profile $(profile) down
-	PROFILE=$(profile) docker compose --profile $(profile) pull
-	PROFILE=$(profile) docker compose --profile $(profile) up -d
+	PROFILE=$(profile) $(COMPOSE) --profile $(profile) down
+	PROFILE=$(profile) $(COMPOSE) --profile $(profile) pull
+	PROFILE=$(profile) $(COMPOSE) --profile $(profile) up $(UP_FLAGS_DEPLOY)
