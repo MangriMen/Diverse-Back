@@ -19,12 +19,27 @@ func (q *RelationQueries) GetRelationsCount(
 ) (int, error) {
 	relationsCount := 0
 
-	query := `SELECT Count(*)
-		FROM user_relations
-		WHERE user_id = $1
-		AND type = $2`
+	const baseQuery = `SELECT Count(*) FROM user_relations`
 
-	err := q.Get(&relationsCount, query, userID, relationGetRequestQuery.Type)
+	const followingCondition = `WHERE user_id = $1 AND type = $2`
+	const followerCondition = `WHERE relation_user_id = $1 AND type = $2`
+	const blockedCondition = followingCondition
+
+	relationType := relationGetRequestQuery.Type
+
+	query := baseQuery + ` `
+
+	switch relationGetRequestQuery.Type {
+	case models.Follower:
+		query += followerCondition
+		relationType = models.Following
+	case models.Following:
+		query += followingCondition
+	case models.Blocked:
+		query += blockedCondition
+	}
+
+	err := q.Get(&relationsCount, query, userID, relationType)
 	if err != nil {
 		return relationsCount, err
 	}
@@ -39,14 +54,33 @@ func (q *RelationQueries) GetRelations(
 ) ([]models.DBRelation, error) {
 	relations := []models.DBRelation{}
 
-	query := `SELECT *
+	const baseQuery = `SELECT *
 		FROM user_relations
 		WHERE created_at < $1
-		AND id <> $2
-		AND user_id = $4
-		AND type = $5
-		ORDER BY created_at DESC
+		AND id <> $2`
+
+	const cutFilter = `ORDER BY created_at DESC
 		FETCH FIRST $3 ROWS ONLY`
+
+	const followingCondition = `AND user_id = $4 AND type = $5`
+	const followerCondition = `AND relation_user_id = $4 AND type = $5`
+	const blockedCondition = followingCondition
+
+	relationType := relationGetRequestQuery.Type
+
+	query := baseQuery + ` `
+
+	switch relationGetRequestQuery.Type {
+	case models.Follower:
+		query += followerCondition
+		relationType = models.Following
+	case models.Following:
+		query += followingCondition
+	case models.Blocked:
+		query += blockedCondition
+	}
+
+	query += ` ` + cutFilter
 
 	err := q.Select(
 		&relations,
@@ -55,7 +89,7 @@ func (q *RelationQueries) GetRelations(
 		relationGetRequestQuery.LastSeenRelationID,
 		relationGetRequestQuery.Count,
 		userID,
-		relationGetRequestQuery.Type,
+		relationType,
 	)
 	if err != nil {
 		return relations, err
@@ -73,7 +107,9 @@ func (q *RelationQueries) GetRelationStatus(
 	query := `SELECT *
 		FROM user_relations
 		WHERE user_id = $1
-		AND relation_user_id = $2`
+		AND relation_user_id = $2
+		OR user_id = $2
+		AND relation_user_id = $1`
 
 	err := q.Select(
 		&relations,
@@ -103,7 +139,7 @@ func (q *RelationQueries) AddRelation(r *models.DBRelation) error {
 // DeleteRelation is used to delete relation with given user and type.
 func (q *RelationQueries) DeleteRelation(
 	relationGetStatusParams *parameters.RelationGetStatusParams,
-	relationAddDeleteRequestBody *parameters.RelationAddDeleteRequestBody,
+	relationAddDeleteRequestBody *parameters.RelationAddDeleteRequestQuery,
 ) error {
 	query := `DELETE
 				FROM user_relations

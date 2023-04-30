@@ -103,6 +103,8 @@ jobs:
           script: |
             cd $PROFILE_PATH
 
+            make undeploy profile=$PROFILE
+
             git restore .
             git checkout $CHECKOUT_BRANCH
             git pull

@@ -10,6 +10,7 @@ import (
 
 // GetNotEmpty returns the non-empty value between a and b.
 func GetNotEmpty[T comparable](a T, b T) T {
+	// newDeref lint error
 	if a == *new(T) {
 		return b
 	}
