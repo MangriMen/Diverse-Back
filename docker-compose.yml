@@ -48,14 +48,6 @@ services:
       - ".:/app:rw,delegated"
       - "backend-data:/var/lib/backend-data"
 
-  backend-testing:
-    <<: *backend
-    restart: "no"
-    profiles: [ testing ]
-    volumes:
-      - ".:/app:rw,delegated"
-      - "backend-data:/var/lib/backend-data"
-
   postgres:
     container_name: diverse-postgres-$PROFILE
     image: postgres:14.5-alpine
