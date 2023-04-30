@@ -33,8 +33,8 @@ test:
 	PROFILE=$(TEST_PROFILE) $(COMPOSE) --profile $(TEST_PROFILE) up $(UP_FLAGS_DEV)
 
 deploy: undeploy prepare_swagger_to_deploy
-	# PROFILE=$(profile) $(COMPOSE) --profile $(profile) pull
-	# PROFILE=$(profile) $(COMPOSE) --profile $(profile) up $(UP_FLAGS_DEPLOY)
+	PROFILE=$(profile) $(COMPOSE) --profile $(profile) pull
+	PROFILE=$(profile) $(COMPOSE) --profile $(profile) up $(UP_FLAGS_DEPLOY)
 
 undeploy: check_deploy_environment
 	PROFILE=$(profile) $(COMPOSE) --profile $(profile) down
