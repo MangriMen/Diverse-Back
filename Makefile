@@ -3,7 +3,7 @@
 COMPOSE=docker compose
 
 UP_FLAGS_DEV=--build
-UP_FLAGS_DEPLOY=-d
+UP_FLAGS_DEPLOY=-d --build
 
 DEV_HOST=host: localhost
 PROD_HOST=host: $(BASE_HOST)
