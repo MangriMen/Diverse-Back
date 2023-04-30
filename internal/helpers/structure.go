@@ -8,15 +8,10 @@ import (
 	"github.com/google/uuid"
 )
 
-// Zero returns default value for any type.
-func Zero[T any]() T {
-	var zero T
-	return zero
-}
-
 // GetNotEmpty returns the non-empty value between a and b.
 func GetNotEmpty[T comparable](a T, b T) T {
-	if a == Zero[T]() {
+	// newDeref lint error
+	if a == *new(T) {
 		return b
 	}
 	return a
