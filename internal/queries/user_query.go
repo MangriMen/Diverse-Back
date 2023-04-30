@@ -99,7 +99,7 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 		b.Username,
 		b.Name,
 		b.UpdatedAt,
-		*b.AvatarURL,
+		b.AvatarURL,
 	)
 	if err != nil {
 		return err
