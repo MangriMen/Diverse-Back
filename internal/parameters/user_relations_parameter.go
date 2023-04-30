@@ -68,17 +68,16 @@ type RelationGetStatusRequest struct {
 	RelationGetStatusParams
 }
 
-// RelationAddDeleteRequestBody includes the ID of the user to add.
-type RelationAddDeleteRequestBody struct {
+// RelationAddDeleteRequestQuery includes the ID of the user to add.
+type RelationAddDeleteRequestQuery struct {
 	// Relation type
 	// required: true
-	Type models.RelationType `json:"type" validate:"required"`
+	Type models.RelationType `query:"type" json:"type" validate:"required"`
 }
 
 // RelationAddDeleteRequest is a struct that encapsulates a body used to add relation.
 // swagger:parameters getRelation addRelation deleteRelation
 type RelationAddDeleteRequest struct {
-	UserIDParams
-	RelationUserIDParams
-	RelationAddDeleteRequestBody
+	RelationGetStatusParams
+	RelationAddDeleteRequestQuery
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/samber/lo"
 )
@@ -29,11 +28,6 @@ import (
 
 // GetRelationsCount is used to fetch relation count with user.
 func GetRelationsCount(c *fiber.Ctx) error {
-	userID, err := helpers.GetUserIDFromToken(c)
-	if err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
 	userIDParams, err := helpers.GetParamsAndValidate[parameters.UserIDParams](
 		c,
 	)
@@ -46,10 +40,6 @@ func GetRelationsCount(c *fiber.Ctx) error {
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
-	}
-
-	if userID != userIDParams.User {
-		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
 	db, err := database.OpenDBConnection()
@@ -107,12 +97,23 @@ func GetRelations(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	relationsToSend := lo.Map(
-		dbRelations,
-		func(item models.DBRelation, index int) models.Relation {
-			return *userhelpers.PrepareRelationToSend(item, db)
-		},
-	)
+	var relationsToSend []models.Relation
+	if relationGetRequestQuery.Type == models.Follower {
+		relationsToSend = lo.Map(
+			dbRelations,
+			func(item models.DBRelation, index int) models.Relation {
+				item.RelationUserID = item.UserID
+				return *userhelpers.PrepareRelationToSend(item, db)
+			},
+		)
+	} else {
+		relationsToSend = lo.Map(
+			dbRelations,
+			func(item models.DBRelation, index int) models.Relation {
+				return *userhelpers.PrepareRelationToSend(item, db)
+			},
+		)
+	}
 
 	return c.JSON(responses.GetRelationResponseBody{
 		Count:     len(relationsToSend),
@@ -149,7 +150,7 @@ func GetRelationStatus(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	statusToSend := userhelpers.PrepareRelationStatusToSend(relationStatus)
+	statusToSend := userhelpers.PrepareRelationStatusToSend(relationGetStatusParams.User, relationStatus)
 
 	return c.JSON(responses.GetRelationStatusResponseBody{
 		Follower:  statusToSend[models.Follower],
@@ -175,21 +176,21 @@ func AddRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	relationGetStatusParams, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
+	params, err := helpers.GetParamsAndValidate[parameters.RelationGetStatusParams](
 		c,
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	relationAddDeleteRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddDeleteRequestBody](
+	query, err := helpers.GetQueryAndValidate[parameters.RelationAddDeleteRequestQuery](
 		c,
 	)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	if userID != relationGetStatusParams.User {
+	if userID != params.User {
 		return helpers.Response(c, fiber.StatusForbidden, configs.ForbiddenError)
 	}
 
@@ -198,17 +199,7 @@ func AddRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	relation := &models.DBRelation{
-		BaseRelation: models.BaseRelation{
-			ID:        uuid.New(),
-			Type:      relationAddDeleteRequestBody.Type,
-			CreatedAt: time.Now(),
-		},
-		UserID:         relationGetStatusParams.User,
-		RelationUserID: relationGetStatusParams.RelationUser,
-	}
-
-	if err = db.AddRelation(relation); err != nil {
+	if err = userhelpers.AddRelation(params, query, db); err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == configs.DBDuplicateError {
 			return helpers.Response(c, fiber.StatusConflict, err.Error())
@@ -244,7 +235,7 @@ func DeleteRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	relationAddDeleteRequestBody, err := helpers.GetBodyAndValidate[parameters.RelationAddDeleteRequestBody](
+	relationAddDeleteRequestQuery, err := helpers.GetQueryAndValidate[parameters.RelationAddDeleteRequestQuery](
 		c,
 	)
 	if err != nil {
@@ -260,7 +251,7 @@ func DeleteRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	if err = db.DeleteRelation(relationGetStatusParams, relationAddDeleteRequestBody); err != nil {
+	if err = db.DeleteRelation(relationGetStatusParams, relationAddDeleteRequestQuery); err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 

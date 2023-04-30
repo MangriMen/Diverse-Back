@@ -119,7 +119,7 @@ func GenerateFilter(
 			return "", err
 		}
 
-		relationStatus := userhelpers.PrepareRelationStatusToSend(rawRelationStatus)
+		relationStatus := userhelpers.PrepareRelationStatusToSend(userID, rawRelationStatus)
 
 		if relationStatus["blocked"] {
 			return "", fmt.Errorf(configs.UserBlocked)
