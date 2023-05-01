@@ -14,12 +14,18 @@ import (
 	"github.com/h2non/bimg"
 )
 
-// swagger:route GET /data/{type}/{image} Data getData
-// Returns the requested data
+// swagger:route GET /data/{type}/{id} Data getData
 //
+// Returns the requested data with optional params
+//
+// Returns the data by type and id with given format parameters
+//
+// Produces:
+//   - image/webp
 //
 // Responses:
-//   304: SuccessResponse
+//   200: GetDataResponse
+//   304: GetDataResponse
 //   default: ErrorResponse
 
 // GetData is used to get data with parameters.
@@ -39,7 +45,7 @@ func GetData(c *fiber.Ctx) error {
 			filepath.Join(
 				configs.DataPath,
 				getDataRequestParams.Type,
-				getDataRequestParams.Image,
+				getDataRequestParams.ID,
 			),
 		)
 		if fileErr != nil {
@@ -85,7 +91,10 @@ func GetData(c *fiber.Ctx) error {
 }
 
 // swagger:route POST /data Data uploadData
-// Returns the ID of uploaded data
+//
+// Uploads data to storage
+//
+// Uploads one of the MIME data type images, converts it to webp and returns a relative path
 //
 // Responses:
 //   200: UploadDataResponse
@@ -114,8 +123,7 @@ func UploadData(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	err = datahelpers.ProcessFile(receivedFile, filepath.Join(pathToFolder, filename))
-	if err != nil {
+	if err = datahelpers.ProcessFile(receivedFile, filepath.Join(pathToFolder, filename)); err != nil {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 

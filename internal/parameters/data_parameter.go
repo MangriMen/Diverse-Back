@@ -20,24 +20,24 @@ type DataTypeParams struct {
 	Type string `params:"type" json:"type" validate:"required"`
 }
 
-// DataImageIDParams includes the id of the image.
-type DataImageIDParams struct {
+// DataIDParams includes the id of the image.
+type DataIDParams struct {
 	// in: path
 	// required: true
-	Image string `params:"image" json:"image" validate:"required"`
+	ID string `params:"id" json:"id" validate:"required"`
 }
 
 // DataImageIDRequest is used to represent a request thet requires a
 // image id to get image.
 // swagger:parameters getImageRaw
 type DataImageIDRequest struct {
-	DataImageIDParams
+	DataIDParams
 }
 
 // GetDataRequestParams TODO.
 type GetDataRequestParams struct {
 	DataTypeParams
-	DataImageIDParams
+	DataIDParams
 }
 
 // GetDataRequestQuery TODO.

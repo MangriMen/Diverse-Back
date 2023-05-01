@@ -1,15 +1,26 @@
 package responses
 
-// UploadDataResponseBody includes the id of uploaded data.
+import "bytes"
+
+// UploadDataResponseBody includes the relative path to uploaded data.
 type UploadDataResponseBody struct {
 	BaseResponseBody
+
 	// required: true
-	Path string `json:"path"`
+	Path string `json:"path" validate:"required"`
 }
 
-// UploadDataResponse represent the response retrived on upload data request.
+// UploadDataResponse contains the uploaded data info.
 // swagger:response
 type UploadDataResponse struct {
 	// in: body
 	Body UploadDataResponseBody
+}
+
+// GetDataResponse contains the binary data of requested type.
+// swagger:response
+type GetDataResponse struct {
+	// in: body
+	// swagger:file
+	Body *bytes.Buffer
 }

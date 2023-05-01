@@ -1,22 +1,29 @@
 package responses
 
-// BaseResponseBody represents the base response body for API.
-// Contains error and message fields.
+// BaseResponseBody is base body for application response.
+// Includes the error and message fields.
 type BaseResponseBody struct {
 	// required: true
 	// example: false
-	Error bool `json:"error"`
+	Error bool `json:"error" validate:"required"`
 
 	// required: true
-	Message interface{} `json:"message"`
+	Message interface{} `json:"message" validate:"required"`
 }
 
-// ErrorResponse represents the error response body for API.
-// Contains error and message fields.
+type errorResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	// example: true
+	Error bool `json:"error" validate:"required"`
+}
+
+// ErrorResponse contains the error data.
 // swagger:response
 type ErrorResponse struct {
 	// in: body
-	Body BaseResponseBody
+	Body errorResponseBody
 }
 
 // SuccessResponse represents success response for request.

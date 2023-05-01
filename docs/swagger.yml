@@ -2,21 +2,6 @@ basePath: /api/v1
 consumes:
     - application/json
 definitions:
-    BaseResponseBody:
-        description: Contains error and message fields.
-        properties:
-            error:
-                example: false
-                type: boolean
-                x-go-name: Error
-            message:
-                x-go-name: Message
-        required:
-            - error
-            - message
-        title: BaseResponseBody represents the base response body for API.
-        type: object
-        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     Comment:
         description: Comment represents the comment for this application
         properties:
@@ -432,7 +417,7 @@ definitions:
             - error
             - message
             - path
-        title: UploadDataResponseBody includes the id of uploaded data.
+        title: UploadDataResponseBody includes the relative path to uploaded data.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     User:
@@ -504,6 +489,19 @@ definitions:
         title: UserUpdateRequestBody includes the new email, username, name or password for the user.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    errorResponseBody:
+        properties:
+            error:
+                example: true
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
 host: localhost:3040
 info:
     title: Diverse API.
@@ -511,7 +509,7 @@ info:
 paths:
     /data:
         post:
-            description: Returns the ID of uploaded data
+            description: Uploads one of the MIME data type images, converts it to webp and returns a relative path
             operationId: uploadData
             parameters:
                 - in: formData
@@ -523,11 +521,12 @@ paths:
                     $ref: '#/responses/UploadDataResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
+            summary: Uploads data to storage
             tags:
                 - Data
-    /data/{type}/{image}:
+    /data/{type}/{id}:
         get:
-            description: Returns the requested data
+            description: Returns the data by type and id with given format parameters
             operationId: getData
             parameters:
                 - in: path
@@ -536,10 +535,10 @@ paths:
                   type: string
                   x-go-name: Type
                 - in: path
-                  name: image
+                  name: id
                   required: true
                   type: string
-                  x-go-name: Image
+                  x-go-name: ID
                 - format: int64
                   in: query
                   name: width
@@ -552,32 +551,38 @@ paths:
                   required: true
                   type: integer
                   x-go-name: Height
-            responses:
-                "304":
-                    $ref: '#/responses/SuccessResponse'
-                default:
-                    $ref: '#/responses/ErrorResponse'
-            tags:
-                - Data
-    /data/image/raw/{image}:
-        get:
-            description: Returns the image by id
-            operationId: getImageRaw
-            parameters:
-                - in: path
-                  name: image
-                  required: true
-                  type: string
-                  x-go-name: Image
             produces:
                 - image/webp
             responses:
                 "200":
-                    $ref: '#/responses/SuccessResponse'
+                    $ref: '#/responses/GetDataResponse'
                 "304":
-                    $ref: '#/responses/SuccessResponse'
+                    $ref: '#/responses/GetDataResponse'
                 default:
                     $ref: '#/responses/ErrorResponse'
+            summary: Returns the requested data with optional params
+            tags:
+                - Data
+    /data/image/raw/{id}:
+        get:
+            description: Returns the original webp image by id
+            operationId: getImageRaw
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: ID
+            produces:
+                - image/webp
+            responses:
+                "200":
+                    $ref: '#/responses/GetDataResponse'
+                "304":
+                    $ref: '#/responses/GetDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            summary: Returns the image by static route
             tags:
                 - Data
     /fetch:
@@ -1262,11 +1267,9 @@ responses:
     DeleteUserResponse:
         description: DeleteUserResponse represents response for successfully delete user request.
     ErrorResponse:
-        description: |-
-            ErrorResponse represents the error response body for API.
-            Contains error and message fields.
+        description: ErrorResponse contains the error data.
         schema:
-            $ref: '#/definitions/BaseResponseBody'
+            $ref: '#/definitions/errorResponseBody'
     GetCommentResponse:
         description: GetCommentResponse represent the response retrived on get comment request.
         schema:
@@ -1275,6 +1278,10 @@ responses:
         description: GetCommentsResponse represent the response retrived on get comments request.
         schema:
             $ref: '#/definitions/GetCommentsResponseBody'
+    GetDataResponse:
+        description: GetDataResponse contains the binary data of requested type.
+        schema:
+            type: file
     GetPostResponse:
         description: GetPostResponse represent the response retrived on get post request.
         schema:
@@ -1327,7 +1334,7 @@ responses:
         schema:
             type: string
     UploadDataResponse:
-        description: UploadDataResponse represent the response retrived on upload data request.
+        description: UploadDataResponse contains the uploaded data info.
         schema:
             $ref: '#/definitions/UploadDataResponseBody'
 schemes:
