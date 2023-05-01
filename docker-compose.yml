@@ -108,5 +108,8 @@ services:
 
 volumes:
   postgres-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-postgres-data
   pgadmin-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-pgadmin-data
   backend-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-backend-data
