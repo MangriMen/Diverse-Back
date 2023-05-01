@@ -2,11 +2,8 @@
 package userhelpers
 
 import (
-	"time"
-
 	"github.com/MangriMen/Diverse-Back/api/database"
 	"github.com/MangriMen/Diverse-Back/internal/models"
-	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/google/uuid"
 )
 
@@ -38,38 +35,4 @@ func PrepareRelationStatusToSend(userID uuid.UUID, relationStatus []models.DBRel
 	}
 
 	return preparedStatus
-}
-
-// AddRelation adds relation.
-func AddRelation(
-	params *parameters.RelationGetStatusParams,
-	query *parameters.RelationAddDeleteRequestQuery,
-	db *database.Queries) error {
-	relation := &models.DBRelation{
-		BaseRelation: models.BaseRelation{
-			ID:        uuid.New(),
-			Type:      query.Type,
-			CreatedAt: time.Now(),
-		},
-		UserID:         params.User,
-		RelationUserID: params.RelationUser,
-	}
-
-	if err := db.AddRelation(relation); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// DeleteRealtionWithReverse adds two relation reverse to each other.
-func DeleteRealtionWithReverse(
-	params *parameters.RelationGetStatusParams,
-	query *parameters.RelationAddDeleteRequestQuery,
-	db *database.Queries) error {
-	if err := db.DeleteRelation(params, query); err != nil {
-		return err
-	}
-
-	return nil
 }
