@@ -99,12 +99,12 @@ services:
   nginx:
     <<: *nginx
     profiles: [ prod ]
-    ports: [ $BACKEND_PORT_PROD:80 ]
+    ports: [ "3030:80" ]
 
   nginx-dev:
     <<: *nginx
     profiles: [ test, dev ]
-    ports: [ $BACKEND_PORT_TEST:80 ]
+    ports: [ "3040:80" ]
 
 volumes:
   postgres-data:
