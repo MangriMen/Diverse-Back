@@ -1,53 +1,48 @@
-FROM golang:1.20 as dev
+ARG GOLANG_IMAGE_TAG="1.20-alpine3.17"
+
+FROM golang:${GOLANG_IMAGE_TAG} as base
+
+FROM base as dev
+WORKDIR /app
+
 EXPOSE 40000
-WORKDIR /app
 
-ARG AIR_VERSION=v1.42.0
+RUN apk update && apk upgrade && \
+    apk add --no-cache vips-dev gcc musl-dev && \
+    pkg-config vips --cflags && \
+    go install github.com/cosmtrek/air@latest && \
+    go install github.com/go-delve/delve/cmd/dlv@latest
 
-RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
-    && apt install -y git libvips-dev \
-    make openssh-client
-
-RUN go install github.com/cosmtrek/air@latest \
-    && go install github.com/go-delve/delve/cmd/dlv@latest
-
-CMD air
-
-FROM golang:1.20 as testing
-WORKDIR /app
-
-COPY go.mod .
-COPY go.sum .
-
-RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
-    && apt install -y libvips-dev && \
-    go mod download
-
-CMD go test -vet=off -v ./test/...
+CMD ["air"]
 
 
-FROM golang:1.20 AS build
-LABEL stage="gobuilder"
+FROM base AS build
 WORKDIR /build
 
 ENV CGO_ENABLED 1
 ENV GOOS linux
 
-RUN DEBIAN_FRONTEND=noninteractive apt update && \
-    apt install -y libvips-dev
+COPY go.mod .
+COPY go.sum .
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache vips-dev gcc musl-dev && \
+    pkg-config vips --cflags && \
+    go mod download
 
 COPY . .
+
 RUN go build -trimpath -ldflags="-s -w" -o /app/server cmd/api/main.go
 
 
-FROM golang:1.20 as prod
+FROM base as prod
 WORKDIR /app
 ENV TZ America/New_York
 
-RUN DEBIAN_FRONTEND=noninteractive apt update && \
-    apt install -y libvips ca-certificates
-
 COPY --from=build /app/server /app/server
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache vips-tools
 
 CMD ["./server"]
 
