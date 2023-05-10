@@ -13,7 +13,7 @@ endef
 COMPOSE_DEPLOY_COMMAND=$(call gen_compose_command,$(profile))
 
 UP_FLAGS_DEV=--build
-UP_FLAGS_DEPLOY=-d --build
+UP_FLAGS_DEPLOY=-d
 
 DEV_HOST=host: localhost
 PROD_HOST=host: $(BASE_HOST)
