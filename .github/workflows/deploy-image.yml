@@ -69,7 +69,7 @@ jobs:
 
     env:
       PROJECT_BASE_PATH: ${{ vars.PROJECT_ROOT }}/${{ github.event.repository.name }}
-      DEPLOY_FILES: docker-compose.yml,Makefile,deployments
+      DEPLOY_FILES: docker-compose.yml,Makefile,deployments,docs
       DEPLOY_TAG_NAME_REGEX: ([0-9].[0-9].[0-9])
 
     steps:
