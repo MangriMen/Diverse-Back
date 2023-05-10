@@ -35,11 +35,11 @@ func GetComments(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](
 		c,
 	)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	commentsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.CommentsFetchRequestQuery](
@@ -58,7 +58,7 @@ func GetComments(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	dbPosts, err := db.GetComments(postCommentIDParams.Post, commentsFetchRequestQuery)
+	dbPosts, err := db.GetComments(postIDParams.Post, commentsFetchRequestQuery)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusNotFound, configs.CommentsNotFoundError)
 	}
