@@ -32,17 +32,17 @@ RUN apk update && apk upgrade && \
 
 COPY . .
 
-RUN go build -trimpath -ldflags="-s -w" -o /app/server cmd/api/main.go
+RUN go build -trimpath -ldflags="-s -w -extldflags '-fuse-ld=bfd'" -o /app/server cmd/api/main.go
 
 
 FROM base as prod
 WORKDIR /app
 ENV TZ America/New_York
 
-COPY --from=build /app/server /app/server
-
 RUN apk update && apk upgrade && \
     apk add --no-cache vips-tools
+
+COPY --from=build /app/server /app/server
 
 CMD ["./server"]
 
