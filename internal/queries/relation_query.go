@@ -19,7 +19,7 @@ func (q *RelationQueries) GetRelationsCount(
 ) (int, error) {
 	relationsCount := 0
 
-	const baseQuery = `SELECT Count(*) FROM user_relations`
+	const baseQuery = `SELECT Count(*) FROM user_relations_view`
 
 	const followingCondition = `WHERE user_id = $1 AND type = $2`
 	const followerCondition = `WHERE relation_user_id = $1 AND type = $2`
@@ -55,7 +55,7 @@ func (q *RelationQueries) GetRelations(
 	relations := []models.DBRelation{}
 
 	const baseQuery = `SELECT *
-		FROM user_relations
+		FROM user_relations_view
 		WHERE created_at < $1
 		AND id <> $2`
 
@@ -105,7 +105,7 @@ func (q *RelationQueries) GetRelationStatus(
 	relations := []models.DBRelation{}
 
 	query := `SELECT *
-		FROM user_relations
+		FROM user_relations_view
 		WHERE user_id = $1
 		AND relation_user_id = $2
 		OR user_id = $2
@@ -126,7 +126,8 @@ func (q *RelationQueries) GetRelationStatus(
 
 // AddRelation is used to add new relation with given parameters.
 func (q *RelationQueries) AddRelation(r *models.DBRelation) error {
-	query := `INSERT INTO user_relations VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO user_relations
+		VALUES ($1, $2, $3, $4, $5)`
 
 	_, err := q.Exec(query, r.ID, r.UserID, r.RelationUserID, r.Type, r.CreatedAt)
 	if err != nil {
@@ -141,11 +142,12 @@ func (q *RelationQueries) DeleteRelation(
 	relationGetStatusParams *parameters.RelationGetStatusParams,
 	relationAddDeleteRequestBody *parameters.RelationAddDeleteRequestQuery,
 ) error {
-	query := `DELETE
-				FROM user_relations
-				WHERE user_id = $1
-				AND relation_user_id = $2
-				AND type = $3`
+	query := `UPDATE user_relations
+		SET
+			deleted_at = now()
+		WHERE user_id = $1
+		AND relation_user_id = $2
+		AND type = $3`
 
 	_, err := q.Exec(
 		query,

@@ -15,7 +15,8 @@ type UserQueries struct {
 func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 	users := []models.DBUser{}
 
-	query := `SELECT * FROM users`
+	query := `SELECT *
+		FROM users_view`
 
 	err := q.Select(&users, query)
 	if err != nil {
@@ -29,7 +30,9 @@ func (q *UserQueries) GetUsers() ([]models.DBUser, error) {
 func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
 	user := models.DBUser{}
 
-	query := `SELECT * FROM users WHERE id = $1`
+	query := `SELECT *
+		FROM users_view
+		WHERE id = $1`
 
 	err := q.Get(&user, query, id)
 	if err != nil {
@@ -43,7 +46,9 @@ func (q *UserQueries) GetUser(id uuid.UUID) (models.DBUser, error) {
 func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
 	user := models.DBUser{}
 
-	query := `SELECT * FROM users WHERE email = $1`
+	query := `SELECT *
+		FROM users_view
+		WHERE email = $1`
 
 	err := q.Get(&user, query, email)
 	if err != nil {
@@ -57,7 +62,9 @@ func (q *UserQueries) GetUserByEmail(email string) (models.DBUser, error) {
 func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) {
 	user := models.DBUser{}
 
-	query := `SELECT * FROM users WHERE username = $1`
+	query := `SELECT *
+		FROM users_view
+		WHERE username = $1`
 
 	err := q.Get(&user, query, username)
 	if err != nil {
@@ -69,7 +76,8 @@ func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) 
 
 // CreateUser creates a new user at the database based on the given user object.
 func (q *UserQueries) CreateUser(b *models.DBUser) error {
-	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	query := `INSERT INTO users
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
 	if err != nil {
@@ -110,7 +118,10 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 
 // DeleteUser deletes user based on the given ID.
 func (q *UserQueries) DeleteUser(id uuid.UUID) error {
-	query := `DELETE FROM users WHERE id = $1`
+	query := `UPDATE users
+		SET 
+			deleted_at = now()
+		WHERE id = $1`
 
 	_, err := q.Exec(query, id)
 	if err != nil {

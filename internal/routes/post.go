@@ -36,6 +36,8 @@ func PostPrivateRoutes(route fiber.Router) {
 func PostCommentPrivateRoutes(route fiber.Router) {
 	posts := route.Group("/posts/:post")
 
+	posts.Get("comments/count", middleware.JWTProtected(), controllers.GetCommentsCount)
+
 	posts.Get("comments", middleware.JWTProtected(), controllers.GetComments)
 
 	posts.Post("/comments", middleware.JWTProtected(), controllers.AddComment)

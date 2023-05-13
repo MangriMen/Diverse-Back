@@ -20,7 +20,7 @@ import (
 )
 
 // swagger:route GET /posts/count Post getPostsCount
-// Returns a list of all posts
+// Returns a count of all posts
 //
 // Security:
 //   bearerAuth:

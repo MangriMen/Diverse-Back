@@ -2,7 +2,7 @@ package responses
 
 import "github.com/MangriMen/Diverse-Back/internal/models"
 
-// GetPostsCountResponseBody includes the slice of posts.
+// GetPostsCountResponseBody includes the posts count.
 type GetPostsCountResponseBody struct {
 	BaseResponseBody
 
