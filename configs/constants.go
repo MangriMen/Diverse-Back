@@ -46,6 +46,7 @@ const (
 	UserAlreadyExistsError = "user with this email or username already exists"
 	/* #nosec */
 	WrongEmailOrPasswordError = "wrong email or password"
+	WrongPassword             = "wrong password"
 	UserBlocked               = "blocked by user"
 	RelationsGetError         = "relations getting error"
 

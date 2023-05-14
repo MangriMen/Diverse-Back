@@ -27,6 +27,7 @@ type RequestBody interface {
 	LoginRequestBody |
 		RegisterRequestBody |
 		UserUpdateRequestBody |
+		UserUpdatePasswordRequestBody |
 		PostCreateRequestBody |
 		PostUpdateRequestBody |
 		CommentAddRequestBody |

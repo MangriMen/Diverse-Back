@@ -13,7 +13,7 @@ type CommentQueries struct {
 	*sqlx.DB
 }
 
-// GetCommentsCount is used to fetch comments count
+// GetCommentsCount is used to fetch comments count.
 func (q *PostQueries) GetCommentsCount(postID uuid.UUID) (int, error) {
 	commentsCount := 0
 
