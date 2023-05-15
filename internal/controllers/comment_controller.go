@@ -18,6 +18,40 @@ import (
 	"github.com/samber/lo"
 )
 
+// swagger:route GET /posts/{post}/comments/count Post getCommentsCount
+// Returns a count post comments
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   200: GetCommentsCountResponse
+//   default: ErrorResponse
+
+// GetCommentsCount is used to fetch the post comments count.
+func GetCommentsCount(c *fiber.Ctx) error {
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](
+		c,
+	)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	commentsCount, err := db.GetCommentsCount(postIDParams.Post)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusNotFound, configs.CommentsNotFoundError)
+	}
+
+	return c.JSON(responses.GetCommentsCountResponseBody{
+		Count: commentsCount,
+	})
+}
+
 // swagger:route GET /posts/{post}/comments Post getComments
 // Returns a list of post comments
 //
@@ -35,11 +69,11 @@ func GetComments(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	postCommentIDParams, err := helpers.GetParamsAndValidate[parameters.PostCommentIDParams](
+	postIDParams, err := helpers.GetParamsAndValidate[parameters.PostIDParams](
 		c,
 	)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	commentsFetchRequestQuery, err := helpers.GetQueryAndValidate[parameters.CommentsFetchRequestQuery](
@@ -58,7 +92,7 @@ func GetComments(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	dbPosts, err := db.GetComments(postCommentIDParams.Post, commentsFetchRequestQuery)
+	dbPosts, err := db.GetComments(postIDParams.Post, commentsFetchRequestQuery)
 	if err != nil {
 		return helpers.Response(c, fiber.StatusNotFound, configs.CommentsNotFoundError)
 	}

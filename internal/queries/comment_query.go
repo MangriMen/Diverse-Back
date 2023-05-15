@@ -13,6 +13,26 @@ type CommentQueries struct {
 	*sqlx.DB
 }
 
+// GetCommentsCount is used to fetch comments count.
+func (q *PostQueries) GetCommentsCount(postID uuid.UUID) (int, error) {
+	commentsCount := 0
+
+	query := `SELECT Count(*)
+		FROM comments_view
+		WHERE post_id = $1`
+
+	err := q.Get(
+		&commentsCount,
+		query,
+		postID,
+	)
+	if err != nil {
+		return commentsCount, err
+	}
+
+	return commentsCount, nil
+}
+
 // GetComments is used to fetch comments related to a post based
 // on a provided post ID.
 func (q *PostQueries) GetComments(
@@ -22,7 +42,7 @@ func (q *PostQueries) GetComments(
 	comments := []models.DBComment{}
 
 	query := `SELECT *
-		FROM comments
+		FROM comments_view
 		WHERE post_id = $1
 		AND created_at < $2
 		ORDER BY created_at DESC
@@ -46,7 +66,9 @@ func (q *PostQueries) GetComments(
 func (q *PostQueries) GetComment(id uuid.UUID) (models.DBComment, error) {
 	comment := models.DBComment{}
 
-	query := `SELECT * FROM comments WHERE id = $1`
+	query := `SELECT *
+		FROM comments_view
+		WHERE id = $1`
 
 	err := q.Get(&comment, query, id)
 	if err != nil {
@@ -58,7 +80,8 @@ func (q *PostQueries) GetComment(id uuid.UUID) (models.DBComment, error) {
 
 // AddComment add a single comment to the database based on the given comment object.
 func (q *PostQueries) AddComment(b *models.DBComment) error {
-	query := `INSERT INTO comments VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	query := `INSERT INTO comments
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	_, err := q.Exec(query, b.ID, b.PostID, b.UserID, b.Content, b.CreatedAt, b.UpdatedAt, b.Likes)
 	if err != nil {
@@ -86,7 +109,8 @@ func (q *UserQueries) UpdateComment(b *models.DBComment) error {
 
 // LikeComment sets like the comment by ID.
 func (q *PostQueries) LikeComment(l *models.DBCommentLike) error {
-	query := `INSERT INTO comment_likes VALUES ($1, $2, $3)`
+	query := `INSERT INTO comment_likes
+		VALUES ($1, $2, $3)`
 
 	_, err := q.Exec(query, l.ID, l.CommentID, l.UserID)
 	if err != nil {
@@ -98,7 +122,9 @@ func (q *PostQueries) LikeComment(l *models.DBCommentLike) error {
 
 // UnlikeComment sets like the comment by ID.
 func (q *PostQueries) UnlikeComment(l *models.DBCommentLike) error {
-	query := `DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2`
+	query := `DELETE
+		FROM comment_likes
+		WHERE comment_id = $1 AND user_id = $2`
 
 	_, err := q.Exec(query, l.CommentID, l.UserID)
 	if err != nil {
@@ -112,7 +138,9 @@ func (q *PostQueries) UnlikeComment(l *models.DBCommentLike) error {
 func (q *PostQueries) GetCommentIsLiked(commentID uuid.UUID, userID uuid.UUID) (bool, error) {
 	likesCount := 0
 
-	query := `SELECT Count(*) FROM comment_likes WHERE comment_id = $1 AND user_id = $2`
+	query := `SELECT Count(*)
+		FROM comment_likes
+		WHERE comment_id = $1 AND user_id = $2`
 
 	err := q.Get(&likesCount, query, commentID, userID)
 	if err != nil {
@@ -124,7 +152,10 @@ func (q *PostQueries) GetCommentIsLiked(commentID uuid.UUID, userID uuid.UUID) (
 
 // DeleteComment deletes comment from database based on the given comment ID.
 func (q *PostQueries) DeleteComment(id uuid.UUID) error {
-	query := `DELETE FROM comments WHERE id = $1`
+	query := `UPDATE comments
+		SET
+			deleted_at = now()
+		WHERE id = $1`
 
 	_, err := q.Exec(query, id)
 	if err != nil {

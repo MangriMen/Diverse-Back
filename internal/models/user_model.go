@@ -33,6 +33,8 @@ type BaseUser struct {
 
 	// URL to user avatar
 	AvatarURL *string `db:"avatar_url" json:"avatar_url"`
+
+	About *string `db:"about" json:"about"`
 }
 
 // DBUser represents a user struct from database.

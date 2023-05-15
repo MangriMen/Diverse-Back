@@ -95,6 +95,25 @@ definitions:
             - data
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetCommentsCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetCommentsCountResponseBody includes the comments count.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetCommentsResponseBody:
         description: |-
             GetCommentsResponseBody includes the slice of comments for a post
@@ -155,7 +174,7 @@ definitions:
             - error
             - message
             - count
-        title: GetPostsCountResponseBody includes the slice of posts.
+        title: GetPostsCountResponseBody includes the posts count.
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
     GetPostsResponseBody:
@@ -438,6 +457,9 @@ definitions:
     User:
         description: User represents the user for this application
         properties:
+            about:
+                type: string
+                x-go-name: About
             avatar_url:
                 description: URL to user avatar
                 type: string
@@ -477,6 +499,21 @@ definitions:
             - updated_at
         type: object
         x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    UserUpdatePasswordRequestBody:
+        properties:
+            old_password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: OldPassword
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+        title: UserUpdatePasswordRequestBody includes the old and new password of the user.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
     UserUpdateRequestBody:
         properties:
             avatar_url:
@@ -908,6 +945,26 @@ paths:
                 - bearerAuth: []
             tags:
                 - Post
+    /posts/{post}/comments/count:
+        get:
+            description: Returns a count post comments
+            operationId: getCommentsCount
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "200":
+                    $ref: '#/responses/GetCommentsCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
     /posts/{post}/like:
         delete:
             description: Unset like to the post by ID
@@ -949,7 +1006,7 @@ paths:
                 - Post
     /posts/count:
         get:
-            description: Returns a list of all posts
+            description: Returns a count of all posts
             operationId: getPostsCount
             parameters:
                 - in: query
@@ -1221,6 +1278,25 @@ paths:
                 - bearerAuth: []
             tags:
                 - User
+    /users/password:
+        patch:
+            description: Update user password
+            operationId: updateUserPassword
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UserUpdatePasswordRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/UpdateUserPasswordResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
     /users/username/{username}:
         get:
             description: Returns the user by given username
@@ -1271,6 +1347,10 @@ responses:
         description: GetCommentResponse represent the response retrived on get comment request.
         schema:
             $ref: '#/definitions/GetCommentResponseBody'
+    GetCommentsCountResponse:
+        description: GetCommentsCountResponse represent the response retrived on get comments request.
+        schema:
+            $ref: '#/definitions/GetCommentsCountResponseBody'
     GetCommentsResponse:
         description: GetCommentsResponse represent the response retrived on get comments request.
         schema:
@@ -1320,6 +1400,10 @@ responses:
             $ref: '#/definitions/RegisterLoginUserResponseBody'
     SuccessResponse:
         description: SuccessResponse represents success response for request.
+        schema:
+            type: string
+    UpdateUserPasswordResponse:
+        description: UpdateUserPasswordResponse represents response for successfully update user password.
         schema:
             type: string
     UpdateUserResponse:

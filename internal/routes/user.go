@@ -11,6 +11,9 @@ import (
 // logging in a user, and register a new user.
 func UserPublicRoutes(route fiber.Router) {
 	route.Get("/users", controllers.GetUsers)
+
+	route.Patch("/users/password", controllers.UpdateUserPassword)
+
 	route.Get("/users/:user", controllers.GetUser)
 
 	route.Get("/users/username/:username", controllers.GetUserByUsername)
