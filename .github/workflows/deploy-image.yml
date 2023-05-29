@@ -108,4 +108,10 @@ jobs:
           envs: PROFILE_PATH,PROFILE,BASE_HOST
           script: |
             cd $PROFILE_PATH
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
             make deploy profile=$PROFILE
+
+            docker logout
+
