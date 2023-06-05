@@ -113,6 +113,16 @@ func (q *UserQueries) UpdateUser(b *models.DBUser) error {
 		return err
 	}
 
+	queryUserInfo := `UPDATE user_info
+		SET
+			about = $2
+		WHERE id = $1`
+
+	_, err = q.Exec(queryUserInfo, b.ID, b.About)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
