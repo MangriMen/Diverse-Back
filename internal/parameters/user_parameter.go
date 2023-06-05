@@ -95,6 +95,10 @@ type UserUpdateRequestBody struct {
 	Password string `json:"password" validate:"omitempty,gte=8,lte=256"`
 
 	AvatarURL *string `json:"avatar_url" validate:"omitempty"`
+
+	// min length: 0
+	// max length: 2048
+	About *string `db:"about" json:"about"`
 }
 
 // UserUpdateRequest represents a request to update a user's information,
