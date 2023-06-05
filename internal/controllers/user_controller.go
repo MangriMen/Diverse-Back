@@ -311,6 +311,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
 	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
 	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
+	foundUser.About = helpers.GetNotEmpty(userUpdateRequestBody.About, foundUser.About)
 
 	foundUser.AvatarURL = helpers.GetNotEmpty(userUpdateRequestBody.AvatarURL, foundUser.AvatarURL)
 
