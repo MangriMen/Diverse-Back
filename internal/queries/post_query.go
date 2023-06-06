@@ -80,7 +80,10 @@ func (q *PostQueries) GetPost(id uuid.UUID) (models.DBPost, error) {
 // CreatePost creates a new post at the database based on the given post object.
 func (q *PostQueries) CreatePost(b *models.DBPost) error {
 	query := `INSERT INTO posts
-		VALUES ($1, $2, $3, $4, $5, $6)`
+		VALUES ($1, $2, $3, $4, $5, $6)
+			ON CONFLICT (id) DO
+		UPDATE
+			SET deleted_at = NULL`
 
 	_, err := q.Exec(query, b.ID, b.UserID, b.Content, b.Description, b.Likes, b.CreatedAt)
 	if err != nil {
@@ -108,7 +111,10 @@ func (q *UserQueries) UpdatePost(b *models.DBPost) error {
 // LikePost sets like the post by ID.
 func (q *PostQueries) LikePost(l *models.DBPostLike) error {
 	query := `INSERT INTO post_likes
-		VALUES ($1, $2, $3)`
+		VALUES ($1, $2, $3)
+			ON CONFLICT(post_id, user_id) DO
+		UPDATE
+			SET deleted_at = NULL`
 
 	_, err := q.Exec(query, l.ID, l.PostID, l.UserID)
 	if err != nil {
@@ -120,8 +126,9 @@ func (q *PostQueries) LikePost(l *models.DBPostLike) error {
 
 // UnlikePost sets like the post by ID.
 func (q *PostQueries) UnlikePost(l *models.DBPostLike) error {
-	query := `DELETE
-		FROM post_likes
+	query := `UPDATE post_likes
+		SET
+			deleted_at = now()
 		WHERE post_id = $1 AND user_id = $2`
 
 	_, err := q.Exec(query, l.PostID, l.UserID)
@@ -137,7 +144,7 @@ func (q *PostQueries) GetPostIsLiked(postID uuid.UUID, userID uuid.UUID) (bool, 
 	likesCount := 0
 
 	query := `SELECT Count(*)
-		FROM post_likes
+		FROM post_likes_view
 		WHERE post_id = $1 AND user_id = $2`
 
 	err := q.Get(&likesCount, query, postID, userID)
