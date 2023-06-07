@@ -127,7 +127,10 @@ func (q *RelationQueries) GetRelationStatus(
 // AddRelation is used to add new relation with given parameters.
 func (q *RelationQueries) AddRelation(r *models.DBRelation) error {
 	query := `INSERT INTO user_relations
-		VALUES ($1, $2, $3, $4, $5)`
+		VALUES ($1, $2, $3, $4, $5)
+			ON CONFLICT (user_id, relation_user_id, type) DO
+		UPDATE
+			SET deleted_at = NULL`
 
 	_, err := q.Exec(query, r.ID, r.UserID, r.RelationUserID, r.Type, r.CreatedAt)
 	if err != nil {

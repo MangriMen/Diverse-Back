@@ -77,7 +77,10 @@ func (q *UserQueries) GetUserByUsername(username string) (models.DBUser, error) 
 // CreateUser creates a new user at the database based on the given user object.
 func (q *UserQueries) CreateUser(b *models.DBUser) error {
 	query := `INSERT INTO users
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (id, email, password, username) DO
+		UPDATE
+			SET deleted_at = NULL`
 
 	_, err := q.Exec(query, b.ID, b.Email, b.Password, b.Username, b.Name, b.CreatedAt, b.UpdatedAt)
 	if err != nil {
