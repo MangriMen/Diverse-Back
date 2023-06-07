@@ -262,7 +262,7 @@ ALTER TABLE public.posts_view OWNER TO "ea1fb999-4aab-4142-9101-facdc7d5b83b";
 
 CREATE TABLE public.user_info (
     id uuid NOT NULL,
-    about character varying(256)
+    about character varying(2048)
 );
 
 
