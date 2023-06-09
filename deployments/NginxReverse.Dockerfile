@@ -9,3 +9,5 @@ RUN sed -i 's/<profile>/test/g' /etc/nginx/conf.d/default.conf
 
 FROM build as dev
 RUN sed -i 's/<profile>/dev/g' /etc/nginx/conf.d/default.conf
+
+FROM dev as testing

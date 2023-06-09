@@ -147,7 +147,7 @@ func LoginUser(c *fiber.Ctx) error {
 
 	token, err := jwthelpers.GenerateNewAccessToken(foundDBUser.ID)
 	if err != nil {
-		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+		return helpers.Response(c, fiber.StatusInternalServerError, "err.Error()")
 	}
 
 	return c.JSON(responses.RegisterLoginUserResponseBody{

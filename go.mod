@@ -3,6 +3,7 @@ module github.com/MangriMen/Diverse-Back
 go 1.20
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/gofiber/fiber/v2 v2.44.0
 	github.com/gofiber/jwt/v3 v3.3.8
@@ -13,7 +14,10 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/zerolog v1.29.1
 	github.com/samber/lo v1.38.1
+	github.com/simukti/sqldb-logger v0.0.0-20230108155151-646c1a075551
+	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.8.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29

@@ -64,3 +64,12 @@ const (
 
 // TestResponseTimeout is response timeout for tests.
 const TestResponseTimeout = 10000
+
+// MockDSN is custom dsn for mock database.
+const MockDSN = "mock_dsn"
+
+// MockLogFilename is filename for sql queries to mock db.
+const MockLogFilename = "mock_db.log"
+
+// TempDirectory is dir for unnecessary runtime logs and etc.
+const TempDirectory = "tmp"

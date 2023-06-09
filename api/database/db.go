@@ -2,7 +2,10 @@
 package database
 
 import (
+	"os"
+
 	"github.com/MangriMen/Diverse-Back/internal/queries"
+	"github.com/jmoiron/sqlx"
 )
 
 // Queries is struct for storing various queries.
@@ -15,7 +18,14 @@ type Queries struct {
 
 // OpenDBConnection open db connection and combine all queries.
 func OpenDBConnection() (*Queries, error) {
-	db, err := PostgreSQLConnection()
+	var db *sqlx.DB
+	var err error
+
+	if os.Getenv("ENABLE_TESTING") != "" {
+		db, err = MockSQLConnection()
+	} else {
+		db, err = PostgreSQLConnection()
+	}
 
 	if err != nil {
 		return nil, err
