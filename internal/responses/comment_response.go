@@ -3,6 +3,21 @@ package responses
 
 import "github.com/MangriMen/Diverse-Back/internal/models"
 
+// GetCommentsCountResponseBody includes the comments count.
+type GetCommentsCountResponseBody struct {
+	BaseResponseBody
+
+	// required: true
+	Count int `json:"count"`
+}
+
+// GetCommentsCountResponse represent the response retrived on get comments request.
+// swagger:response
+type GetCommentsCountResponse struct {
+	// in: body
+	Body GetCommentsCountResponseBody
+}
+
 // GetCommentsResponseBody includes the slice of comments for a post
 // and its count.
 type GetCommentsResponseBody struct {

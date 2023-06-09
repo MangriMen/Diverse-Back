@@ -12,6 +12,7 @@ import (
 	"github.com/MangriMen/Diverse-Back/internal/parameters"
 	"github.com/MangriMen/Diverse-Back/internal/responses"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/samber/lo"
 )
@@ -199,7 +200,17 @@ func AddRelation(c *fiber.Ctx) error {
 		return helpers.Response(c, fiber.StatusInternalServerError, err)
 	}
 
-	if err = userhelpers.AddRelation(params, query, db); err != nil {
+	relation := &models.DBRelation{
+		BaseRelation: models.BaseRelation{
+			ID:        uuid.New(),
+			Type:      query.Type,
+			CreatedAt: time.Now(),
+		},
+		UserID:         params.User,
+		RelationUserID: params.RelationUser,
+	}
+
+	if err = db.AddRelation(relation); err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == configs.DBDuplicateError {
 			return helpers.Response(c, fiber.StatusConflict, err.Error())

@@ -86,3 +86,9 @@ type CommentsFetchRequest struct {
 
 	CommentsFetchRequestQuery
 }
+
+// CommentsFetchCountRequest is a struct that encapsulates a query used to fetch comments count.
+// swagger:parameters getCommentsCount
+type CommentsFetchCountRequest struct {
+	PostIDParams
+}

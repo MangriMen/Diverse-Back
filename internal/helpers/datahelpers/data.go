@@ -88,9 +88,5 @@ func processImage(buffer []byte, quality int, filepath string) error {
 		return err
 	}
 
-	if err = bimg.Write(filepath, processed); err != nil {
-		return err
-	}
-
-	return nil
+	return bimg.Write(filepath, processed)
 }

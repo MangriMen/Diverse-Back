@@ -99,14 +99,17 @@ services:
   nginx:
     <<: *nginx
     profiles: [ prod ]
-    ports: [ "3030:80" ]
+    ports: [ $BACKEND_PORT_PROD:80 ]
 
   nginx-dev:
     <<: *nginx
     profiles: [ test, dev ]
-    ports: [ "3040:80" ]
+    ports: [ $BACKEND_PORT_TEST:80 ]
 
 volumes:
   postgres-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-postgres-data
   pgadmin-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-pgadmin-data
   backend-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-backend-data

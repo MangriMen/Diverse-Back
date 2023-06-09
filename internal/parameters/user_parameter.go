@@ -95,6 +95,10 @@ type UserUpdateRequestBody struct {
 	Password string `json:"password" validate:"omitempty,gte=8,lte=256"`
 
 	AvatarURL *string `json:"avatar_url" validate:"omitempty"`
+
+	// min length: 0
+	// max length: 2048
+	About *string `db:"about" json:"about"`
 }
 
 // UserUpdateRequest represents a request to update a user's information,
@@ -105,4 +109,23 @@ type UserUpdateRequest struct {
 	// in: body
 	// required: true
 	Body UserUpdateRequestBody
+}
+
+// UserUpdatePasswordRequestBody includes the old and new password of the user.
+type UserUpdatePasswordRequestBody struct {
+	// min length: 8
+	// max length: 256
+	OldPassword string `json:"old_password" validate:"required,gte=8,lte=256"`
+
+	// min length: 8
+	// max length: 256
+	Password string `json:"password" validate:"required,gte=8,lte=256"`
+}
+
+// UserUpdatePasswordRequest represents a request to update a user's password.
+// swagger:parameters updateUserPassword
+type UserUpdatePasswordRequest struct {
+	// in: body
+	// required: true
+	Body UserUpdatePasswordRequestBody
 }

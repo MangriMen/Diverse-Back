@@ -1,5 +1,5 @@
 FROM nginx:alpine as build
-COPY third_party/nginx/base.conf /etc/nginx/conf.d/default.conf
+COPY deployments/nginx/base.conf /etc/nginx/conf.d/default.conf
 
 FROM build as prod
 RUN sed -i 's/<profile>/prod/g' /etc/nginx/conf.d/default.conf

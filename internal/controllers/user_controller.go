@@ -311,6 +311,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	foundUser.Email = helpers.GetNotEmpty(userUpdateRequestBody.Email, foundUser.Email)
 	foundUser.Username = helpers.GetNotEmpty(userUpdateRequestBody.Username, foundUser.Username)
 	foundUser.Name = helpers.GetNotEmpty(userUpdateRequestBody.Name, foundUser.Name)
+	foundUser.About = helpers.GetNotEmpty(userUpdateRequestBody.About, foundUser.About)
 
 	foundUser.AvatarURL = helpers.GetNotEmpty(userUpdateRequestBody.AvatarURL, foundUser.AvatarURL)
 
@@ -319,6 +320,65 @@ func UpdateUser(c *fiber.Ctx) error {
 		if err != nil {
 			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
 		}
+	}
+
+	foundUser.UpdatedAt = time.Now()
+
+	validate := helpers.NewValidator()
+	if err = validate.Struct(foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, helpers.ValidatorErrors(err))
+	}
+
+	if err = db.UpdateUser(&foundUser); err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.SendStatus(fiber.StatusCreated)
+}
+
+// swagger:route PATCH /users/password User updateUserPassword
+// Update user password
+//
+// Security:
+//   bearerAuth:
+//
+// Responses:
+//   201: UpdateUserPasswordResponse
+//   default: ErrorResponse
+
+// UpdateUserPassword is used to update user password by ID.
+func UpdateUserPassword(c *fiber.Ctx) error {
+	userID, err := helpers.GetUserIDFromToken(c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	userUpdateRequestBody, err := helpers.GetBodyAndValidate[parameters.UserUpdatePasswordRequestBody](c)
+	if err != nil {
+		return helpers.Response(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	foundUser, err := db.GetUser(userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return helpers.Response(c, fiber.StatusNotFound, configs.UserNotFoundError)
+		}
+
+		return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	if userhelpers.CheckPasswordHash(userUpdateRequestBody.OldPassword, foundUser.Password) {
+		foundUser.Password, err = userhelpers.HashPassword(userUpdateRequestBody.Password)
+		if err != nil {
+			return helpers.Response(c, fiber.StatusInternalServerError, err.Error())
+		}
+	} else {
+		return helpers.Response(c, fiber.StatusForbidden, configs.WrongPassword)
 	}
 
 	foundUser.UpdatedAt = time.Now()
