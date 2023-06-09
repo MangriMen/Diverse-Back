@@ -12,17 +12,20 @@ import (
 // DataPublicRoutes sets up the public routes for data-related API endpoints
 // such as getting a image.
 func DataPublicRoutes(route fiber.Router) {
-	route.Get("data/:type/:image", controllers.GetData)
+	route.Get("data/:type/:id", controllers.GetData)
 
-	// swagger:route GET /data/image/raw/{image} Data getImageRaw
-	// Returns the image by id
+	// swagger:route GET /data/image/raw/{id} Data getImageRaw
+	//
+	// Returns the image by static route
+	//
+	// Returns the original webp image by id
 	//
 	// Produces:
 	//   - image/webp
 	//
 	// Responses:
-	//   200: SuccessResponse
-	//   304: SuccessResponse
+	//   200: GetDataResponse
+	//   304: GetDataResponse
 	//   default: ErrorResponse
 
 	route.Static(
