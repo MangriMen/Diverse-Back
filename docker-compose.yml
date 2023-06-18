@@ -1,0 +1,115 @@
+version: "3.9"
+
+x-nginx:
+  &nginx
+  container_name: diverse-nginx-$PROFILE
+  restart: always
+  pull_policy: build
+  build:
+    context: .
+    dockerfile: deployments/NginxReverse.Dockerfile
+    target: $PROFILE
+
+x-backend:
+  &backend
+  container_name: diverse-backend-$PROFILE
+  restart: always
+  pull_policy: always
+  env_file: .env
+  build:
+    context: .
+    dockerfile: deployments/Backend.Dockerfile
+    target: $PROFILE
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  backend:
+    <<: *backend
+    image: ghcr.io/mangrimen/diverse-back:latest
+    profiles: [ prod ]
+    volumes:
+      - "backend-data:/var/lib/backend-data"
+
+  backend-test:
+    <<: *backend
+    image: ghcr.io/mangrimen/diverse-back:develop
+    profiles: [ test ]
+    volumes:
+      - "backend-data:/var/lib/backend-data"
+
+  backend-dev:
+    <<: *backend
+    profiles: [ dev ]
+    ports:
+      - "40000:40000"
+    volumes:
+      - ".:/app:rw,delegated"
+      - "backend-data:/var/lib/backend-data"
+
+  postgres:
+    container_name: diverse-postgres-$PROFILE
+    image: postgres:14.5-alpine
+    restart: always
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - "./scripts/postgres-initd:/docker-entrypoint-initdb.d:ro"
+      - "postgres-data:/var/lib/postgresql/data"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: diverse-pgadmin-$PROFILE
+    image: dpage/pgadmin4
+    restart: always
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
+    volumes:
+      - "pgadmin-data:/var/lib/pgadmin"
+
+  swagger:
+    container_name: diverse-swagger-$PROFILE
+    image: quay.io/goswagger/swagger
+    restart: always
+    env_file: .env
+    command:
+      [
+        "serve",
+        "swagger.yml",
+        "--flavor=swagger",
+        "--no-open",
+        "--base-path=/api/v1/",
+        "--port=$SWAGGER_PORT"
+      ]
+    working_dir: "/docs"
+    volumes:
+      - "./docs:/docs"
+
+  nginx:
+    <<: *nginx
+    profiles: [ prod ]
+    ports: [ $BACKEND_PORT_PROD:80 ]
+
+  nginx-dev:
+    <<: *nginx
+    profiles: [ test, dev ]
+    ports: [ $BACKEND_PORT_TEST:80 ]
+
+volumes:
+  postgres-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-postgres-data
+  pgadmin-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-pgadmin-data
+  backend-data:
+    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-backend-data

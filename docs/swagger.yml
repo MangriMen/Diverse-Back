@@ -1,0 +1,1433 @@
+basePath: /api/v1
+consumes:
+    - application/json
+definitions:
+    Comment:
+        description: Comment represents the comment for this application
+        properties:
+            content:
+                description: Comment content
+                type: string
+                x-go-name: Content
+            created_at:
+                description: The time the comment was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            id:
+                description: The id for this comment
+                format: uuid
+                type: string
+                x-go-name: ID
+            liked_by_me:
+                type: boolean
+                x-go-name: LikedByMe
+            likes:
+                description: Number of likes
+                format: int64
+                type: integer
+                x-go-name: Likes
+            updated_at:
+                description: The time the comment was updated
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - id
+            - content
+            - created_at
+            - updated_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    CommentAddRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+        required:
+            - content
+        title: CommentAddRequestBody includes the content of the comment.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    CommentUpdateRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+        required:
+            - content
+        title: CommentUpdateRequestBody includes the content of the comment.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    GetCommentResponseBody:
+        description: |-
+            GetCommentResponseBody includes the signle comment for a post
+            based on given post and comment ID.
+        properties:
+            data:
+                $ref: '#/definitions/Comment'
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - data
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetCommentsCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetCommentsCountResponseBody includes the comments count.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetCommentsResponseBody:
+        description: |-
+            GetCommentsResponseBody includes the slice of comments for a post
+            and its count.
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            data:
+                items:
+                    $ref: '#/definitions/Comment'
+                type: array
+                x-go-name: Data
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+            - data
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostResponseBody:
+        properties:
+            data:
+                $ref: '#/definitions/Post'
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - data
+        title: GetPostResponseBody includes the signle post for a given ID.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostsCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetPostsCountResponseBody includes the posts count.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetPostsResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            data:
+                items:
+                    $ref: '#/definitions/Post'
+                type: array
+                x-go-name: Data
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+            - data
+        title: GetPostsResponseBody includes the slice of posts.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationCountResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+            - count
+        title: GetRelationCountResponseBody includes the count of relations.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetRelationResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            relations:
+                items:
+                    $ref: '#/definitions/Relation'
+                type: array
+                x-go-name: Relations
+        required:
+            - error
+            - message
+            - count
+            - relations
+        title: GetRelationResponseBody includes the slice of relations.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetUserResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - error
+            - message
+            - user
+        title: GetUserResponseBody includes the signle user for a given ID.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    GetUsersResponseBody:
+        properties:
+            count:
+                format: int64
+                type: integer
+                x-go-name: Count
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            users:
+                items:
+                    $ref: '#/definitions/User'
+                type: array
+                x-go-name: Users
+        required:
+            - error
+            - message
+            - count
+            - users
+        title: GetUsersResponseBody includes the slice of users.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    LoginRequestBody:
+        properties:
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+        required:
+            - email
+            - password
+        title: LoginRequestBody includes the email and password of the user.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    Post:
+        description: Post represents the post for this application
+        properties:
+            comments:
+                items:
+                    $ref: '#/definitions/Comment'
+                type: array
+                x-go-name: Comments
+            content:
+                description: The url to the post content
+                type: string
+                x-go-name: Content
+            created_at:
+                description: The time the post was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            description:
+                description: Post description
+                type: string
+                x-go-name: Description
+            id:
+                description: The id for this post
+                format: uuid
+                type: string
+                x-go-name: ID
+            liked_by_me:
+                type: boolean
+                x-go-name: LikedByMe
+            likes:
+                description: Number of likes
+                format: int64
+                type: integer
+                x-go-name: Likes
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - id
+            - content
+            - description
+            - created_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    PostCreateRequestBody:
+        properties:
+            content:
+                type: string
+                x-go-name: Content
+            description:
+                maxLength: 2048
+                type: string
+                x-go-name: Description
+        required:
+            - content
+            - description
+        title: PostCreateRequestBody includes the content, description and id of the user creating the post.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    RegisterLoginUserResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            token:
+                type: string
+                x-go-name: Token
+            user:
+                $ref: '#/definitions/User'
+        required:
+            - error
+            - message
+            - token
+            - user
+        title: RegisterLoginUserResponseBody includes the token and user model when user register or login.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    RegisterRequestBody:
+        properties:
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+            username:
+                maxLength: 32
+                minLength: 1
+                type: string
+                x-go-name: Username
+        required:
+            - email
+            - username
+            - password
+        title: RegisterRequestBody includes the email, username, and password of the user being created.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    Relation:
+        description: Relation represents the relation for this application
+        properties:
+            created_at:
+                description: The time the relation was created
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            id:
+                description: The id for this relation
+                format: uuid
+                type: string
+                x-go-name: ID
+            relation_user:
+                $ref: '#/definitions/User'
+            type:
+                $ref: '#/definitions/RelationType'
+        required:
+            - id
+            - type
+            - created_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    RelationType:
+        title: RelationType is type for relations between users.
+        type: string
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    UploadDataResponseBody:
+        properties:
+            error:
+                example: false
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+            path:
+                type: string
+                x-go-name: Path
+        required:
+            - error
+            - message
+            - path
+        title: UploadDataResponseBody includes the relative path to uploaded data.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+    User:
+        description: User represents the user for this application
+        properties:
+            about:
+                type: string
+                x-go-name: About
+            avatar_url:
+                description: URL to user avatar
+                type: string
+                x-go-name: AvatarURL
+            created_at:
+                description: The time the user was registered
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            email:
+                description: The email for this user
+                type: string
+                x-go-name: Email
+            id:
+                description: The id for this user
+                format: uuid
+                type: string
+                x-go-name: ID
+            name:
+                description: The name for this user
+                type: string
+                x-go-name: Name
+            updated_at:
+                description: The time the user was updated
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            username:
+                description: The username for this user
+                type: string
+                x-go-name: Username
+        required:
+            - id
+            - email
+            - username
+            - created_at
+            - updated_at
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/models
+    UserUpdatePasswordRequestBody:
+        properties:
+            old_password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: OldPassword
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+        title: UserUpdatePasswordRequestBody includes the old and new password of the user.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    UserUpdateRequestBody:
+        properties:
+            avatar_url:
+                type: string
+                x-go-name: AvatarURL
+            email:
+                maxLength: 255
+                minLength: 6
+                type: string
+                x-go-name: Email
+            name:
+                maxLength: 32
+                type: string
+                x-go-name: Name
+            password:
+                maxLength: 256
+                minLength: 8
+                type: string
+                x-go-name: Password
+            username:
+                maxLength: 32
+                minLength: 1
+                type: string
+                x-go-name: Username
+        title: UserUpdateRequestBody includes the new email, username, name or password for the user.
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/parameters
+    errorResponseBody:
+        properties:
+            error:
+                example: true
+                type: boolean
+                x-go-name: Error
+            message:
+                x-go-name: Message
+        required:
+            - error
+            - message
+        type: object
+        x-go-package: github.com/MangriMen/Diverse-Back/internal/responses
+host: localhost:3040
+info:
+    title: Diverse API.
+    version: 0.0.1
+paths:
+    /data:
+        post:
+            description: Uploads one of the MIME data type images, converts it to webp and returns a relative path
+            operationId: uploadData
+            parameters:
+                - in: formData
+                  name: file
+                  type: file
+                  x-go-name: File
+            responses:
+                "200":
+                    $ref: '#/responses/UploadDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            summary: Uploads data to storage
+            tags:
+                - Data
+    /data/{type}/{id}:
+        get:
+            description: Returns the data by type and id with given format parameters
+            operationId: getData
+            parameters:
+                - in: path
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+                - in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: ID
+                - format: int64
+                  in: query
+                  name: width
+                  required: true
+                  type: integer
+                  x-go-name: Width
+                - format: int64
+                  in: query
+                  name: height
+                  required: true
+                  type: integer
+                  x-go-name: Height
+            produces:
+                - image/webp
+            responses:
+                "200":
+                    $ref: '#/responses/GetDataResponse'
+                "304":
+                    $ref: '#/responses/GetDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            summary: Returns the requested data with optional params
+            tags:
+                - Data
+    /data/image/raw/{id}:
+        get:
+            description: Returns the original webp image by id
+            operationId: getImageRaw
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  type: string
+                  x-go-name: ID
+            produces:
+                - image/webp
+            responses:
+                "200":
+                    $ref: '#/responses/GetDataResponse'
+                "304":
+                    $ref: '#/responses/GetDataResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            summary: Returns the image by static route
+            tags:
+                - Data
+    /fetch:
+        get:
+            description: Get user and new token if user exists
+            operationId: fetchUser
+            responses:
+                "200":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /login:
+        post:
+            description: Returns the user and token by given credentials
+            operationId: loginUser
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/LoginRequestBody'
+            responses:
+                "200":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
+    /posts:
+        get:
+            description: Returns a list of all posts
+            operationId: getPosts
+            parameters:
+                - format: uuid
+                  in: query
+                  name: last_seen_post_id
+                  type: string
+                  x-go-name: LastSeenPostID
+                - description: nolint:lll
+                  format: date-time
+                  in: query
+                  name: last_seen_post_created_at
+                  type: string
+                  x-go-name: LastSeenPostCreatedAt
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - format: uuid
+                  in: query
+                  name: user_id
+                  type: string
+                  x-go-name: UserID
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
+            responses:
+                "200":
+                    $ref: '#/responses/GetPostsResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Creates the post with given info
+            operationId: createPost
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/PostCreateRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/CreateUpdatePostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}:
+        delete:
+            description: Delete post by ID
+            operationId: deletePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeletePostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        get:
+            description: Returns the post by given ID
+            operationId: getPost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "200":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        patch:
+            description: Update post by ID with given fields
+            operationId: updatePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/comments:
+        get:
+            description: Returns a list of post comments
+            operationId: getComments
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: query
+                  name: last_seen_comment_id
+                  type: string
+                  x-go-name: LastSeenCommentID
+                - description: nolint:lll
+                  format: date-time
+                  in: query
+                  name: last_seen_comment_created_at
+                  type: string
+                  x-go-name: LastSeenCommentCreatedAt
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: 1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
+            responses:
+                "200":
+                    $ref: '#/responses/GetCommentsResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Add comment to the given post
+            operationId: addComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CommentAddRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/CreateUpdateCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/comments/{comment}:
+        delete:
+            description: Delete comment by comment ID with given post ID
+            operationId: deleteComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        patch:
+            description: Update comment content by comment ID with given post ID
+            operationId: updateComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CommentUpdateRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/CreateUpdateCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/comments/{comment}/like:
+        delete:
+            description: Unset like to the comment by ID
+            operationId: unlikeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the comment by ID
+            operationId: likeComment
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+                - format: uuid
+                  in: path
+                  name: comment
+                  required: true
+                  type: string
+                  x-go-name: Comment
+            responses:
+                "201":
+                    $ref: '#/responses/GetCommentResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/comments/count:
+        get:
+            description: Returns a count post comments
+            operationId: getCommentsCount
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "200":
+                    $ref: '#/responses/GetCommentsCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/{post}/like:
+        delete:
+            description: Unset like to the post by ID
+            operationId: unlikePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+        post:
+            description: Set like to the post by ID
+            operationId: likePost
+            parameters:
+                - format: uuid
+                  in: path
+                  name: post
+                  required: true
+                  type: string
+                  x-go-name: Post
+            responses:
+                "201":
+                    $ref: '#/responses/GetPostResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /posts/count:
+        get:
+            description: Returns a count of all posts
+            operationId: getPostsCount
+            parameters:
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - format: uuid
+                  in: query
+                  name: user_id
+                  type: string
+                  x-go-name: UserID
+            responses:
+                "200":
+                    $ref: '#/responses/GetPostsCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - Post
+    /register:
+        post:
+            description: Returns the user and token by given credentials
+            operationId: createUser
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/RegisterRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/RegisterLoginUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
+    /users:
+        get:
+            description: Returns a list of all users
+            operationId: allowempty
+            responses:
+                "200":
+                    $ref: '#/responses/GetUsersResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
+    /users/{user}:
+        delete:
+            description: Delete user by id
+            operationId: deleteUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+            produces:
+                - application/json
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            schemes:
+                - http
+                - https
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        get:
+            description: Returns the user by given id
+            operationId: getUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+            responses:
+                "200":
+                    $ref: '#/responses/GetUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
+        patch:
+            description: Update user by id with given fields
+            operationId: updateUser
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UserUpdateRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/UpdateUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations:
+        get:
+            description: Returns a list of users from given relation
+            operationId: getRelations
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: query
+                  name: last_seen_relation_id
+                  type: string
+                  x-go-name: LastSeenRelationID
+                - description: nolint:lll
+                  format: date-time
+                  in: query
+                  name: last_seen_relation_created_at
+                  type: string
+                  x-go-name: LastSeenRelationCreatedAt
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+                - format: int64
+                  in: query
+                  maximum: 50
+                  minimum: -1
+                  name: count
+                  required: true
+                  type: integer
+                  x-go-name: Count
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationsResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations/{relationUser}:
+        delete:
+            description: Returns relation by id
+            operationId: deleteRelation
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relationUser
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            responses:
+                "204":
+                    $ref: '#/responses/DeleteRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        get:
+            description: Returns a true or false from given relation
+            operationId: getRelationStatus
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relationUser
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationStatusResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+        post:
+            description: Add realtion with given info
+            operationId: addRelation
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - format: uuid
+                  in: path
+                  name: relationUser
+                  required: true
+                  type: string
+                  x-go-name: RelationUser
+                - description: Relation type
+                  in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            responses:
+                "201":
+                    $ref: '#/responses/AddRelationResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/{user}/relations/count:
+        get:
+            description: Returns a count of users from given relation
+            operationId: getRelationsCount
+            parameters:
+                - format: uuid
+                  in: path
+                  name: user
+                  required: true
+                  type: string
+                  x-go-name: User
+                - in: query
+                  name: type
+                  required: true
+                  type: string
+                  x-go-name: Type
+            responses:
+                "200":
+                    $ref: '#/responses/GetRelationCountResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/password:
+        patch:
+            description: Update user password
+            operationId: updateUserPassword
+            parameters:
+                - in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UserUpdatePasswordRequestBody'
+            responses:
+                "201":
+                    $ref: '#/responses/UpdateUserPasswordResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            security:
+                - bearerAuth: []
+            tags:
+                - User
+    /users/username/{username}:
+        get:
+            description: Returns the user by given username
+            operationId: getUserByUsername
+            parameters:
+                - in: path
+                  name: username
+                  required: true
+                  type: string
+                  x-go-name: Username
+            responses:
+                "200":
+                    $ref: '#/responses/GetUserResponse'
+                default:
+                    $ref: '#/responses/ErrorResponse'
+            tags:
+                - User
+produces:
+    - application/json
+responses:
+    AddRelationResponse:
+        description: AddRelationResponse represents response for successfully create relation.
+        schema:
+            type: string
+    CreateUpdateCommentResponse:
+        description: CreateUpdateCommentResponse represents response for successfully create or update comment request.
+        schema:
+            type: string
+    CreateUpdatePostResponse:
+        description: CreateUpdatePostResponse represents response for successfully create or update post request.
+        schema:
+            type: string
+    DeleteCommentResponse:
+        description: DeleteCommentResponse represents response for successfully delete comment request.
+    DeletePostResponse:
+        description: DeletePostResponse represents response for successfully delete post.
+    DeleteRelationResponse:
+        description: DeleteRelationResponse represents response for successfully delete relation request.
+    DeleteUserResponse:
+        description: DeleteUserResponse represents response for successfully delete user request.
+    ErrorResponse:
+        description: ErrorResponse contains the error data.
+        schema:
+            $ref: '#/definitions/errorResponseBody'
+    GetCommentResponse:
+        description: GetCommentResponse represent the response retrived on get comment request.
+        schema:
+            $ref: '#/definitions/GetCommentResponseBody'
+    GetCommentsCountResponse:
+        description: GetCommentsCountResponse represent the response retrived on get comments request.
+        schema:
+            $ref: '#/definitions/GetCommentsCountResponseBody'
+    GetCommentsResponse:
+        description: GetCommentsResponse represent the response retrived on get comments request.
+        schema:
+            $ref: '#/definitions/GetCommentsResponseBody'
+    GetDataResponse:
+        description: GetDataResponse contains the binary data of requested type.
+        schema:
+            type: file
+    GetPostResponse:
+        description: GetPostResponse represent the response retrived on get post request.
+        schema:
+            $ref: '#/definitions/GetPostResponseBody'
+    GetPostsCountResponse:
+        description: GetPostsCountResponse represent the response retrived on get posts request.
+        schema:
+            $ref: '#/definitions/GetPostsCountResponseBody'
+    GetPostsResponse:
+        description: GetPostsResponse represent the response retrived on get posts request.
+        schema:
+            $ref: '#/definitions/GetPostsResponseBody'
+    GetRelationCountResponse:
+        description: GetRelationCountResponse represent the response retrived on get relation count request.
+        schema:
+            $ref: '#/definitions/GetRelationCountResponseBody'
+    GetRelationStatusResponse:
+        description: |-
+            GetRelationStatusResponse represent the response retrived on
+            get relation by relation user request.
+        headers:
+            blocked:
+                type: boolean
+            follower:
+                type: boolean
+            following:
+                type: boolean
+    GetRelationsResponse:
+        description: GetRelationsResponse represent the response retrived on get relation request.
+        schema:
+            $ref: '#/definitions/GetRelationResponseBody'
+    GetUserResponse:
+        description: GetUserResponse represent the response retrived on get user request.
+        schema:
+            $ref: '#/definitions/GetUserResponseBody'
+    GetUsersResponse:
+        description: GetUsersResponse represent the response retrived on get users request.
+        schema:
+            $ref: '#/definitions/GetUsersResponseBody'
+    RegisterLoginUserResponse:
+        description: RegisterLoginUserResponse represent the response retrived on register or login request.
+        schema:
+            $ref: '#/definitions/RegisterLoginUserResponseBody'
+    SuccessResponse:
+        description: SuccessResponse represents success response for request.
+        schema:
+            type: string
+    UpdateUserPasswordResponse:
+        description: UpdateUserPasswordResponse represents response for successfully update user password.
+        schema:
+            type: string
+    UpdateUserResponse:
+        description: UpdateUserResponse represents response for successfully update user request.
+        schema:
+            type: string
+    UploadDataResponse:
+        description: UploadDataResponse contains the uploaded data info.
+        schema:
+            $ref: '#/definitions/UploadDataResponseBody'
+schemes:
+    - http
+    - https
+securityDefinitions:
+    bearerAuth:
+        description: JWT Authorization header
+        in: header
+        name: Authorization
+        type: apiKey
+swagger: "2.0"

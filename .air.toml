@@ -1,0 +1,26 @@
+# Config file for [Air](https://github.com/cosmtrek/air) in TOML format
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+bin = "tmp/server"
+cmd = "go build -gcflags='all=-N -l' -o ./tmp/server cmd/api/main.go"
+
+full_bin = "APP_ENV=dev APP_USER=air dlv --accept-multiclient --headless --continue --listen=:40000 --api-version=2 exec ./tmp/server"
+log = "air_errors.log"
+
+exclude_dir = ["assets", "tmp"]
+exclude_ext = ["gitignore", "editorconfig"]
+
+include_ext = ["go", "yaml", "env"]
+
+# Trigger delay
+delay = 1000 # ms
+
+[log]
+time = true
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = true
