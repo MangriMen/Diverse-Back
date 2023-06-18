@@ -9,6 +9,7 @@ x-nginx:
     context: .
     dockerfile: deployments/NginxReverse.Dockerfile
     target: $PROFILE
+  networks: [ backend ]
 
 x-backend:
   &backend
@@ -23,6 +24,7 @@ x-backend:
   depends_on:
     postgres:
       condition: service_healthy
+  networks: [ backend ]
 
 services:
   backend-prod:
@@ -49,6 +51,7 @@ services:
       - "backend-data:/var/lib/backend-data"
 
   postgres:
+    profiles: [ prod, test, dev ]
     container_name: diverse-postgres-$PROFILE
     image: postgres:14.5-alpine
     restart: always
@@ -65,8 +68,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks: [ backend ]
 
   pgadmin:
+    profiles: [ test, dev ]
     container_name: diverse-pgadmin-$PROFILE
     image: dpage/pgadmin4
     restart: always
@@ -77,8 +82,10 @@ services:
       PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
     volumes:
       - "pgadmin-data:/var/lib/pgadmin"
+    networks: [ backend ]
 
   swagger:
+    profiles: [ test, dev ]
     container_name: diverse-swagger-$PROFILE
     image: quay.io/goswagger/swagger
     restart: always
@@ -95,6 +102,7 @@ services:
     working_dir: "/docs"
     volumes:
       - "./docs:/docs"
+    networks: [ backend ]
 
   nginx:
     <<: *nginx
@@ -106,10 +114,14 @@ services:
     profiles: [ test, dev ]
     ports: [ $BACKEND_PORT_TEST:80 ]
 
+networks:
+  backend:
+    name: diverse-backend-${PROFILE}
+
 volumes:
   postgres-data:
-    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-postgres-data
+    name: diverse-backend-${PROFILE}-postgres-data
   pgadmin-data:
-    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-pgadmin-data
+    name: diverse-backend-${PROFILE}-pgadmin-data
   backend-data:
-    name: ${COMPOSE_PROJECT_NAME}-${PROFILE}-backend-data
+    name: diverse-backend-${PROFILE}-backend-data
